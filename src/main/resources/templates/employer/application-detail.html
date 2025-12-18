@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle} + ' - JobFinder'">Chi tiết hồ sơ - JobFinder</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            position: fixed;
+            width: 250px;
+            left: 0;
+            top: 0;
+            bottom: 0;
+        }
+        
+        .sidebar .company-name {
+            font-size: 20px;
+            font-weight: bold;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 20px;
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 12px 15px;
+            margin: 5px 0;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        .sidebar .nav-link i {
+            margin-right: 10px;
+            width: 20px;
+        }
+        
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+        }
+        
+        .content-card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        
+        .status-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        
+        .status-badge.applied {
+            background-color: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .status-badge.viewed {
+            background-color: #e1f5fe;
+            color: #0288d1;
+        }
+        
+        .status-badge.shortlisted {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .status-badge.rejected {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+        
+        .status-badge.hired {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .section-title {
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #6c757d;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-bottom: 15px;
+        }
+        
+        .info-box {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="company-name" th:text="${employer.companyName}">Công ty</div>
+        <nav class="nav flex-column">
+            <a class="nav-link" href="/employer/dashboard">
+                <i class="bi bi-speedometer2"></i> Bảng điều khiển
+            </a>
+            <a class="nav-link" href="/employer/jobs">
+                <i class="bi bi-briefcase"></i> Tin tuyển dụng
+            </a>
+            <a class="nav-link active" href="/employer/applications">
+                <i class="bi bi-file-earmark-text"></i> Hồ sơ ứng viên
+            </a>
+            <a class="nav-link" href="/employer/profile">
+                <i class="bi bi-building"></i> Hồ sơ doanh nghiệp
+            </a>
+            <hr style="border-color: rgba(255,255,255,0.2);">
+            <a class="nav-link" href="/auth/logout">
+                <i class="bi bi-box-arrow-right"></i> Đăng xuất
+            </a>
+        </nav>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <div class="content-card mb-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h4 mb-1">Chi tiết hồ sơ ứng viên | JobFind</h1>
+                    <div class="text-muted small">
+                        <i class="bi bi-building me-2"></i>
+                        <span th:text="'Công ty ' + ${employer.companyName}">Công ty</span>
+                        <span class="ms-3">
+                            <i class="bi bi-calendar me-2"></i>
+                            <span th:text="${#temporals.format(application.appliedAt, 'dd/MM/yyyy')}">17/12/2025</span>
+                        </span>
+                    </div>
+                </div>
+                <a href="/employer/applications" class="btn btn-outline-secondary">
+                    Xem hồ sơ đầy đủ
+                </a>
+            </div>
+        </div>
+        
+        <a href="/employer/applications" class="btn btn-link text-decoration-none ps-0 mb-3">
+            <i class="bi bi-arrow-left"></i> Quay về danh sách
+        </a>
+        
+        <!-- Flash Messages -->
+        <div th:if="${flashMessage}" th:class="'alert alert-' + ${flashType} + ' alert-dismissible fade show'" role="alert">
+            <span th:text="${flashMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        
+        <div class="row g-4">
+            <!-- Left Column -->
+            <div class="col-xl-8">
+                <!-- Candidate Info Card -->
+                <div class="content-card">
+                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
+                        <div>
+                            <span th:class="'status-badge ' + ${application.status}"
+                                  th:text="${application.status == 'applied' ? 'Mới ứng tuyển' : 
+                                            (application.status == 'viewed' ? 'Đã xem' : 
+                                            (application.status == 'shortlisted' ? 'Đã Chọn Phỏng Vấn' :
+                                            (application.status == 'rejected' ? 'Từ chối' : 'Đã tuyển')))}">
+                                Mới ứng tuyển
+                            </span>
+                            <h2 class="h4 mt-3 mb-1" th:text="${applicationDetail.candidateName}">Tên ứng viên</h2>
+                            <div class="text-muted">
+                                <i class="bi bi-envelope me-2"></i>
+                                <span th:text="${applicationDetail.candidateEmail}">email@example.com</span>
+                                <span th:if="${!#strings.isEmpty(applicationDetail.candidatePhone)}" class="ms-3">
+                                    <i class="bi bi-telephone me-2"></i>
+                                    <span th:text="${applicationDetail.candidatePhone}">0123456789</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <p th:if="${!#strings.isEmpty(applicationDetail.candidateHeadline)}" 
+                       class="mb-3 text-secondary" 
+                       th:text="${applicationDetail.candidateHeadline}">
+                        Headline của ứng viên
+                    </p>
+                    
+                    <div class="mb-3">
+                        <h3 class="section-title">THƯ GIỚI THIỆU</h3>
+                        <div class="info-box"
+                             th:utext="${!#strings.isEmpty(applicationDetail.coverLetter) ? #strings.replace(applicationDetail.coverLetter, '\\n', '<br>') : 'Ứng viên chưa đính kèm thư giới thiệu.'}">
+                            Nội dung thư giới thiệu
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h3 class="section-title">TÓM TẮT KINH NGHIỆM</h3>
+                        <div th:if="${!#strings.isEmpty(applicationDetail.candidateSummary)}" 
+                             class="info-box mb-3"
+                             th:utext="${#strings.replace(applicationDetail.candidateSummary, '\\n', '<br>')}">
+                            Tóm tắt kinh nghiệm
+                        </div>
+                        <p th:if="${#strings.isEmpty(applicationDetail.candidateSummary)}" class="text-muted">
+                            Ứng viên chưa cập nhật tóm tắt kinh nghiệm.
+                        </p>
+                    </div>
+                    
+                    <!-- Experience Details -->
+                    <div th:if="${!#strings.isEmpty(applicationDetail.candidateExperience)}" class="mt-4">
+                        <h3 class="section-title">KINH NGHIỆM LÀM VIỆC</h3>
+                        <div class="info-box"
+                             th:utext="${#strings.replace(applicationDetail.candidateExperience, '\\n', '<br>')}">
+                            Kinh nghiệm làm việc
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Job Info Card -->
+                <div class="content-card">
+                    <h3 class="h5 mb-3">Thông tin tin tuyển dụng</h3>
+                    <div class="d-flex flex-wrap gap-3 text-muted mb-3">
+                        <span>
+                            <i class="bi bi-briefcase me-2"></i>
+                            <span th:text="${applicationDetail.jobTitle}">Tiêu đề công việc</span>
+                        </span>
+                        <span th:if="${!#strings.isEmpty(applicationDetail.jobLocation)}">
+                            <i class="bi bi-geo-alt me-2"></i>
+                            <span th:text="${applicationDetail.jobLocation}">Hà Nội</span>
+                        </span>
+                        <span th:if="${!#strings.isEmpty(applicationDetail.jobEmploymentType)}">
+                            <i class="bi bi-clock me-2"></i>
+                            <span th:text="${applicationDetail.jobEmploymentType}">Full-time</span>
+                        </span>
+                        <span th:if="${!#strings.isEmpty(applicationDetail.jobSalary)}">
+                            <i class="bi bi-cash me-2"></i>
+                            <span th:text="${applicationDetail.jobSalary}">Thỏa thuận</span>
+                        </span>
+                    </div>
+                    
+                    <!-- Job Description -->
+                    <div class="mb-3" th:if="${!#strings.isEmpty(applicationDetail.jobDescription)}">
+                        <h4 class="h6 fw-semibold mb-2">Mô tả công việc:</h4>
+                        <div class="info-box small text-secondary" 
+                             th:utext="${#strings.replace(applicationDetail.jobDescription, '\\n', '<br>')}">
+                            Mô tả công việc
+                        </div>
+                    </div>
+                    
+                    <!-- Job Requirements -->
+                    <div th:if="${!#strings.isEmpty(applicationDetail.jobRequirements)}">
+                        <h4 class="h6 fw-semibold mb-2">Yêu cầu công việc:</h4>
+                        <div class="info-box small text-secondary" 
+                             th:utext="${#strings.replace(applicationDetail.jobRequirements, '\\n', '<br>')}">
+                            Yêu cầu công việc
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Column -->
+            <div class="col-xl-4">
+                <!-- Action Card -->
+                <div class="content-card">
+                    <h3 class="section-title">HÀNH ĐỘNG</h3>
+                    <form th:action="@{/employer/applications/{id}/update-status(id=${application.id})}" method="post" class="d-grid gap-3">
+                        <div>
+                            <label for="status" class="form-label fw-semibold">Trạng thái tuyển dụng</label>
+                            <select id="status" name="status" class="form-select" required>
+                                <option value="applied" th:selected="${application.status == 'applied'}">Mới ứng tuyển</option>
+                                <option value="viewed" th:selected="${application.status == 'viewed'}">Đã xem</option>
+                                <option value="shortlisted" th:selected="${application.status == 'shortlisted'}">Đã chọn phỏng vấn</option>
+                                <option value="rejected" th:selected="${application.status == 'rejected'}">Từ chối</option>
+                                <option value="hired" th:selected="${application.status == 'hired'}">Đã tuyển</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="note" class="form-label fw-semibold">Ghi chú gửi ứng viên</label>
+                            <textarea id="note" 
+                                      name="note" 
+                                      class="form-control" 
+                                      rows="4" 
+                                      placeholder="Chia sẻ lý do từ chối hoặc hướng dẫn bước tiếp theo..."></textarea>
+                            <div class="form-text">Bắt buộc khi từ chối. Ứng viên sẽ nhìn thấy nội dung này.</div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle me-2"></i>Cập nhật trạng thái
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- Info Card -->
+                <div class="content-card">
+                    <h3 class="section-title">HỒ SƠ & TÀI LIỆU</h3>
+                    <dl class="row mb-0 small">
+                        <dt class="col-5 text-secondary">Ứng tuyển lúc</dt>
+                        <dd class="col-7" th:text="${applicationDetail.appliedAtFormatted}">17/12/2023 10:30</dd>
+                        <dt th:if="${!#strings.isEmpty(applicationDetail.candidateLocation)}" class="col-5 text-secondary">Địa điểm</dt>
+                        <dd th:if="${!#strings.isEmpty(applicationDetail.candidateLocation)}" class="col-7" th:text="${applicationDetail.candidateLocation}">Hà Nội</dd>
+                    </dl>
+                    
+                    <div th:if="${!#strings.isEmpty(applicationDetail.candidateSkills)}" class="mt-3">
+                        <h4 class="h6 fw-semibold">Kỹ năng nổi bật</h4>
+                        <div class="d-flex flex-wrap gap-2 mt-2">
+                            <span class="badge bg-light text-dark border" th:text="${applicationDetail.candidateSkills}">
+                                #Kỹ năng
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <a th:if="${!#strings.isEmpty(applicationDetail.resumeSnapshot)}" 
+                           th:href="@{/uploads/cv/{file}(file=${applicationDetail.resumeSnapshot})}" 
+                           class="btn btn-success w-100" 
+                           target="_blank">
+                            <i class="bi bi-download me-2"></i>Tải CV ứng viên
+                        </a>
+                        <div th:if="${#strings.isEmpty(applicationDetail.resumeSnapshot)}" 
+                             class="alert alert-warning mb-0">
+                            Ứng viên chưa tải lên CV.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

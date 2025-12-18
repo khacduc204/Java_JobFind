@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="~{fragments/header :: head}" />
+<link rel="stylesheet" th:href="@{/assets/css/dashboard.css}" />
+</head>
+<body>
+    <!-- Header -->
+    <th:block th:replace="~{fragments/header :: header}" />
+
+    <div class="container py-5">
+        <!-- Welcome Section -->
+        <div class="dashboard-welcome-banner mb-4">
+            <div class="welcome-content">
+                <h2 class="welcome-title">
+                    Xin chào, <span th:text="${currentUser != null ? currentUser.name : 'Ứng viên'}">Ứng viên</span>! 👋
+                </h2>
+                <p class="mb-0 opacity-90">Chúc bạn có một ngày làm việc hiệu quả!</p>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm stat-card" style="border-left-color: #00b14f;">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <p class="text-muted mb-1 small">Hồ sơ hoàn thành</p>
+                                <h3 class="mb-0 stat-value">85%</h3>
+                            </div>
+                            <div class="stat-icon" style="background: linear-gradient(135deg, rgba(0,177,79,0.1) 0%, rgba(0,177,79,0.2) 100%); color: #00b14f;">
+                                <i class="fa-solid fa-user-check"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm stat-card" style="border-left-color: #0d6efd;">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <p class="text-muted mb-1 small">Đơn ứng tuyển</p>
+                                <h3 class="mb-0 stat-value">0</h3>
+                            </div>
+                            <div class="stat-icon" style="background: linear-gradient(135deg, rgba(13,110,253,0.1) 0%, rgba(13,110,253,0.2) 100%); color: #0d6efd;">
+                                <i class="fa-solid fa-file-circle-check"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm stat-card" style="border-left-color: #ffc107;">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <p class="text-muted mb-1 small">Việc làm lưu</p>
+                                <h3 class="mb-0 stat-value">0</h3>
+                            </div>
+                            <div class="stat-icon" style="background: linear-gradient(135deg, rgba(255,193,7,0.1) 0%, rgba(255,193,7,0.2) 100%); color: #ffc107;">
+                                <i class="fa-solid fa-bookmark"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm stat-card" style="border-left-color: #dc3545;">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <p class="text-muted mb-1 small">Lượt xem CV</p>
+                                <h3 class="mb-0 stat-value">0</h3>
+                            </div>
+                            <div class="stat-icon" style="background: linear-gradient(135deg, rgba(220,53,69,0.1) 0%, rgba(220,53,69,0.2) 100%); color: #dc3545;">
+                                <i class="fa-solid fa-eye"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="row mb-3">
+            <div class="col-12">
+                <h4 class="mb-0">
+                    <i class="fa-solid fa-bolt text-warning"></i> Hành động nhanh
+                </h4>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-lg-3 col-md-6">
+                <a th:href="@{/candidate/profile}" class="text-decoration-none">
+                    <div class="card border-0 shadow-sm quick-action-card h-100">
+                        <div class="card-body text-center">
+                            <div class="action-icon-box" style="background: linear-gradient(135deg, rgba(0,177,79,0.1), rgba(0,177,79,0.2));">
+                                <i class="fa-solid fa-user" style="color: #00b14f;"></i>
+                            </div>
+                            <h5 class="action-title">Hồ sơ của tôi</h5>
+                            <p class="action-description">Cập nhật thông tin cá nhân</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <a th:href="@{/candidate/edit-profile}" class="text-decoration-none">
+                    <div class="card border-0 shadow-sm quick-action-card h-100">
+                        <div class="card-body text-center">
+                            <div class="action-icon-box" style="background: linear-gradient(135deg, rgba(13,110,253,0.1), rgba(13,110,253,0.2));">
+                                <i class="fa-solid fa-pen-to-square" style="color: #0d6efd;"></i>
+                            </div>
+                            <h5 class="action-title">Chỉnh sửa hồ sơ</h5>
+                            <p class="action-description">Cập nhật thông tin</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <a th:href="@{/candidate/upload-cv}" class="text-decoration-none">
+                    <div class="card border-0 shadow-sm quick-action-card h-100">
+                        <div class="card-body text-center">
+                            <div class="action-icon-box" style="background: linear-gradient(135deg, rgba(255,193,7,0.1), rgba(255,193,7,0.2));">
+                                <i class="fa-solid fa-file-arrow-up" style="color: #ffc107;"></i>
+                            </div>
+                            <h5 class="action-title">Upload CV</h5>
+                            <p class="action-description">Tải lên CV của bạn</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <a href="#" class="text-decoration-none">
+                    <div class="card border-0 shadow-sm quick-action-card h-100">
+                        <div class="card-body text-center">
+                            <div class="action-icon-box" style="background: linear-gradient(135deg, rgba(220,53,69,0.1), rgba(220,53,69,0.2));">
+                                <i class="fa-solid fa-magnifying-glass" style="color: #dc3545;"></i>
+                            </div>
+                            <h5 class="action-title">Tìm việc làm</h5>
+                            <p class="action-description">Khám phá cơ hội mới</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Content Sections -->
+        <div class="row g-4">
+            <!-- Left Column -->
+            <div class="col-lg-8">
+                <!-- Recent Activity -->
+                <div class="dashboard-section">
+                    <div class="section-header">
+                        <h5 class="section-title">
+                            <i class="fa-solid fa-clock-rotate-left"></i>
+                            Hoạt động gần đây
+                        </h5>
+                    </div>
+                    <div class="empty-state">
+                        <div class="empty-state-icon">
+                            <i class="fa-solid fa-circle-info"></i>
+                        </div>
+                        <h6 class="empty-state-title">Chưa có hoạt động nào</h6>
+                        <p class="empty-state-description">Hoạt động của bạn sẽ hiển thị ở đây</p>
+                    </div>
+                </div>
+
+                <!-- Recommended Jobs -->
+                <div class="dashboard-section">
+                    <div class="section-header">
+                        <h5 class="section-title">
+                            <i class="fa-solid fa-briefcase"></i>
+                            Việc làm đề xuất
+                        </h5>
+                        <a href="#" class="btn btn-sm btn-outline-success">Xem tất cả</a>
+                    </div>
+                    <div class="empty-state">
+                        <div class="empty-state-icon">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </div>
+                        <h6 class="empty-state-title">Chưa có việc làm phù hợp</h6>
+                        <p class="empty-state-description">Chúng tôi đang tìm kiếm việc làm phù hợp với bạn</p>
+                        <a href="#" class="btn btn-success">
+                            <i class="fa-solid fa-search me-2"></i>Tìm việc ngay
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="col-lg-4">
+                <!-- Profile Completion -->
+                <div class="dashboard-section">
+                    <div class="section-header">
+                        <h5 class="section-title">
+                            <i class="fa-solid fa-chart-pie"></i>
+                            Hoàn thiện hồ sơ
+                        </h5>
+                    </div>
+                    <div class="progress-card">
+                        <div class="progress-header">
+                            <span class="progress-label">
+                                <i class="fa-solid fa-user-check me-2"></i>
+                                Thông tin cá nhân
+                            </span>
+                            <span class="progress-percentage">100%</span>
+                        </div>
+                        <div class="progress-bar-custom">
+                            <div class="progress-bar-fill" style="width: 100%;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-card">
+                        <div class="progress-header">
+                            <span class="progress-label">
+                                <i class="fa-solid fa-file-pdf me-2"></i>
+                                CV & Thư giới thiệu
+                            </span>
+                            <span class="progress-percentage">75%</span>
+                        </div>
+                        <div class="progress-bar-custom">
+                            <div class="progress-bar-fill" style="width: 75%;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-card">
+                        <div class="progress-header">
+                            <span class="progress-label">
+                                <i class="fa-solid fa-graduation-cap me-2"></i>
+                                Học vấn & Kinh nghiệm
+                            </span>
+                            <span class="progress-percentage">60%</span>
+                        </div>
+                        <div class="progress-bar-custom">
+                            <div class="progress-bar-fill" style="width: 60%;"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center mt-3">
+                        <a th:href="@{/candidate/edit-profile}" class="btn btn-success">
+                            <i class="fa-solid fa-pen-to-square me-2"></i>
+                            Hoàn thiện hồ sơ ngay
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="dashboard-section">
+                    <div class="section-header">
+                        <h5 class="section-title">
+                            <i class="fa-solid fa-link"></i>
+                            Liên kết nhanh
+                        </h5>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        <a th:href="@{/candidate/profile}" class="list-group-item list-group-item-action">
+                            <i class="fa-solid fa-user me-2"></i>Hồ sơ của tôi
+                        </a>
+                        <a th:href="@{/candidate/upload-cv}" class="list-group-item list-group-item-action">
+                            <i class="fa-solid fa-file-arrow-up me-2"></i>Quản lý CV
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action">
+                            <i class="fa-solid fa-briefcase me-2"></i>Việc đã ứng tuyển
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action">
+                            <i class="fa-solid fa-bookmark me-2"></i>Việc đã lưu
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action">
+                            <i class="fa-solid fa-gear me-2"></i>Cài đặt tài khoản
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+                            Chào mừng bạn đến với JobFind! 
+                            Bạn đang đăng nhập với vai trò <strong>Ứng viên</strong>.
+                            Hãy hoàn thiện hồ sơ để nhận được nhiều cơ hội việc làm hơn!
+                        </p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <th:block th:replace="~{fragments/footer :: footer}" />
+    <th:block th:replace="~{fragments/footer :: backToTop}" />
+    <th:block th:replace="~{fragments/footer :: scripts}" />
+</body>
+</html>

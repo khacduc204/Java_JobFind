@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:fragment="head">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title th:text="${pageTitle} ?: 'JobFind - Nền tảng việc làm chuẩn TopCV'">JobFind</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css">
+    <link rel="stylesheet" th:href="@{/assets/css/style.css}" />
+    <th:block th:if="${pageStyles != null}">
+        <link th:each="styleHref : ${pageStyles}" rel="stylesheet" th:href="@{'/assets/css/' + ${styleHref}}" />
+    </th:block>
+    <style>
+        :root {
+            --jf-primary: #00b14f;
+            --jf-primary-dark: #019146;
+            --jf-primary-light: #e8f9f0;
+            --jf-secondary: #1f2a44;
+            --jf-bg: #f4f6fb;
+            --jf-text: #243047;
+            --jf-text-muted: #6c7a93;
+            --jf-border: #e4e9f2;
+            --jf-radius: 22px;
+            --jf-radius-sm: 14px;
+            --jf-shadow: 0 20px 60px rgba(19, 28, 67, 0.15);
+            --jf-transition: all 0.35s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        
+        body {
+            font-family: 'Be Vietnam Pro', sans-serif;
+            background: var(--jf-bg);
+            color: var(--jf-text);
+        }
+        
+        /* Header Styles */
+        .jf-header {
+            position: sticky;
+            top: 0;
+            z-index: 1030;
+            transition: var(--jf-transition);
+            background: white;
+            box-shadow: 0 2px 12px rgba(15, 23, 42, 0.08);
+        }
+        
+        .jf-header.scroll-down {
+            transform: translateY(-100%);
+        }
+        
+        .jf-topbar {
+            background: linear-gradient(135deg, var(--jf-secondary) 0%, #2d3a58 100%);
+            color: rgba(255, 255, 255, 0.85);
+            padding: 0.5rem 0;
+            font-size: 0.875rem;
+        }
+        
+        .jf-topbar a {
+            color: rgba(255, 255, 255, 0.85);
+            text-decoration: none;
+            transition: var(--jf-transition);
+        }
+        
+        .jf-topbar a:hover {
+            color: white;
+        }
+        
+        .jf-navbar {
+            padding: 1rem 0;
+        }
+        
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--jf-primary) !important;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .nav-link {
+            font-weight: 500;
+            color: var(--jf-text) !important;
+            padding: 0.5rem 1rem !important;
+            transition: var(--jf-transition);
+        }
+        
+        .nav-link:hover {
+            color: var(--jf-primary) !important;
+        }
+        
+        .dropdown-menu {
+            border: 1px solid var(--jf-border);
+            border-radius: var(--jf-radius-sm);
+            box-shadow: 0 12px 32px rgba(19, 28, 67, 0.12);
+            padding: 0.5rem 0;
+        }
+        
+        .dropdown-item {
+            padding: 0.625rem 1.25rem;
+            transition: var(--jf-transition);
+        }
+        
+        .dropdown-item:hover {
+            background: var(--jf-primary-light);
+            color: var(--jf-primary);
+        }
+        
+        .jf-profile-dropdown {
+            min-width: 280px;
+        }
+        
+        .jf-profile-header {
+            padding: 1.25rem;
+            border-bottom: 1px solid var(--jf-border);
+            background: linear-gradient(135deg, var(--jf-primary-light) 0%, white 100%);
+        }
+        
+        .jf-profile-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            background: var(--jf-primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+        
+        .jf-profile-section {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--jf-border);
+        }
+        
+        .jf-profile-section:last-child {
+            border-bottom: none;
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #dc3545;
+            color: white;
+            border-radius: 10px;
+            padding: 2px 6px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        
+        .btn-success {
+            background: var(--jf-primary);
+            border-color: var(--jf-primary);
+            font-weight: 600;
+        }
+        
+        .btn-success:hover {
+            background: var(--jf-primary-dark);
+            border-color: var(--jf-primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 177, 79, 0.3);
+        }
+        
+        .btn-outline-success {
+            color: var(--jf-primary);
+            border-color: var(--jf-primary);
+            font-weight: 600;
+        }
+        
+        .btn-outline-success:hover {
+            background: var(--jf-primary);
+            border-color: var(--jf-primary);
+            color: white;
+        }
+        
+        /* Footer Styles */
+        .jf-footer {
+            background: linear-gradient(135deg, #1f2a44 0%, #2d3a58 100%);
+            color: rgba(255, 255, 255, 0.85);
+            padding: 3rem 0 1.5rem;
+            margin-top: 5rem;
+        }
+        
+        .jf-footer-brand p {
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+        
+        .jf-footer-brand .social-link {
+            width: 40px;
+            height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: white;
+            transition: all 0.3s;
+            margin-right: 0.5rem;
+            text-decoration: none;
+        }
+        
+        .jf-footer-brand .social-link:hover {
+            background: var(--jf-primary);
+            transform: translateY(-3px);
+        }
+        
+        .jf-footer h6 {
+            color: white;
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .jf-footer-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .jf-footer-links li {
+            margin-bottom: 0.75rem;
+        }
+        
+        .jf-footer-links a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: color 0.3s;
+            display: block;
+        }
+        
+        .jf-footer-links a:hover {
+            color: var(--jf-primary);
+        }
+        
+        .jf-footer-bottom {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .jf-footer-bottom-copyright {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+        }
+        
+        .jf-footer-bottom-links {
+            text-align: right;
+        }
+        
+        .jf-footer-bottom-links a {
+            color: rgba(255, 255, 255, 0.7);
+            margin-left: 1.5rem;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        
+        .jf-footer-bottom-links a:hover {
+            color: var(--jf-primary);
+        }
+        
+        @media (max-width: 768px) {
+            .jf-footer-bottom-links {
+                text-align: left;
+                margin-top: 1rem;
+            }
+            
+            .jf-footer-bottom-links a {
+                margin-left: 0;
+                margin-right: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<header th:fragment="header" class="jf-header">
+    <!-- Topbar (only for non-authenticated users) -->
+    <div sec:authorize="!isAuthenticated()" class="jf-topbar d-none d-lg-block">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex gap-4">
+                    <a href="tel:02471076480" class="text-decoration-none">
+                        <i class="fa-solid fa-phone me-2"></i>Hotline: 1900-123-456
+                    </a>
+                    <a href="mailto:contact@jobfind.vn" class="text-decoration-none">
+                        <i class="fa-solid fa-envelope me-2"></i>support@jobfind.vn
+                    </a>
+                </div>
+                <div>
+                    <span>Bạn là nhà tuyển dụng? <a th:href="@{/auth/register(role=employer)}" class="fw-semibold">Đăng tuyển ngay</a></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light jf-navbar">
+        <div class="container">
+            <a class="navbar-brand" th:href="@{/}">
+                <i class="fa-solid fa-briefcase"></i>
+                <span>JobFind</span>
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarMain">
+                <ul class="navbar-nav me-auto">
+                    <!-- Việc làm -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Việc làm</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/jobs"><i class="fa-solid fa-magnifying-glass me-2"></i>Tìm việc làm</a></li>
+                            <li sec:authorize="isAuthenticated()"><a class="dropdown-item" href="/jobs/saved"><i class="fa-solid fa-heart me-2"></i>Việc làm đã lưu</a></li>
+                            <li sec:authorize="isAuthenticated()"><a class="dropdown-item" href="/applications"><i class="fa-solid fa-file-circle-check me-2"></i>Việc đã ứng tuyển</a></li>
+                        </ul>
+                    </li>
+                    
+                    <!-- Hồ sơ & CV (for candidates only) -->
+                    <li sec:authorize="hasRole('CANDIDATE')" class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Hồ sơ &amp; CV</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/candidate/profile"><i class="fa-regular fa-user me-2"></i>Hồ sơ của tôi</a></li>
+                            <li><a class="dropdown-item" href="/candidate/cv"><i class="fa-regular fa-file-lines me-2"></i>Quản lý CV</a></li>
+                            <li><a class="dropdown-item" href="/cv/templates"><i class="fa-solid fa-wand-magic-sparkles me-2"></i>Thư viện mẫu CV</a></li>
+                        </ul>
+                    </li>
+                    
+                    <!-- Phát triển sự nghiệp -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Phát triển sự nghiệp</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/blog"><i class="fa-solid fa-newspaper me-2"></i>Cẩm nang nghề nghiệp</a></li>
+                            <li><a class="dropdown-item" href="/tools/salary"><i class="fa-solid fa-calculator me-2"></i>Tính lương gộp - ròng</a></li>
+                            <li><a class="dropdown-item" href="/tips/interview"><i class="fa-solid fa-lightbulb me-2"></i>Bí quyết phỏng vấn</a></li>
+                        </ul>
+                    </li>
+                    
+                    <!-- Top công ty -->
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/employers}">Top công ty</a>
+                    </li>
+                    
+                    <!-- Admin link (only for admin) -->
+                    <li sec:authorize="hasRole('ADMIN')" class="nav-item">
+                        <a class="nav-link" th:href="@{/admin/dashboard}"><i class="fa-solid fa-shield-halved me-1"></i>Quản trị</a>
+                    </li>
+                </ul>
+                
+                <!-- Right Side Menu -->
+                <div class="d-flex align-items-center gap-2">
+                    <!-- For Non-Authenticated Users -->
+                    <div sec:authorize="!isAuthenticated()" class="d-flex gap-2">
+                        <a th:href="@{/auth/login}" class="btn btn-outline-success">Đăng nhập</a>
+                        <a th:href="@{/auth/register}" class="btn btn-success">Đăng ký ngay</a>
+                    </div>
+                    
+                    <!-- For Authenticated Users -->
+                    <div sec:authorize="isAuthenticated()" class="dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" role="button" data-bs-toggle="dropdown">
+                            <div class="jf-profile-avatar" style="width: 36px; height: 36px; font-size: 0.875rem;">
+                                <span sec:authentication="name" th:text="${#strings.substring(#authentication.name, 0, 1).toUpperCase()}">U</span>
+                            </div>
+                            <span class="d-none d-md-inline fw-semibold" sec:authentication="name">User</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end jf-profile-dropdown">
+                            <li>
+                                <div class="jf-profile-header">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="jf-profile-avatar">
+                                            <span sec:authentication="name" th:text="${#strings.substring(#authentication.name, 0, 1).toUpperCase()}">U</span>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0 fw-bold" sec:authentication="name">User</h6>
+                                            <small class="text-muted">Xin chào!</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li><hr class="dropdown-divider m-0"></li>
+                            
+                            <!-- Dashboard link based on role -->
+                            <li class="jf-profile-section">
+                                <a sec:authorize="hasRole('CANDIDATE')" class="dropdown-item" href="/candidate/dashboard">
+                                    <i class="fa-solid fa-gauge-high me-2"></i>Dashboard
+                                </a>
+                                <a sec:authorize="hasRole('EMPLOYER')" class="dropdown-item" href="/employer/admin/dashboard">
+                                    <i class="fa-solid fa-gauge-high me-2"></i>Bảng điều khiển
+                                </a>
+                                <a sec:authorize="hasRole('ADMIN')" class="dropdown-item" th:href="@{/admin/dashboard}">
+                                    <i class="fa-solid fa-gauge-high me-2"></i>Admin Dashboard
+                                </a>
+                            </li>
+                            
+                            <!-- Profile links based on role -->
+                            <li class="jf-profile-section">
+                                <a sec:authorize="hasRole('CANDIDATE')" class="dropdown-item" href="/candidate/profile">
+                                    <i class="fa-regular fa-user me-2"></i>Hồ sơ của tôi
+                                </a>
+                                <a sec:authorize="hasRole('EMPLOYER')" class="dropdown-item" href="/employer/profile">
+                                    <i class="fa-regular fa-building me-2"></i>Hồ sơ doanh nghiệp
+                                </a>
+                            </li>
+                            
+                            <!-- Candidate specific -->
+                            <li sec:authorize="hasRole('CANDIDATE')" class="jf-profile-section">
+                                <a class="dropdown-item" href="/candidate/cv">
+                                    <i class="fa-regular fa-file-lines me-2"></i>CV của tôi
+                                </a>
+                                <a class="dropdown-item" href="/jobs/applied">
+                                    <i class="fa-solid fa-file-circle-check me-2"></i>Việc đã ứng tuyển
+                                </a>
+                                <a class="dropdown-item" href="/jobs/saved">
+                                    <i class="fa-solid fa-heart me-2"></i>Việc làm đã lưu
+                                </a>
+                            </li>
+                            
+                            <!-- Employer specific -->
+                            <li sec:authorize="hasRole('EMPLOYER')" class="jf-profile-section">
+                                <a class="dropdown-item" href="/employer/admin/jobs">
+                                    <i class="fa-solid fa-briefcase me-2"></i>Tin tuyển dụng
+                                </a>
+                                <a class="dropdown-item" href="/employer/admin/applications">
+                                    <i class="fa-regular fa-id-card me-2"></i>Hồ sơ ứng viên
+                                </a>
+                            </li>
+                            
+                            <li><hr class="dropdown-divider m-0"></li>
+                            
+                            <!-- Settings -->
+                            <li class="jf-profile-section">
+                                <a class="dropdown-item" href="/dashboard">
+                                    <i class="fa-solid fa-gear me-2"></i>Cài đặt tài khoản
+                                </a>
+                            </li>
+                            
+                            <!-- Logout -->
+                            <li class="jf-profile-section">
+                                <form th:action="@{/auth/logout}" method="post" class="d-inline w-100">
+                                    <button type="submit" class="dropdown-item text-danger w-100 text-start">
+                                        <i class="fa-solid fa-arrow-right-from-bracket me-2"></i>Đăng xuất
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+</header>
+</html>

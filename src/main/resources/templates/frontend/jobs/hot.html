@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="~{fragments/header :: head}" />
+<style>
+    .job-hot-page {
+        background: #f8f9fa;
+        min-height: 100vh;
+    }
+    .hot-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+        color: white;
+        padding: 0.4rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+    }
+    .hot-job-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.75rem;
+        border: 1px solid #e5e7eb;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    .hot-job-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(180deg, #ff6b6b 0%, #ee5a6f 100%);
+    }
+    .hot-job-card:hover {
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        transform: translateY(-4px);
+    }
+    .hot-rank {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.25rem;
+        color: #1f2937;
+        box-shadow: 0 3px 10px rgba(255, 215, 0, 0.4);
+    }
+    .view-count-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(0, 177, 79, 0.1);
+        color: #00b14f;
+        padding: 0.35rem 0.75rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        border: 1px solid rgba(0, 177, 79, 0.2);
+    }
+    .trending-icon {
+        color: #ef4444;
+        animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.6; }
+    }
+</style>
+</head>
+<body>
+    <th:block th:replace="~{fragments/header :: header}" />
+    
+    <main class="job-hot-page py-5">
+        <div class="container">
+            <!-- Page header -->
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+                <div>
+                    <h1 class="h3 fw-bold mb-1">
+                        <i class="fa-solid fa-fire text-danger me-2"></i>
+                        Việc làm hot
+                    </h1>
+                    <p class="text-muted mb-0">
+                        Xếp hạng theo số lượt xem 
+                        <span th:if="${withinDays != null}">
+                            trong <strong th:text="${withinDays}">30</strong> ngày gần đây
+                        </span>
+                    </p>
+                </div>
+                
+                <!-- Time range filter -->
+                <form method="get" action="/jobs/hot" class="d-flex align-items-center gap-2">
+                    <label for="range" class="text-muted small mb-0 text-nowrap">Khoảng thời gian</label>
+                    <select id="range" name="range" class="form-select form-select-sm" onchange="this.form.submit()">
+                        <option th:each="opt : ${rangeOptions}" 
+                                th:value="${opt.value}" 
+                                th:text="${opt.label}"
+                                th:selected="${withinDays == opt.value}">
+                        </option>
+                    </select>
+                </form>
+            </div>
+            
+            <!-- Empty state -->
+            <div th:if="${#lists.isEmpty(jobs)}" class="alert alert-light border text-center py-5">
+                <div class="text-muted mb-3">
+                    <i class="fa-solid fa-fire fa-3x"></i>
+                </div>
+                <h5 class="fw-semibold mb-2">Chưa có việc làm nổi bật</h5>
+                <p class="text-muted mb-3">Hãy khám phá danh sách việc làm mới nhất để tìm cơ hội phù hợp.</p>
+                <a href="/jobs" class="btn btn-success">Xem việc làm mới</a>
+            </div>
+            
+            <!-- Hot jobs list -->
+            <div class="row" th:unless="${#lists.isEmpty(jobs)}">
+                <div class="col-lg-6" th:each="job, iterStat : ${jobs}">
+                    <article class="hot-job-card">
+                        <!-- Rank badge -->
+                        <div class="hot-rank" th:text="${iterStat.count}">1</div>
+                        
+                        <div class="d-flex align-items-start justify-content-between mb-3">
+                            <div class="d-flex align-items-center gap-3 flex-grow-1">
+                                <!-- Logo -->
+                                <div class="job-logo" style="width: 60px; height: 60px; border-radius: 8px; background: #f3f4f6; overflow: hidden; flex-shrink: 0;">
+                                    <img th:if="${job.logoPath != null and job.logoPath != ''}"
+                                         th:src="@{'/assets/' + ${job.logoPath}}"
+                                         th:alt="${job.companyName}"
+                                         style="width: 100%; height: 100%; object-fit: cover;"
+                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                    <div style="width: 60px; height: 60px; display: none; align-items: center; justify-content: center; font-weight: 700; color: #00b14f; font-size: 1.2rem;" 
+                                         th:text="${job.employer.initial}">
+                                    </div>
+                                </div>
+                                
+                                <!-- Title and company -->
+                                <div class="flex-grow-1" style="min-width: 0;">
+                                    <h3 class="h5 mb-1" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                        <a th:href="@{/jobs/{id}(id=${job.id})}" 
+                                           class="text-decoration-none text-dark"
+                                           th:text="${job.title}">
+                                            Senior Frontend Developer
+                                        </a>
+                                    </h3>
+                                    <div class="text-muted small fw-semibold" th:text="${job.companyName}">VNPay</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Save button -->
+                            <button th:if="${canSaveJobs}" 
+                                    class="btn btn-sm btn-link p-0 text-muted ms-2 flex-shrink-0"
+                                    style="font-size: 1.5rem;"
+                                    th:data-job-id="${job.id}"
+                                    onclick="toggleSaveJob(this)"
+                                    title="Lưu việc làm">
+                                <i class="fa-solid fa-heart"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- Meta info -->
+                        <div class="row row-cols-1 row-cols-md-3 g-3 small text-muted mb-3">
+                            <div class="col">
+                                <i class="fa-solid fa-location-dot me-2 text-success"></i>
+                                <span th:text="${job.location}">Hà Nội</span>
+                            </div>
+                            <div class="col">
+                                <i class="fa-solid fa-coins me-2 text-success"></i>
+                                <span th:text="${job.salary}">20 - 30 triệu</span>
+                            </div>
+                            <div class="col">
+                                <i class="fa-solid fa-suitcase me-2 text-success"></i>
+                                <span th:text="${job.employmentType}">Full-time</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Categories -->
+                        <div class="d-flex flex-wrap gap-2 mb-3" th:unless="${#lists.isEmpty(job.categories)}">
+                            <span th:each="cat : ${job.categories}" 
+                                  class="badge" 
+                                  style="background: rgba(0,177,79,0.1); color: #00b14f; border: 1px solid rgba(0,177,79,0.2);"
+                                  th:text="${cat.name}">
+                                IT
+                            </span>
+                        </div>
+                        
+                        <!-- Stats and deadline -->
+                        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3">
+                            <div class="d-flex flex-wrap gap-3 align-items-center">
+                                <span class="view-count-badge">
+                                    <i class="fa-solid fa-eye"></i>
+                                    <strong th:text="${#numbers.formatInteger(job.viewCount, 0, 'COMMA')}">1,250</strong> lượt xem
+                                </span>
+                                <span class="hot-badge">
+                                    <i class="fa-solid fa-fire-flame-curved trending-icon"></i>
+                                    HOT
+                                </span>
+                                <span class="small text-muted" th:if="${job.postedAgo}">
+                                    <i class="fa-solid fa-clock me-1"></i>
+                                    <span th:text="${job.postedAgo}">2 ngày trước</span>
+                                </span>
+                            </div>
+                            
+                            <div class="d-flex gap-2">
+                                <span class="small text-muted" th:if="${job.deadlineFormatted}">
+                                    <i class="fa-solid fa-calendar-day me-1 text-success"></i>
+                                    Hạn: <span th:text="${job.deadlineFormatted}">31/12/2024</span>
+                                </span>
+                                <a th:href="@{/jobs/{id}(id=${job.id})}" 
+                                   class="btn btn-outline-success btn-sm">
+                                    Xem chi tiết
+                                    <i class="fa-solid fa-arrow-right ms-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+            
+            <!-- Pagination -->
+            <nav th:if="${totalPages > 1}" aria-label="Hot jobs pagination" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" th:classappend="${currentPage == 1 ? 'disabled' : ''}">
+                        <a class="page-link" th:href="@{/jobs/hot(range=${withinDays},page=${currentPage - 1})}">
+                            <span>&laquo;</span>
+                        </a>
+                    </li>
+                    
+                    <li th:each="i : ${#numbers.sequence(1, totalPages)}" 
+                        th:if="${i <= 3 or i >= totalPages - 2 or (i >= currentPage - 1 and i <= currentPage + 1)}"
+                        class="page-item" 
+                        th:classappend="${i == currentPage ? 'active' : ''}">
+                        <a class="page-link" 
+                           th:href="@{/jobs/hot(range=${withinDays},page=${i})}"
+                           th:text="${i}">1</a>
+                    </li>
+                    
+                    <li class="page-item" th:classappend="${currentPage == totalPages ? 'disabled' : ''}">
+                        <a class="page-link" th:href="@{/jobs/hot(range=${withinDays},page=${currentPage + 1})}">
+                            <span>&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </main>
+    
+    <th:block th:replace="~{fragments/footer :: footer}" />
+    <th:block th:replace="~{fragments/footer :: backToTop}" />
+    <th:block th:replace="~{fragments/footer :: scripts}" />
+    
+    <script>
+    function toggleSaveJob(btn) {
+        const jobId = btn.dataset.jobId;
+        
+        fetch('/jobs/save', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: 'jobId=' + jobId
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                if (data.saved) {
+                    btn.classList.add('text-danger');
+                    btn.classList.remove('text-muted');
+                } else {
+                    btn.classList.add('text-muted');
+                    btn.classList.remove('text-danger');
+                }
+                alert(data.message);
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Có lỗi xảy ra.');
+        });
+    }
+    </script>
+</body>
+</html>

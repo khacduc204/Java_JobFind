@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="~{fragments/header :: head}" />
+<link rel="stylesheet" th:href="@{/assets/css/candidate-profile.css}" />
+</head>
+<body>
+    <!-- Header -->
+    <th:block th:replace="~{fragments/header :: header}" />
+
+    <main class="candidate-page py-5">
+        <div class="container" style="max-width: 860px;">
+            <a th:href="@{/candidate/profile}" class="text-decoration-none d-inline-flex align-items-center text-muted mb-4">
+                <i class="fa-solid fa-arrow-left-long me-2"></i>Quay lại hồ sơ
+            </a>
+            <div class="section-card p-4 p-md-5 shadow-sm">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+                    <div>
+                        <h1 class="h3 mb-1">Cập nhật hồ sơ ứng viên</h1>
+                        <p class="text-muted mb-0">Điền các thông tin nổi bật để nhà tuyển dụng hiểu rõ hơn về bạn.</p>
+                    </div>
+                    <a class="btn btn-outline-success" th:href="@{/candidate/profile}" target="_blank" rel="noopener">
+                        <i class="fa-solid fa-eye me-2"></i>Xem trước hồ sơ
+                    </a>
+                </div>
+
+                <!-- Success Message -->
+                <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fa-solid fa-check-circle me-2"></i>
+                    <span th:text="${successMessage}">Cập nhật thành công!</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <!-- Error Messages -->
+                <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fa-solid fa-exclamation-circle me-2"></i>
+                    <span th:text="${errorMessage}">Có lỗi xảy ra!</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <form th:action="@{/candidate/edit-profile}" method="post" class="row g-4" enctype="multipart/form-data">
+                    
+                    <!-- Avatar Section -->
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Ảnh đại diện</label>
+                        <div class="d-flex align-items-center gap-3 flex-wrap">
+                            <div>
+                                <!-- Ưu tiên profilePicture, fallback avatarPath, cuối cùng là default -->
+                                <img id="avatarPreview" 
+                                     th:if="${candidate != null and candidate.profilePicture != null}"
+                                     th:src="@{'/uploads/avatars/' + ${candidate.profilePicture}}" 
+                                     alt="Ảnh đại diện" 
+                                     class="rounded-circle border" 
+                                     style="width:96px;height:96px;object-fit:cover;"
+                                     onerror="this.src='/assets/img/profile-img.jpg';">
+                                <img id="avatarPreview"
+                                     th:if="${(candidate == null or candidate.profilePicture == null) and user != null and user.avatarPath != null}"
+                                     th:src="@{'/uploads/avatars/' + ${user.avatarPath}}" 
+                                     alt="Ảnh đại diện" 
+                                     class="rounded-circle border" 
+                                     style="width:96px;height:96px;object-fit:cover;"
+                                     onerror="this.src='/assets/img/profile-img.jpg';">
+                                <img id="avatarPreview"
+                                     th:if="${(candidate == null or candidate.profilePicture == null) and (user == null or user.avatarPath == null)}"
+                                     th:src="@{/assets/img/profile-img.jpg}" 
+                                     alt="Ảnh đại diện" 
+                                     class="rounded-circle border" 
+                                     style="width:96px;height:96px;object-fit:cover;">
+                            </div>
+                            <div class="flex-grow-1" style="min-width:220px;">
+                                <input type="file" 
+                                       class="form-control" 
+                                       id="avatar" 
+                                       name="avatar" 
+                                       accept="image/*"
+                                       onchange="previewAvatar(event)">
+                                <div class="form-text">Hỗ trợ JPG, PNG, GIF hoặc WEBP với dung lượng tối đa 2MB.</div>
+                                <div class="form-check mt-2" th:if="${candidate != null and candidate.profilePicture != null}">
+                                    <input class="form-check-input" 
+                                           type="checkbox" 
+                                           value="1" 
+                                           id="removeAvatar" 
+                                           name="removeAvatar">
+                                    <label class="form-check-label" for="removeAvatar">
+                                        Xóa ảnh đại diện hiện tại
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Full Name -->
+                    <div class="col-12">
+                        <label for="fullName" class="form-label fw-semibold">Họ tên <span class="text-danger">*</span></label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="fullName" 
+                               name="fullName" 
+                               th:value="${user != null ? user.name : ''}"
+                               required>
+                    </div>
+
+                    <!-- Headline & Location -->
+                    <div class="col-md-6">
+                        <label for="headline" class="form-label fw-semibold">Tiêu đề nổi bật</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="headline" 
+                               name="headline" 
+                               th:value="${headline != null ? headline : ''}"
+                               placeholder="VD: Chuyên viên Marketing Digital">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="location" class="form-label fw-semibold">Địa điểm làm việc</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="location" 
+                               name="location" 
+                               th:value="${location != null ? location : ''}"
+                               placeholder="VD: Hà Nội, Việt Nam">
+                    </div>
+
+                    <!-- Phone -->
+                    <div class="col-md-6">
+                        <label for="phone" class="form-label fw-semibold">Số điện thoại</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="phone" 
+                               name="phone" 
+                               th:value="${user != null ? user.phone : ''}"
+                               placeholder="VD: 0901 234 567">
+                    </div>
+
+                    <!-- Email (Read-only) -->
+                    <div class="col-md-6">
+                        <label for="email" class="form-label fw-semibold">Email</label>
+                        <input type="email" 
+                               class="form-control" 
+                               id="email" 
+                               th:value="${email}"
+                               readonly
+                               disabled>
+                        <div class="form-text">Email không thể thay đổi</div>
+                    </div>
+
+                    <!-- Summary -->
+                    <div class="col-12">
+                        <label for="summary" class="form-label fw-semibold">Giới thiệu ngắn</label>
+                        <textarea class="form-control" 
+                                  id="summary" 
+                                  name="summary" 
+                                  rows="4"
+                                  th:text="${summary != null ? summary : ''}"
+                                  placeholder="Tóm tắt mục tiêu nghề nghiệp, kinh nghiệm và thành tích nổi bật..."></textarea>
+                    </div>
+
+                    <!-- Skills -->
+                    <div class="col-12">
+                        <label for="skills" class="form-label fw-semibold">Kỹ năng chuyên môn</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="skills" 
+                               name="skills" 
+                               th:value="${skillsList != null ? #strings.listJoin(skillsList, ', ') : ''}"
+                               placeholder="Ví dụ: PHP, Laravel, Digital Marketing, SEO, Excel nhập cao">
+                        <div class="form-text">Nhập các kỹ năng, cách nhau bởi dấu phẩy</div>
+                    </div>
+
+                    <!-- Experience -->
+                    <div class="col-12">
+                        <label for="experience" class="form-label fw-semibold">Kinh nghiệm làm việc</label>
+                        <textarea class="form-control" 
+                                  id="experience" 
+                                  name="experience" 
+                                  rows="6"
+                                  th:text="${experienceText != null ? experienceText : ''}"
+                                  placeholder="Ví trí | Công ty | YYYY-MM | YYYY-MM hoặc đề trưởng | Mô tả chi tiết"></textarea>
+                        <div class="form-text">
+                            Mỗi dòng tương ứng một vị trí. Ví dụ:<br>
+                            <span class="text-muted">"Digital Marketing Executive | TopGrow Agency | 2021-06 | 2024-03 | Quản lý ngân sách quảng cáo 200 triệu/tháng"</span>
+                        </div>
+                    </div>
+
+                    <!-- Submit Buttons -->
+                    <div class="col-12 d-flex justify-content-end gap-2">
+                        <a th:href="@{/candidate/profile}" class="btn btn-light">Hủy</a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fa-solid fa-floppy-disk me-2"></i>Lưu cập nhật
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <th:block th:replace="~{fragments/footer :: footer}" />
+    <th:block th:replace="~{fragments/footer :: backToTop}" />
+    <th:block th:replace="~{fragments/footer :: scripts}" />
+
+    <script>
+        // Avatar preview function
+        function previewAvatar(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Check file size (2MB max)
+            if (file.size > 2 * 1024 * 1024) {
+                alert('Kích thước file không được vượt quá 2MB');
+                event.target.value = '';
+                return;
+            }
+
+            // Check file type
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+            if (!allowedTypes.includes(file.type)) {
+                alert('Chỉ chấp nhận file ảnh JPG, PNG, GIF, WEBP');
+                event.target.value = '';
+                return;
+            }
+
+            // Preview image
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('avatarPreview').src = e.target.result;
+                // Uncheck remove avatar if user selects new image
+                const removeCheckbox = document.getElementById('removeAvatar');
+                if (removeCheckbox) {
+                    removeCheckbox.checked = false;
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // If remove avatar is checked, clear file input
+        const removeCheckbox = document.getElementById('removeAvatar');
+        if (removeCheckbox) {
+            removeCheckbox.addEventListener('change', function() {
+                if (this.checked) {
+                    const avatarInput = document.getElementById('avatar');
+                    if (avatarInput) {
+                        avatarInput.value = '';
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

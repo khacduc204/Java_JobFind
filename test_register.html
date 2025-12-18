@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Test Register</title>
+</head>
+<body>
+    <h2>Test Registration</h2>
+    <form action="http://localhost:8080/auth/register" method="post">
+        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}">
+        <p>
+            <label>Email: <input type="email" name="email" value="testuser@example.com" required></label>
+        </p>
+        <p>
+            <label>Name: <input type="text" name="name" value="Test User" required></label>
+        </p>
+        <p>
+            <label>Password: <input type="password" name="password" value="password123" required></label>
+        </p>
+        <p>
+            <label>Role:
+                <select name="roleId" required>
+                    <option value="2">Employer</option>
+                    <option value="3" selected>Candidate</option>
+                </select>
+            </label>
+        </p>
+        <button type="submit">Register</button>
+    </form>
+    <hr>
+    <p><a href="http://localhost:8080/auth/login">Go to Login</a></p>
+</body>
+</html>

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<footer th:fragment="footer" class="jf-footer mt-5">
+    <div class="container">
+        <div class="row g-4">
+            <!-- Brand Column -->
+            <div class="col-lg-4 col-md-6">
+                <div class="jf-footer-brand">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="fa-solid fa-briefcase me-2" style="font-size: 1.8rem; color: var(--jf-primary);"></i>
+                        <h4 class="mb-0 text-white">JobFind</h4>
+                    </div>
+                    <p class="mb-3">JobFind mang tới trải nghiệm tìm việc và tuyển dụng chuyên nghiệp, chuẩn phong cách TopCV cho người Việt.</p>
+                    
+                    <!-- Social Links -->
+                    <div class="d-flex gap-2">
+                        <a href="https://facebook.com" target="_blank" rel="noopener" class="social-link" aria-label="Facebook">
+                            <i class="fa-brands fa-facebook-f"></i>
+                        </a>
+                        <a href="https://linkedin.com" target="_blank" rel="noopener" class="social-link" aria-label="LinkedIn">
+                            <i class="fa-brands fa-linkedin-in"></i>
+                        </a>
+                        <a href="https://tiktok.com" target="_blank" rel="noopener" class="social-link" aria-label="TikTok">
+                            <i class="fa-brands fa-tiktok"></i>
+                        </a>
+                        <a href="https://youtube.com" target="_blank" rel="noopener" class="social-link" aria-label="YouTube">
+                            <i class="fa-brands fa-youtube"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- About Us -->
+            <div class="col-lg-2 col-md-6 col-6">
+                <h6 class="text-white mb-3 fw-bold">Về chúng tôi</h6>
+                <ul class="list-unstyled jf-footer-links">
+                    <li><a href="/about">Giới thiệu</a></li>
+                    <li><a href="/contact">Liên hệ</a></li>
+                    <li><a href="/terms">Điều khoản sử dụng</a></li>
+                    <li><a href="/privacy">Chính sách bảo mật</a></li>
+                    <li><a href="/faq">Câu hỏi thường gặp</a></li>
+                </ul>
+            </div>
+            
+            <!-- For Candidates -->
+            <div class="col-lg-3 col-md-6 col-6">
+                <h6 class="text-white mb-3 fw-bold">Dành cho ứng viên</h6>
+                <ul class="list-unstyled jf-footer-links">
+                    <li><a href="/jobs">Tìm việc làm</a></li>
+                    <li><a href="/cv/builder">Tạo CV online</a></li>
+                    <li><a href="/cv/templates">Mẫu CV đẹp</a></li>
+                    <li><a href="/blog">Cẩm nang nghề nghiệp</a></li>
+                    <li><a href="/tools/salary">Tính lương NET</a></li>
+                    <li><a href="/tips/interview">Bí quyết phỏng vấn</a></li>
+                </ul>
+            </div>
+            
+            <!-- For Employers -->
+            <div class="col-lg-3 col-md-6">
+                <h6 class="text-white mb-3 fw-bold">Dành cho nhà tuyển dụng</h6>
+                <ul class="list-unstyled jf-footer-links">
+                    <li><a th:href="@{/auth/register(role=employer)}">Đăng tuyển ngay</a></li>
+                    <li><a th:href="@{/employers}">Tìm ứng viên</a></li>
+                    <li><a href="/employer/solutions">Giải pháp HR</a></li>
+                    <li><a href="/employer/pricing">Bảng giá dịch vụ</a></li>
+                    <li><a href="/employer/guide">Hướng dẫn đăng tin</a></li>
+                    <li><a href="/employer/contact">Liên hệ hợp tác</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Footer Bottom -->
+        <div class="jf-footer-bottom">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 pt-4">
+                <div class="jf-footer-bottom-copyright">
+                    &copy; <span th:text="${#dates.year(#dates.createNow())}">2025</span> JobFind. All rights reserved.
+                </div>
+                <div class="jf-footer-bottom-links">
+                    <a href="/terms">Quy chế hoạt động</a>
+                    <a href="/complaints">Giải quyết khiếu nại</a>
+                    <a href="/privacy">Quy định bảo mật</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- Back to Top Button Fragment -->
+<div th:fragment="backToTop" id="backToTop" class="back-to-top" style="display: none;">
+    <i class="fa-solid fa-arrow-up"></i>
+</div>
+
+<!-- Common Scripts Fragment -->
+<th:block th:fragment="scripts">
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Page Scripts if provided -->
+    <th:block th:if="${pageScripts != null}">
+        <script th:each="scriptSrc : ${pageScripts}" th:src="@{'/assets/js/' + ${scriptSrc}}" defer></script>
+    </th:block>
+    
+    <!-- Page Loaded Class -->
+    <script>
+        window.addEventListener('load', function () {
+            document.body.classList.add('page-loaded');
+        });
+        
+        // Back to Top Button
+        const backToTop = document.getElementById('backToTop');
+        if (backToTop) {
+            window.addEventListener('scroll', function() {
+                if (window.pageYOffset > 300) {
+                    backToTop.style.display = 'flex';
+                } else {
+                    backToTop.style.display = 'none';
+                }
+            });
+            
+            backToTop.addEventListener('click', function() {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        }
+    </script>
+</th:block>
+
+</html>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <h6 class="text-white mb-3 fw-bold">Liên hệ</h6>
+                <ul class="list-unstyled jf-footer-links">
+                    <li class="d-flex align-items-start mb-2">
+                        <i class="fa-solid fa-location-dot me-2 mt-1"></i>
+                        <span>Tầng 5, Tòa nhà Sunrise, Số 1 Nguyễn Huy Tưởng, Thanh Xuân, Hà Nội</span>
+                    </li>
+                    <li class="d-flex align-items-center mb-2">
+                        <i class="fa-solid fa-phone me-2"></i>
+                        <a href="tel:02471076480" class="text-decoration-none">(024) 7107 6480</a>
+                    </li>
+                    <li class="d-flex align-items-center mb-2">
+                        <i class="fa-solid fa-envelope me-2"></i>
+                        <a href="mailto:contact@jobfind.vn" class="text-decoration-none">contact@jobfind.vn</a>
+                    </li>
+                    <li class="d-flex align-items-center">
+                        <i class="fa-solid fa-clock me-2"></i>
+                        <span>Thứ 2 - Thứ 6: 8h30 - 18h00</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <hr class="jf-footer-divider">
+        
+        <div class="row jf-footer-bottom">
+            <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+                <p class="mb-0 small">&copy; 2025 JobFind Vietnam JSC. All Rights Reserved.</p>
+            </div>
+            <div class="col-md-6 text-center text-md-end">
+                <div class="jf-footer-bottom-links">
+                    <a href="#" class="text-decoration-none small me-3">Điều khoản sử dụng</a>
+                    <a href="#" class="text-decoration-none small me-3">Chính sách bảo mật</a>
+                    <a href="#" class="text-decoration-none small">Giải quyết khiếu nại</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+</html>

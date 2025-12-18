@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin-layout}">
+<head>
+    <title>Quản lý người dùng</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="pagetitle">
+        <h1>Quản lý người dùng</h1>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}">Trang chủ</a></li>
+                    <li class="breadcrumb-item active">Người dùng</li>
+                </ol>
+            </nav>
+        </div>
+
+        <section class="section">
+            <div class="card p-3 shadow-sm">
+
+                <!-- Flash Messages -->
+                <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <span th:text="${successMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
+                </div>
+
+                <div th:if="${warningMessage}" class="alert alert-warning alert-dismissible fade show" role="alert">
+                    <span th:text="${warningMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
+                </div>
+
+                <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <span th:text="${errorMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
+                </div>
+
+                <!-- Add User Button -->
+                <div class="text-end mb-3">
+                    <a th:href="@{/admin/users/add}" class="btn btn-success">
+                        <i class="bi bi-plus-circle"></i> Thêm người dùng
+                    </a>
+                </div>
+
+                <!-- Users Table -->
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover align-middle bg-white">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Email</th>
+                                <th>Tên</th>
+                                <th>Vai trò</th>
+                                <th>Ảnh</th>
+                                <th width="180">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="user : ${users}">
+                                <td th:text="${user.id}">1</td>
+                                <td th:text="${user.email}">user@example.com</td>
+                                <td th:text="${user.name}">Tên người dùng</td>
+                                <td>
+                                    <span th:if="${user.role}" th:text="${user.role.name}">Role</span>
+                                    <span th:unless="${user.role}" class="text-muted">N/A</span>
+                                </td>
+                                <td style="width:60px;">
+                                    <img th:if="${user.avatarPath}" 
+                                         th:src="@{${user.avatarPath}}" 
+                                         class="rounded-circle" 
+                                         width="48" 
+                                         height="48" 
+                                         style="object-fit:cover;"
+                                         alt="Avatar">
+                                    <span th:unless="${user.avatarPath}" class="text-muted small">Không có</span>
+                                </td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a th:href="@{/admin/users/edit/{id}(id=${user.id})}" 
+                                           class="btn btn-sm btn-primary">
+                                            <i class="bi bi-pencil"></i> Sửa
+                                        </a>
+                                        <button type="button" 
+                                                class="btn btn-sm btn-danger"
+                                                data-bs-toggle="modal" 
+                                                th:data-bs-target="'#deleteModal' + ${user.id}">
+                                            <i class="bi bi-trash"></i> Xóa
+                                        </button>
+                                    </div>
+
+                                    <!-- Delete Confirmation Modal -->
+                                    <div class="modal fade" th:id="'deleteModal' + ${user.id}" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Xác nhận xóa</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    Bạn có chắc chắn muốn xóa người dùng <strong th:text="${user.name}">này</strong>?
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                                    <form th:action="@{/admin/users/delete/{id}(id=${user.id})}" method="post" style="display:inline;">
+                                                        <button type="submit" class="btn btn-danger">Xóa</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(users)}">
+                                <td colspan="6" class="text-center text-muted py-4">
+                                    Chưa có người dùng nào
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+</div>
+</body>
+</html>

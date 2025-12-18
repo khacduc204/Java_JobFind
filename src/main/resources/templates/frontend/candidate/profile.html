@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="~{fragments/header :: head}" />
+<style>
+    /* Profile specific styles */
+    .profile-hero {
+        background: linear-gradient(180deg, rgba(229, 247, 255, 0.5) 0%, rgba(240, 249, 255, 0.3) 100%);
+        padding: 3rem 0;
+        margin-bottom: 2rem;
+    }
+    .profile-card {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 2px 12px rgba(15, 23, 42, 0.08);
+    }
+    .profile-avatar-large {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid #f0f0f0;
+    }
+    .profile-name {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 0.5rem;
+    }
+    .profile-title {
+        color: #00b14f;
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+    }
+    .profile-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        color: #6b7280;
+        font-size: 0.95rem;
+    }
+    .profile-meta i {
+        margin-right: 0.5rem;
+    }
+    .section-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.75rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    .section-card h2 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 1.25rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid #f3f4f6;
+    }
+    .experience-item {
+        padding: 1.25rem 0;
+        border-bottom: 1px solid #f3f4f6;
+    }
+    .experience-item:last-child {
+        border-bottom: none;
+    }
+    .experience-title {
+        font-weight: 600;
+        color: #1f2937;
+        font-size: 1.05rem;
+        margin-bottom: 0.5rem;
+    }
+    .experience-company {
+        color: #6b7280;
+        font-size: 0.95rem;
+        margin-bottom: 0.25rem;
+    }
+    .experience-period {
+        color: #9ca3af;
+        font-size: 0.875rem;
+    }
+    .skill-badge {
+        display: inline-block;
+        background: rgba(0, 177, 79, 0.1);
+        color: #00b14f;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        margin: 0.25rem;
+    }
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f3f4f6;
+    }
+    .info-row:last-child {
+        border-bottom: none;
+    }
+    .info-label {
+        color: #6b7280;
+        font-weight: 500;
+    }
+    .info-value {
+        color: #1f2937;
+        font-weight: 600;
+    }
+    .highlight-stat {
+        text-align: left;
+        padding: 1.25rem;
+        background: white;
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+    }
+    .highlight-stat .stat-label {
+        color: #6b7280;
+        font-size: 0.875rem;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    .highlight-stat .stat-number {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #00b14f;
+        display: block;
+        margin-bottom: 0.25rem;
+    }
+    .highlight-stat .stat-desc {
+        color: #6b7280;
+        font-size: 0.8rem;
+        line-height: 1.4;
+    }
+    .experience-circle {
+        width: 10px;
+        height: 10px;
+        background: #00b14f;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 0.5rem;
+    }
+    .achievement-item {
+        padding: 0.75rem 0;
+        display: flex;
+        align-items: start;
+        gap: 0.75rem;
+    }
+    .achievement-icon {
+        color: #00b14f;
+        font-size: 1.25rem;
+        margin-top: 0.25rem;
+    }
+    .achievement-text {
+        color: #6b7280;
+        font-size: 0.95rem;
+        line-height: 1.5;
+    }
+    .profile-avatar-wrapper {
+        position: relative;
+    }
+    .profile-avatar-label {
+        color: #9ca3af;
+        font-size: 0.85rem;
+        margin-bottom: 0.5rem;
+    }
+</style>
+</head>
+<body>
+    <!-- Header -->
+    <th:block th:replace="~{fragments/header :: header}" />
+
+    <!-- Profile Hero -->
+    <div class="profile-hero">
+        <div class="container">
+            <div class="profile-card">
+                <div class="row align-items-start">
+                    <div class="col-lg-2 col-md-3 text-center text-md-start mb-3 mb-md-0">
+                        <div class="profile-avatar-wrapper">
+                            <div class="profile-avatar-label"><<span th:text="${fullName}">Lê Văn Bằng</span>></div>
+                            <!-- Ưu tiên: candidate.profilePicture → user.avatarPath → default -->
+                            <img th:if="${candidate != null and candidate.profilePicture != null}" 
+                                 th:src="@{'/uploads/avatars/' + ${candidate.profilePicture}}"
+                                 th:alt="${fullName}"
+                                 class="profile-avatar-large"
+                                 onerror="this.src='/assets/img/profile-img.jpg';">
+                            <img th:if="${(candidate == null or candidate.profilePicture == null) and avatarPath != null}" 
+                                 th:src="@{'/uploads/avatars/' + ${avatarPath}}"
+                                 th:alt="${fullName}"
+                                 class="profile-avatar-large"
+                                 onerror="this.src='/assets/img/profile-img.jpg';">
+                            <img th:if="${(candidate == null or candidate.profilePicture == null) and avatarPath == null}" 
+                                 th:src="@{/assets/img/profile-img.jpg}"
+                                 th:alt="${fullName}"
+                                 class="profile-avatar-large">
+                        </div>
+                    </div>
+                    <div class="col-lg-7 col-md-6 mb-3 mb-md-0">
+                        <h1 class="profile-name" th:text="${fullName}">Lê Văn Bằng</h1>
+                        <div class="profile-title">
+                            <i class="fa-solid fa-circle-check me-2"></i>
+                            <span th:text="${headline != null ? headline : 'Chưa cập nhật tiêu đề'}">Chuyên viên Marketing</span>
+                        </div>
+                        <div class="profile-meta">
+                            <span th:if="${location != null and location != ''}">
+                                <i class="fa-solid fa-location-dot" style="color: #6b7280;"></i>
+                                <span th:text="${location}">Nghệ An</span>
+                            </span>
+                            <span>
+                                <i class="fa-regular fa-envelope" style="color: #6b7280;"></i>
+                                <span th:text="${email}">bang@email.com</span>
+                            </span>
+                            <span th:if="${user != null and user.phone != null}">
+                                <i class="fa-solid fa-phone" style="color: #6b7280;"></i>
+                                <span th:text="${user.phone}">0343211021</span>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-3 text-md-end">
+                        <div class="d-flex flex-column gap-2">
+                            <a th:if="${cvPath != null and cvPath != ''}" 
+                               th:href="@{'/uploads/cvs/' + ${cvPath}}" 
+                               class="btn btn-success" 
+                               target="_blank">
+                                <i class="fa-solid fa-download me-2"></i>Tải CV
+                            </a>
+                            <a th:if="${!isOwnProfile}"
+                               th:href="@{'mailto:' + ${email}}" 
+                               class="btn btn-outline-success">
+                                <i class="fa-solid fa-paper-plane me-2"></i>Liên hệ ứng viên
+                            </a>
+                            <button class="btn btn-light" type="button" 
+                                    onclick="navigator.clipboard?.writeText(window.location.href).then(() => alert('Đã sao chép link!')).catch(() => {});">
+                                <i class="fa-solid fa-share-nodes me-2"></i>Chia sẻ hồ sơ
+                            </button>
+                            <a th:if="${isOwnProfile}" 
+                               th:href="@{/candidate/edit-profile}" 
+                               class="btn btn-outline-secondary">
+                                <i class="fa-solid fa-pen-to-square me-2"></i>Chỉnh sửa hồ sơ
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container pb-5">
+        <div class="row">
+            <!-- Left Column -->
+            <div class="col-lg-8">
+                <!-- Introduction Section -->
+                <div class="section-card">
+                    <h2>Giới thiệu</h2>
+                    <p th:if="${summary != null and !summary.isEmpty()}" 
+                       th:text="${summary}" 
+                       style="white-space: pre-line; line-height: 1.6;">
+                        Nội dung giới thiệu
+                    </p>
+                    <p th:unless="${summary != null and !summary.isEmpty()}" 
+                       class="text-muted fst-italic">
+                        Chưa có thông tin giới thiệu
+                    </p>
+                    
+                    <!-- Highlight Stats -->
+                    <div class="row g-3 mt-3">
+                        <div class="col-md-4 col-6">
+                            <div class="highlight-stat">
+                                <span class="stat-label">Kinh nghiệm</span>
+                                <span class="stat-number">
+                                    <span th:text="${experienceList != null && experienceList.size() > 0 ? 'Dưới ' + experienceList.size() + ' năm' : 'Dưới 1 năm'}">Dưới 1 năm</span>
+                                </span>
+                                <div class="stat-desc">Tổng thời gian làm việc thực tế</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-6">
+                            <div class="highlight-stat">
+                                <span class="stat-label">Kỹ năng chủ chốt</span>
+                                <span class="stat-number" th:text="${skillsList != null ? skillsList.size() : 1}">1</span>
+                                <div class="stat-desc">Kỹ năng đã được ứng viên cập nhật</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-6">
+                            <div class="highlight-stat">
+                                <span class="stat-label">Cập nhật gần nhất</span>
+                                <span class="stat-number" th:text="${#temporals.format(candidate.updatedAt != null ? candidate.updatedAt : candidate.user.createdAt, 'dd/MM/yyyy')}">04/11/2025</span>
+                                <div class="stat-desc">Hồ sơ luôn được làm mới</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Status -->
+                    <div class="row g-3 mt-3">
+                        <div class="col-12">
+                            <div class="highlight-stat">
+                                <span class="stat-label">Trạng thái</span>
+                                <span class="stat-number">Sẵn sàng</span>
+                                <div class="stat-desc">Ứng viên mở với cơ hội phỏng vấn</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Experience Section -->
+                <div class="section-card">
+                    <h2>Kinh nghiệm làm việc</h2>
+                    <div th:if="${experienceList != null and !experienceList.isEmpty()}">
+                        <div th:each="exp : ${experienceList}" class="experience-item">
+                            <div class="experience-title">
+                                <span class="experience-circle"></span>
+                                <span th:text="${exp['title']}">Làm việc ở Campuchia</span>
+                            </div>
+                            <div class="experience-period" style="color: #00b14f; margin-left: 1.25rem;">
+                                <span th:text="${exp['startDate']}">- Hiện tại</span> - 
+                                <span th:text="${exp['endDate'] != null ? exp['endDate'] : 'Hiện tại'}">Hiện tại</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div th:unless="${experienceList != null and !experienceList.isEmpty()}" 
+                         class="py-2">
+                        <div class="experience-item">
+                            <div class="experience-title">
+                                <span class="experience-circle"></span>
+                                Làm việc ở Campuchia
+                            </div>
+                            <div class="experience-period" style="color: #00b14f; margin-left: 1.25rem;">- Hiện tại - Hiện tại</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="col-lg-4">
+                <!-- Skills Section -->
+                <div class="section-card">
+                    <h2>Kỹ năng chuyên môn</h2>
+                    <div th:if="${skillsList != null and !skillsList.isEmpty()}" class="mt-3">
+                        <span th:each="skill : ${skillsList}" 
+                              class="skill-badge" 
+                              th:text="${skill}">
+                            Sale
+                        </span>
+                    </div>
+                    <div th:unless="${skillsList != null and !skillsList.isEmpty()}" class="mt-3">
+                        <span class="skill-badge">Sale</span>
+                    </div>
+                    
+                    <div class="mt-4 pt-3 border-top">
+                        <a th:href="@{/candidate/edit-profile}" 
+                           class="btn btn-outline-success w-100">
+                            <i class="fa-solid fa-plus me-2"></i>Liên tục cập nhật kỹ năng mới
+                        </a>
+                    </div>
+                </div>
+
+                <!-- CV & Documents -->
+                <div class="section-card">
+                    <h2>CV & tài liệu</h2>
+                    <div class="info-row">
+                        <span class="info-label">CV chính thức</span>
+                        <span class="info-value">
+                            <i class="fa-regular fa-file-lines me-2 text-success"></i>
+                            <span th:if="${cvPath != null and cvPath != ''}">Đính kèm chuẩn ATS, tối đa nhà tuyển dụng</span>
+                            <span th:unless="${cvPath != null and cvPath != ''}" class="text-muted">Đính kèm chuẩn ATS, tối đa nhà tuyển dụng</span>
+                        </span>
+                    </div>
+                    <div class="mt-3">
+                        <a th:if="${cvPath != null and cvPath != ''}"
+                           th:href="@{'/uploads/cvs/' + ${cvPath}}" 
+                           class="btn btn-success w-100" 
+                           target="_blank">
+                            <i class="fa-solid fa-download me-2"></i>Tải xuống
+                        </a>
+                        <a th:unless="${cvPath != null and cvPath != ''}"
+                           th:href="@{/candidate/upload-cv}" 
+                           class="btn btn-outline-success w-100">
+                            <i class="fa-solid fa-upload me-2"></i>Cập nhật CV mới
+                        </a>
+                    </div>
+                    <div class="alert alert-light mt-3 mb-0" style="font-size: 0.875rem;">
+                        <i class="fa-regular fa-lightbulb text-warning me-2"></i>
+                        Tip: Thêm link portfolio hoặc dự án nổi bật để tăng ấn tượng.
+                    </div>
+                </div>
+
+                <!-- Achievements Section - Hidden vì chưa có data từ database -->
+                <div class="section-card" style="display: none;">
+                    <h2>Thành tựu nổi bật</h2>
+                    <div class="achievement-item">
+                        <i class="fa-solid fa-trophy achievement-icon"></i>
+                        <div class="achievement-text">Đạt giải Nhân viên xuất sắc quý 1/2024 tại doanh nghiệp hiện tại.</div>
+                    </div>
+                    <div class="achievement-item">
+                        <i class="fa-solid fa-chart-line achievement-icon"></i>
+                        <div class="achievement-text">Đóng góp tăng trưởng 150% traffic tự nhiên trong 6 tháng.</div>
+                    </div>
+                    <div class="achievement-item">
+                        <i class="fa-solid fa-people-group achievement-icon"></i>
+                        <div class="achievement-text">Làm đạo nhận 5 thành viên triển khai chiến dịch digital đa kênh.</div>
+                    </div>
+                </div>
+
+                <!-- Quick Info - Hidden -->
+                <div class="section-card" style="display: none;">
+                    <h2>Thông tin nhanh</h2>
+                    <div class="info-row">
+                        <span class="info-label">
+                            <i class="fa-solid fa-circle-check text-success me-2"></i>
+                            Hồ sơ được xác thực bởi JobFind
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">
+                            <i class="fa-solid fa-circle-check text-success me-2"></i>
+                            Sẵn sàng nhận việc trong 2 tuần
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">
+                            <i class="fa-solid fa-circle-check text-success me-2"></i>
+                            Tiếng Anh giao tiếp tốt
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">
+                            <i class="fa-solid fa-circle-check text-success me-2"></i>
+                            Đăng gửi hồ sơ ứng tuyển 100% thành công trong 2 tháng
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">
+                            <i class="fa-solid fa-circle-check text-success me-2"></i>
+                            Liên đọc nhận thông báo khi nhà tuyển dụng xem hồ sơ
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Suggested Jobs Section -->
+        <div class="section-card mt-5">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0">Việc làm gợi ý cho <span th:text="${fullName}">Lê Văn Bằng</span></h2>
+            </div>
+            <div class="row g-3">
+                <!-- Job Card 1 -->
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title text-truncate">Chuyên viên Marketing Online</h5>
+                            <p class="text-muted small mb-2">
+                                <i class="fa-solid fa-building me-1"></i>
+                                Công ty Cổng nghề TechCorp
+                            </p>
+                            <p class="text-muted small mb-3">
+                                <i class="fa-solid fa-location-dot me-1"></i>
+                                Hà Nội
+                            </p>
+                            <div class="d-flex gap-2 mb-3 flex-wrap">
+                                <span class="badge bg-light text-dark">Hỗ trợ tìm việc tại</span>
+                                <span class="badge bg-light text-dark">E-10 triệu</span>
+                            </div>
+                            <a href="#" class="btn btn-outline-success btn-sm w-100">Xem chi tiết</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Job Card 2 -->
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title text-truncate">Content Writer</h5>
+                            <p class="text-muted small mb-2">
+                                <i class="fa-solid fa-building me-1"></i>
+                                Công ty Cổng nghề TechCorp
+                            </p>
+                            <p class="text-muted small mb-3">
+                                <i class="fa-solid fa-location-dot me-1"></i>
+                                Hà Nội
+                            </p>
+                            <div class="d-flex gap-2 mb-3 flex-wrap">
+                                <span class="badge bg-light text-dark">Hỗ trợ tìm việc tại</span>
+                                <span class="badge bg-light text-dark">7-9 triệu</span>
+                            </div>
+                            <a href="#" class="btn btn-outline-success btn-sm w-100">Xem chi tiết</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Job Card 3 -->
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title text-truncate">Lập trình viên PHP</h5>
+                            <p class="text-muted small mb-2">
+                                <i class="fa-solid fa-building me-1"></i>
+                                Công ty Thuyên Vũ SmartMedia
+                            </p>
+                            <p class="text-muted small mb-3">
+                                <i class="fa-solid fa-location-dot me-1"></i>
+                                Hà Nội
+                            </p>
+                            <div class="d-flex gap-2 mb-3 flex-wrap">
+                                <span class="badge bg-light text-dark">Hà Nội</span>
+                                <span class="badge bg-light text-dark">12-15 triệu</span>
+                            </div>
+                            <a href="#" class="btn btn-outline-success btn-sm w-100">Xem chi tiết</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <th:block th:replace="~{fragments/footer :: footer}" />
+    <th:block th:replace="~{fragments/footer :: backToTop}" />
+    <th:block th:replace="~{fragments/footer :: scripts}" />
+</body>
+</html>

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập JobFind</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/assets/bootstrap.min.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" th:href="@{/assets/css/auth.css}">
+</head>
+<body>
+<main class="auth-wrapper">
+    <div class="container">
+        <div class="auth-card">
+            <div class="row g-0">
+                <div class="col-lg-6">
+                    <div class="auth-form-pane">
+                        <a class="auth-brand" th:href="@{/}">
+                            <i class="fa-solid fa-briefcase"></i>
+                            JobFind
+                        </a>
+                        <div class="mb-4">
+                            <h2 class="fw-bold mb-1">Chào mừng bạn đã quay trở lại</h2>
+                            <p class="text-muted mb-0">Cùng xây dựng hồ sơ nổi bật và tiếp cận cơ hội sự nghiệp lý tưởng.</p>
+                        </div>
+
+                        <div th:if="${authError}" class="alert alert-danger" role="alert" th:text="${authError}"></div>
+                        <div th:if="${logoutMessage}" class="alert alert-success" role="alert" th:text="${logoutMessage}"></div>
+
+                        <form method="post" class="auth-form" th:action="@{/auth/login}">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                            <div class="mb-3">
+                                <label class="form-label">Email</label>
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text"><i class="fa-regular fa-envelope"></i></span>
+                                    <input type="email" name="email" class="form-control" placeholder="Email" required th:value="${param.email}">
+                                </div>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label d-flex justify-content-between align-items-center">
+                                    <span>Mật khẩu</span>
+                                    <a href="#" class="auth-link">Quên mật khẩu?</a>
+                                </label>
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text"><i class="fa-solid fa-shield"></i></span>
+                                    <input type="password" name="password" class="form-control js-password" placeholder="Mật khẩu" required>
+                                    <button type="button" class="toggle-password" aria-label="Hiển thị mật khẩu">
+                                        <i class="fa-regular fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="d-grid mt-4">
+                                <button type="submit" class="btn btn-success btn-lg">Đăng nhập</button>
+                            </div>
+                        </form>
+
+                        <div class="auth-divider">
+                            <span>Hoặc đăng nhập bằng</span>
+                        </div>
+
+                        <div class="auth-social-group">
+                            <a href="#" class="btn btn-outline-danger btn-lg disabled" aria-disabled="true">
+                                <i class="fa-brands fa-google me-1"></i>
+                                Google
+                            </a>
+                            <a href="#" class="btn btn-outline-primary btn-lg disabled" aria-disabled="true">
+                                <i class="fa-brands fa-facebook-f me-1"></i>
+                                Facebook
+                            </a>
+                            <a href="#" class="btn btn-outline-info btn-lg disabled" aria-disabled="true">
+                                <i class="fa-brands fa-linkedin-in me-1"></i>
+                                LinkedIn
+                            </a>
+                        </div>
+
+                        <p class="mt-4 text-center text-muted">Bạn chưa có tài khoản?
+                            <a class="auth-link" th:href="@{/auth/register}">Đăng ký ngay</a>
+                        </p>
+
+                        <div class="auth-support text-center mt-4">
+                            <p class="mb-1">Bạn gặp khó khăn khi đăng nhập?</p>
+                            <p class="mb-0">Vui lòng liên hệ <a href="tel:02471076480" class="fw-semibold">(024) 7107 6480</a> (giờ hành chính)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6 d-none d-lg-block">
+                    <div class="auth-hero-pane">
+                        <div class="auth-hero-content">
+                            <div class="auth-hero-logo mb-4 d-flex align-items-center">
+                                <i class="fa-solid fa-briefcase" style="font-size: 48px; color: white;"></i>
+                                <span style="font-size: 48px; color: white; font-weight: 700; margin-left: 10px;">JobFind</span>
+                            </div>
+                            <h2 class="auth-hero-title">Tiếp lợi thế<br>Nối thành công</h2>
+                            <p class="auth-hero-subtitle">JobFind - Hệ sinh thái nhân sự tiên phong ứng dụng công nghệ tại Việt Nam.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<footer class="auth-footer">
+    © 2016. All Rights Reserved. JobFind Vietnam JSC.
+</footer>
+<script th:src="@{/assets/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/assets/js/auth.js}" defer></script>
+</body>
+</html>

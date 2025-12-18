@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="vi" 
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin-layout}">
+<head>
+    <title>Chỉnh sửa tin tuyển dụng</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+
+        <div class="pagetitle">
+            <h1>Chỉnh sửa tin tuyển dụng</h1>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}">Trang chủ</a></li>
+                    <li class="breadcrumb-item"><a th:href="@{/admin/jobs}">Tin tuyển dụng</a></li>
+                    <li class="breadcrumb-item active">Chỉnh sửa</li>
+                </ol>
+            </nav>
+        </div>
+
+        <a class="btn btn-link text-decoration-none ps-0 mb-3" th:href="@{/admin/jobs}">
+            <i class="bi bi-arrow-left me-2"></i>Quay lại danh sách
+        </a>
+
+        <section class="section">
+            <!-- Error Messages -->
+            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <span th:text="${errorMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Thông tin tin tuyển dụng</h5>
+
+                            <form th:action="@{'/admin/jobs/' + ${job.id} + '/edit'}" method="post">
+                                
+                                <!-- Employer -->
+                                <div class="mb-3">
+                                    <label for="employerId" class="form-label">Nhà tuyển dụng <span class="text-danger">*</span></label>
+                                    <select id="employerId" name="employerId" class="form-select" required>
+                                        <option value="">-- Chọn nhà tuyển dụng --</option>
+                                        <option th:each="employer : ${employers}" 
+                                                th:value="${employer.id}"
+                                                th:text="${employer.companyName}"
+                                                th:selected="${employer.id == job.employer.id}">
+                                            Company Name
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <!-- Title -->
+                                <div class="mb-3">
+                                    <label for="title" class="form-label">Tiêu đề <span class="text-danger">*</span></label>
+                                    <input type="text" 
+                                           id="title" 
+                                           name="title" 
+                                           class="form-control" 
+                                           th:value="${job.title}"
+                                           placeholder="VD: Senior Java Developer"
+                                           required>
+                                </div>
+
+                                <!-- Description -->
+                                <div class="mb-3">
+                                    <label for="description" class="form-label">Mô tả công việc <span class="text-danger">*</span></label>
+                                    <textarea id="description" 
+                                              name="description" 
+                                              class="form-control" 
+                                              rows="6"
+                                              placeholder="Mô tả chi tiết về công việc..."
+                                              required
+                                              th:text="${job.description}"></textarea>
+                                    <div class="form-text">Hãy mô tả rõ ràng về vị trí công việc, trách nhiệm và môi trường làm việc.</div>
+                                </div>
+
+                                <!-- Job Requirements -->
+                                <div class="mb-3">
+                                    <label for="jobRequirements" class="form-label">Yêu cầu công việc</label>
+                                    <textarea id="jobRequirements" 
+                                              name="jobRequirements" 
+                                              class="form-control" 
+                                              rows="6"
+                                              placeholder="Các yêu cầu về kỹ năng, kinh nghiệm..."
+                                              th:text="${job.jobRequirements}"></textarea>
+                                </div>
+
+                                <!-- Location -->
+                                <div class="mb-3">
+                                    <label for="location" class="form-label">Địa điểm</label>
+                                    <input type="text" 
+                                           id="location" 
+                                           name="location" 
+                                           class="form-control"
+                                           th:value="${job.location}"
+                                           placeholder="VD: Hà Nội, TP.HCM">
+                                </div>
+
+                                <!-- Salary -->
+                                <div class="mb-3">
+                                    <label for="salary" class="form-label">Mức lương</label>
+                                    <input type="text" 
+                                           id="salary" 
+                                           name="salary" 
+                                           class="form-control"
+                                           th:value="${job.salary}"
+                                           placeholder="VD: 15-20 triệu, Thỏa thuận">
+                                </div>
+
+                                <!-- Employment Type -->
+                                <div class="mb-3">
+                                    <label for="employmentType" class="form-label">Loại hình công việc</label>
+                                    <select id="employmentType" name="employmentType" class="form-select">
+                                        <option value="">-- Chọn loại hình --</option>
+                                        <option value="Full-time" th:selected="${job.employmentType == 'Full-time'}">Full-time</option>
+                                        <option value="Part-time" th:selected="${job.employmentType == 'Part-time'}">Part-time</option>
+                                        <option value="Contract" th:selected="${job.employmentType == 'Contract'}">Contract</option>
+                                        <option value="Internship" th:selected="${job.employmentType == 'Internship'}">Internship</option>
+                                        <option value="Freelance" th:selected="${job.employmentType == 'Freelance'}">Freelance</option>
+                                    </select>
+                                </div>
+
+                                <!-- Status -->
+                                <div class="mb-3">
+                                    <label for="status" class="form-label">Trạng thái <span class="text-danger">*</span></label>
+                                    <select id="status" name="status" class="form-select" required>
+                                        <option value="draft" th:selected="${job.status == 'draft'}">Nháp</option>
+                                        <option value="published" th:selected="${job.status == 'published'}">Đăng tuyển</option>
+                                        <option value="closed" th:selected="${job.status == 'closed'}">Đã đóng</option>
+                                    </select>
+                                </div>
+
+                                <!-- Quantity -->
+                                <div class="mb-3">
+                                    <label for="quantity" class="form-label">Số lượng cần tuyển</label>
+                                    <input type="number" 
+                                           id="quantity" 
+                                           name="quantity" 
+                                           class="form-control"
+                                           th:value="${job.quantity}"
+                                           min="1"
+                                           placeholder="VD: 5">
+                                </div>
+
+                                <!-- Deadline -->
+                                <div class="mb-3">
+                                    <label for="deadline" class="form-label">Hạn nộp hồ sơ</label>
+                                    <input type="date" 
+                                           id="deadline" 
+                                           name="deadline" 
+                                           class="form-control"
+                                           th:value="${job.deadline != null ? #temporals.format(job.deadline, 'yyyy-MM-dd') : ''}">
+                                </div>
+
+                                <!-- Categories -->
+                                <div class="mb-3">
+                                    <label class="form-label">Danh mục</label>
+                                    <div class="border rounded p-3" style="max-height: 250px; overflow-y: auto;">
+                                        <div th:each="category : ${allCategories}" class="form-check">
+                                            <input class="form-check-input" 
+                                                   type="checkbox" 
+                                                   name="categories" 
+                                                   th:id="'cat-' + ${category.id}"
+                                                   th:value="${category.id}"
+                                                   th:checked="${selectedCategoryIds.contains(category.id)}">
+                                            <label class="form-check-label" th:for="'cat-' + ${category.id}">
+                                                <span th:text="${category.name}">Category Name</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="form-text">Chọn các danh mục phù hợp với vị trí tuyển dụng.</div>
+                                </div>
+
+                                <!-- Buttons -->
+                                <div class="d-flex gap-2 justify-content-end">
+                                    <a th:href="@{/admin/jobs}" class="btn btn-outline-secondary">
+                                        <i class="bi bi-x-circle"></i> Hủy
+                                    </a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-save"></i> Lưu thay đổi
+                                    </button>
+                                </div>
+
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <!-- Job Info Card -->
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Thông tin</h5>
+                            
+                            <div class="mb-3">
+                                <small class="text-muted">ID tin tuyển dụng</small>
+                                <div class="fw-semibold" th:text="${job.id}">1</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <small class="text-muted">Ngày tạo</small>
+                                <div th:if="${job.createdAt != null}" 
+                                     th:text="${#temporals.format(job.createdAt, 'dd/MM/yyyy HH:mm')}">
+                                    01/01/2024 10:00
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <small class="text-muted">Cập nhật lần cuối</small>
+                                <div th:if="${job.updatedAt != null}" 
+                                     th:text="${#temporals.format(job.updatedAt, 'dd/MM/yyyy HH:mm')}">
+                                    01/01/2024 10:00
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <small class="text-muted">Trạng thái hiện tại</small>
+                                <div>
+                                    <span th:if="${job.status == 'draft'}" class="badge bg-secondary">Nháp</span>
+                                    <span th:if="${job.status == 'published'}" class="badge bg-success">Đang hiển thị</span>
+                                    <span th:if="${job.status == 'closed'}" class="badge bg-dark">Đã đóng</span>
+                                </div>
+                            </div>
+
+                            <hr>
+
+                            <div class="d-grid gap-2">
+                                <a th:href="@{'/jobs/' + ${job.id}}" 
+                                   class="btn btn-outline-info btn-sm"
+                                   target="_blank">
+                                    <i class="bi bi-eye"></i> Xem tin đăng tuyển
+                                </a>
+                                
+                                <form th:action="@{'/admin/jobs/' + ${job.id} + '/delete'}" 
+                                      method="post"
+                                      onsubmit="return confirm('Bạn có chắc muốn xóa tin tuyển dụng này? Hành động này không thể hoàn tác.');">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm w-100">
+                                        <i class="bi bi-trash"></i> Xóa tin tuyển dụng
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Thao tác nhanh</h5>
+                            
+                            <div class="d-grid gap-2">
+                                <form th:action="@{'/admin/jobs/' + ${job.id} + '/update-status'}" 
+                                      method="post">
+                                    <input type="hidden" name="status" value="published">
+                                    <button type="submit" 
+                                            class="btn btn-success btn-sm w-100"
+                                            th:disabled="${job.status == 'published'}">
+                                        <i class="bi bi-check-circle"></i> Đăng tuyển ngay
+                                    </button>
+                                </form>
+
+                                <form th:action="@{'/admin/jobs/' + ${job.id} + '/update-status'}" 
+                                      method="post">
+                                    <input type="hidden" name="status" value="closed">
+                                    <button type="submit" 
+                                            class="btn btn-dark btn-sm w-100"
+                                            th:disabled="${job.status == 'closed'}">
+                                        <i class="bi bi-x-circle"></i> Đóng tin tuyển dụng
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+</div>
+
+</body>
+</html>

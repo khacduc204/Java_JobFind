@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin-layout}">
+<head>
+    <title>Thêm người dùng</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="pagetitle">
+        <h1>Thêm người dùng</h1>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}">Trang chủ</a></li>
+                    <li class="breadcrumb-item"><a th:href="@{/admin/users}">Người dùng</a></li>
+                    <li class="breadcrumb-item active">Thêm mới</li>
+                </ol>
+            </nav>
+        </div>
+
+        <section class="section">
+            <div class="row g-4">
+                <div class="col-12">
+                    <!-- Error Messages -->
+                    <div th:if="${errorMessage}" class="alert alert-danger shadow-sm">
+                        <h6 class="alert-heading mb-2">Không thể lưu tài khoản</h6>
+                        <p class="mb-0" th:text="${errorMessage}"></p>
+                    </div>
+                </div>
+            </div>
+
+            <form th:action="@{/admin/users/add}" method="POST" enctype="multipart/form-data" class="row g-4" novalidate>
+                <!-- Left Column: Avatar Upload -->
+                <div class="col-lg-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body text-center d-flex flex-column justify-content-center">
+                            <div id="avatarPreview" class="mx-auto d-flex align-items-center justify-content-center rounded-circle border bg-light" style="width: 140px; height: 140px; overflow: hidden;">
+                                <i class="bi bi-person fs-1 text-secondary"></i>
+                            </div>
+                            <p class="text-muted small mb-3 mt-3">Ảnh sẽ được hiển thị trong bảng quản trị và các khu vực yêu cầu danh tính.</p>
+                            
+                            <div class="mb-3 text-start">
+                                <label for="avatar" class="form-label fw-semibold">Ảnh đại diện (tùy chọn)</label>
+                                <input type="file" 
+                                       name="avatar" 
+                                       id="avatar" 
+                                       accept="image/png,image/jpeg,image/gif,image/webp" 
+                                       class="form-control">
+                                <div class="form-text">PNG, JPG, GIF, WEBP · tối đa 2MB.</div>
+                            </div>
+                            
+                            <div class="border rounded p-3 text-start bg-light-subtle small">
+                                <span class="fw-semibold mb-2 d-block">Mẹo:</span>
+                                <ul class="mb-0 ps-3">
+                                    <li>Sử dụng nền đơn sắc, khuôn mặt rõ nét.</li>
+                                    <li>Kích thước đề xuất tối thiểu 300x300px.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: User Information -->
+                <div class="col-lg-8">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold mb-4">Thông tin tài khoản</h5>
+                            
+                            <div class="row g-3">
+                                <!-- Name -->
+                                <div class="col-md-6">
+                                    <label for="name" class="form-label fw-semibold">Tên hiển thị <span class="text-danger">*</span></label>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="name" 
+                                           name="name" 
+                                           required 
+                                           placeholder="VD: Nguyễn Văn A">
+                                </div>
+
+                                <!-- Email -->
+                                <div class="col-md-6">
+                                    <label for="email" class="form-label fw-semibold">Email đăng nhập <span class="text-danger">*</span></label>
+                                    <input type="email" 
+                                           class="form-control" 
+                                           id="email" 
+                                           name="email" 
+                                           required 
+                                           placeholder="email@example.com">
+                                </div>
+
+                                <!-- Password -->
+                                <div class="col-md-6">
+                                    <label for="password" class="form-label fw-semibold">Mật khẩu tạm thời <span class="text-danger">*</span></label>
+                                    <input type="password" 
+                                           class="form-control" 
+                                           id="password" 
+                                           name="password" 
+                                           required 
+                                           minlength="8"
+                                           placeholder="Tối thiểu 8 ký tự">
+                                    <div class="form-text">Người dùng có thể đổi mật khẩu sau khi đăng nhập.</div>
+                                </div>
+
+                                <!-- Role -->
+                                <div class="col-md-6">
+                                    <label for="roleId" class="form-label fw-semibold">Vai trò <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="roleId" name="roleId" required>
+                                        <option value="">-- Chọn vai trò --</option>
+                                        <option th:each="role : ${roles}" 
+                                                th:value="${role.id}" 
+                                                th:text="${role.name}">
+                                            Role Name
+                                        </option>
+                                    </select>
+                                    <div class="form-text">Xác định quyền truy cập của người dùng trong hệ thống.</div>
+                                </div>
+
+                                <!-- Description -->
+                                <div class="col-12">
+                                    <div class="alert alert-info d-flex align-items-start">
+                                        <i class="bi bi-info-circle me-2 flex-shrink-0"></i>
+                                        <div class="small">
+                                            <strong>Lưu ý:</strong> Tất cả các trường đánh dấu (<span class="text-danger">*</span>) là bắt buộc. 
+                                            Người dùng sẽ nhận được thông tin đăng nhập qua email sau khi tài khoản được tạo.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex justify-content-end gap-2 mt-3">
+                        <a th:href="@{/admin/users}" class="btn btn-secondary">
+                            <i class="bi bi-x-circle"></i> Hủy
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-check-circle"></i> Tạo tài khoản
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </section>
+    </section>
+</div>
+
+<script th:inline="javascript">
+// Avatar Preview
+document.getElementById('avatar').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    const preview = document.getElementById('avatarPreview');
+    
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.innerHTML = '<img src="' + e.target.result + '" class="w-100 h-100" style="object-fit: cover;">';
+        }
+        reader.readAsDataURL(file);
+    } else {
+        preview.innerHTML = '<i class="bi bi-person fs-1 text-secondary"></i>';
+    }
+});
+</script>
+</th:block>
+</div>
+
+<th:block layout:fragment="scripts">
+<script>
+

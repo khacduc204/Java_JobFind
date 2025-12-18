@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin-layout}">
+<head>
+    <title>Thêm nhà tuyển dụng</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="pagetitle">
+        <h1>Thêm nhà tuyển dụng</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/admin}">Trang chủ</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/admin/employers}">Nhà tuyển dụng</a></li>
+                <li class="breadcrumb-item active">Thêm</li>
+            </ol>
+        </nav>
+    </div>
+
+    <section class="section">
+        <div class="card p-4 shadow-sm">
+            <!-- Error Messages -->
+            <div th:if="${error}" class="alert alert-danger">
+                <span th:text="${error}"></span>
+            </div>
+
+            <form method="POST" th:action="@{/admin/employers/add}" enctype="multipart/form-data" class="row g-4" novalidate>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold" for="userId">
+                        Tài khoản nhà tuyển dụng <span class="text-danger">*</span>
+                    </label>
+                    <select name="userId" id="userId" class="form-select" required>
+                        <option value="">-- Chọn người dùng --</option>
+                        <option th:each="user : ${employerUsers}" 
+                                th:value="${user.id}" 
+                                th:text="${user.email}"
+                                th:selected="${user.id == userId}">
+                            user@example.com
+                        </option>
+                    </select>
+                    <div class="form-text">Chỉ hiển thị tài khoản có vai trò nhà tuyển dụng.</div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold" for="companyName">
+                        Tên công ty <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" name="companyName" id="companyName" 
+                           class="form-control" th:value="${companyName}" required>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label fw-semibold" for="companyLogo">Logo doanh nghiệp</label>
+                    <input type="file" class="form-control" name="companyLogo" id="companyLogo" 
+                           accept="image/png,image/jpeg,image/gif,image/webp">
+                    <div class="form-text">Tùy chọn · Hỗ trợ PNG, JPG, GIF, WEBP (tối đa 3MB).</div>
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold" for="website">Website</label>
+                    <input type="url" name="website" id="website" class="form-control" 
+                           placeholder="https://example.com" th:value="${website}">
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold" for="address">Địa chỉ</label>
+                    <input type="text" name="address" id="address" class="form-control" 
+                           placeholder="Ví dụ: Hà Nội" th:value="${address}">
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label fw-semibold" for="about">Giới thiệu doanh nghiệp</label>
+                    <textarea name="about" id="about" class="form-control" rows="4" 
+                              placeholder="Tầm nhìn, sứ mệnh, đội ngũ cốt lõi..."
+                              th:text="${about}"></textarea>
+                </div>
+
+                <div class="col-12 d-flex justify-content-end gap-2">
+                    <a th:href="@{/admin/employers}" class="btn btn-light">
+                        <i class="bi bi-arrow-left"></i> Huỷ
+                    </a>
+                    <button type="submit" class="btn btn-success" name="add">
+                        <i class="bi bi-save"></i> Lưu hồ sơ
+                    </button>
+                </div>
+            </form>
+        </div>
+    </section>
+</div>
+</body>
+</html>

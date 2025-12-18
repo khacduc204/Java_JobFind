@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin-layout}">
+<head>
+    <title>Xóa ứng viên</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="pagetitle">
+      <h1>Xóa ứng viên</h1>
+      <nav>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}">Trang chủ</a></li>
+          <li class="breadcrumb-item"><a th:href="@{/admin/candidates}">Ứng viên</a></li>
+          <li class="breadcrumb-item active">Xóa</li>
+        </ol>
+      </nav>
+    </div>
+
+    <section class="section">
+      <div class="card p-4 shadow-sm">
+        <h5 class="text-danger mb-3">
+          <i class="bi bi-exclamation-triangle"></i> Xác nhận xóa ứng viên
+        </h5>
+
+        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+        <p>Bạn sắp xóa hồ sơ và tài khoản của ứng viên <strong th:text="${candidate.full_name}">Tên ứng viên</strong>.</p>
+        
+        <ul class="mb-4">
+          <li><strong>Email:</strong> <span th:text="${candidate.email}">email@example.com</span></li>
+          <li><strong>Tiêu đề:</strong> <span th:text="${candidate.headline}">Chưa cập nhật</span></li>
+          <li><strong>Địa điểm:</strong> <span th:text="${candidate.location}">Chưa cập nhật</span></li>
+          <li><strong>Tạo ngày:</strong> <span th:text="${candidate.created_label}">Không rõ</span></li>
+          <li><strong>CV:</strong> <span th:text="${candidate.cv_status}">Chưa có CV</span></li>
+        </ul>
+
+        <div class="alert alert-warning small">
+          <i class="bi bi-info-circle"></i> Khi xóa, toàn bộ dữ liệu liên quan (bao gồm CV, đơn ứng tuyển, việc đã lưu) của ứng viên sẽ bị loại bỏ vĩnh viễn.
+        </div>
+
+        <form method="POST" th:action="@{'/admin/candidates/delete/' + ${candidate.user_id}}" class="text-end">
+          <a th:href="@{/admin/candidates}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Hủy
+          </a>
+          <button type="submit" class="btn btn-danger">
+            <i class="bi bi-trash"></i> Xác nhận xóa ứng viên
+          </button>
+        </form>
+      </div>
+    </section>
+</div>
+</body>
+</html>

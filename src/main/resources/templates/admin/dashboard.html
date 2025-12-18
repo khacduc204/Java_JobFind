@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin-layout}">
+<head>
+    <title>Bảng điều khiển</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="pagetitle">
+        <h1>Bảng điều khiển</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}">Trang chủ</a></li>
+                <li class="breadcrumb-item active">Dashboard</li>
+            </ol>
+        </nav>
+    </div>
+
+    <section class="section dashboard">
+        <div class="row">
+            <!-- Tin tuyển dụng -->
+            <div class="col-xxl-3 col-md-6">
+                <div class="card info-card">
+                    <div class="card-body">
+                        <h5 class="card-title">Tin tuyển dụng <span class="text-muted">| Tổng hợp</span></h5>
+                        <div class="d-flex align-items-center">
+                            <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                <i class="bi bi-briefcase"></i>
+                            </div>
+                            <div class="ps-3">
+                                <h6 th:text="${totalJobs ?: 0}">0</h6>
+                                <span class="text-success small pt-1 fw-semibold" th:text="${activeJobs ?: 0}">0</span>
+                                <span class="text-muted small">tin đang hiển thị</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hồ sơ ứng tuyển -->
+            <div class="col-xxl-3 col-md-6">
+                <div class="card info-card">
+                    <div class="card-body">
+                        <h5 class="card-title">Hồ sơ ứng tuyển <span class="text-muted">| 30 ngày</span></h5>
+                        <div class="d-flex align-items-center">
+                            <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                <i class="bi bi-file-earmark-person"></i>
+                            </div>
+                            <div class="ps-3">
+                                <h6 th:text="${totalApplications ?: 0}">0</h6>
+                                <span class="text-primary small pt-1 fw-semibold">+<span th:text="${applicationsLast30 ?: 0}">0</span></span>
+                                <span class="text-muted small">trong 30 ngày qua</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tỉ lệ phỏng vấn -->
+            <div class="col-xxl-3 col-md-6">
+                <div class="card info-card">
+                    <div class="card-body">
+                        <h5 class="card-title">Tỉ lệ phỏng vấn</h5>
+                        <div class="d-flex align-items-center">
+                            <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                <i class="bi bi-people"></i>
+                            </div>
+                            <div class="ps-3">
+                                <h6><span th:text="${#numbers.formatDecimal(interviewRate ?: 0, 1, 1)}">0.0</span>%</h6>
+                                <span class="text-muted small"><span th:text="${shortlistedCount ?: 0}">0</span> hồ sơ được chọn</span>
+                            </div>
+                        </div>
+                        <div class="progress mt-3" style="height: 6px;">
+                            <div class="progress-bar bg-warning" role="progressbar" 
+                                 th:style="'width: ' + ${interviewRate ?: 0} + '%'" 
+                                 th:attr="aria-valuenow=${interviewRate ?: 0}" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tỉ lệ tuyển dụng -->
+            <div class="col-xxl-3 col-md-6">
+                <div class="card info-card">
+                    <div class="card-body">
+                        <h5 class="card-title">Tỉ lệ tuyển dụng</h5>
+                        <div class="d-flex align-items-center">
+                            <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                <i class="bi bi-check-circle"></i>
+                            </div>
+                            <div class="ps-3">
+                                <h6><span th:text="${#numbers.formatDecimal(hireRate ?: 0, 1, 1)}">0.0</span>%</h6>
+                                <span class="text-muted small"><span th:text="${hiredCount ?: 0}">0</span> ứng viên trúng tuyển</span>
+                            </div>
+                        </div>
+                        <div class="progress mt-3" style="height: 6px;">
+                            <div class="progress-bar bg-success" role="progressbar" 
+                                 th:style="'width: ' + ${hireRate ?: 0} + '%'" 
+                                 th:attr="aria-valuenow=${hireRate ?: 0}" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Tổng quan nguồn lực -->
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Tổng quan nguồn lực</h5>
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <div class="p-3 border rounded-3 text-center h-100">
+                                    <div class="text-muted small">Nhà tuyển dụng</div>
+                                    <div class="fw-bold fs-4 mb-1" th:text="${employerCount ?: 0}">0</div>
+                                    <div class="text-muted small">doanh nghiệp đang hoạt động</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="p-3 border rounded-3 text-center h-100">
+                                    <div class="text-muted small">Ứng viên</div>
+                                    <div class="fw-bold fs-4 mb-1" th:text="${candidateCount ?: 0}">0</div>
+                                    <div class="text-muted small">tài khoản tìm việc</div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="alert alert-info mb-0">
+                                    <div class="fw-semibold mb-1">Giám sát chất lượng tuyển dụng</div>
+                                    <div class="small">Quản trị viên có thể theo dõi và liên hệ doanh nghiệp khi tỉ lệ phỏng vấn hoặc tuyển dụng giảm để đảm bảo trải nghiệm ứng viên.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Biểu đồ trạng thái -->
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Trạng thái xử lý hồ sơ</h5>
+                        <div class="chart-container mb-4" style="min-height: 260px;">
+                            <canvas id="pipelineStatusChart" height="260" aria-label="Biểu đồ trạng thái xử lý hồ sơ"></canvas>
+                        </div>
+                        <div class="alert alert-light border mb-0 small">Biểu đồ sẽ hiển thị khi có dữ liệu ứng tuyển trong hệ thống.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Hoạt động theo tháng -->
+            <div class="col-xl-7">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Hoạt động theo tháng <span class="text-muted">6 tháng gần đây</span></h5>
+                        <div class="chart-container mb-4" style="min-height: 320px;">
+                            <canvas id="activityTimelineChart" height="320" aria-label="Biểu đồ hoạt động theo tháng"></canvas>
+                        </div>
+                        <p class="small text-muted mb-0">Sử dụng bảng số liệu để đánh giá hiệu quả chiến dịch tuyển dụng và xác định tháng có biến động bất thường.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Doanh nghiệp nổi bật -->
+            <div class="col-xl-5">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Doanh nghiệp nổi bật</h5>
+                        <div class="alert alert-light border mb-0">Chưa có dữ liệu doanh nghiệp đủ lớn để thống kê.</div>
+                        <p class="text-muted small mt-3 mb-0">Quản trị viên có thể ưu tiên hỗ trợ các doanh nghiệp có lượng hồ sơ cao hoặc tỉ lệ tuyển dụng thấp để tối ưu hiệu quả.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<th:block layout:fragment="scripts">
+    <script th:inline="javascript">
+    /*<![CDATA[*/
+    document.addEventListener('DOMContentLoaded', function () {
+        // Chart.js initialization code will go here
+        console.log('Dashboard charts ready');
+    });
+    /*]]>*/
+    </script>
+</th:block>
+</body>
+</html>

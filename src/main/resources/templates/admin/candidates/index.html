@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin-layout}">
+<head>
+    <title>Quản lý ứng viên</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="pagetitle">
+      <h1>Quản lý ứng viên</h1>
+      <nav>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}">Trang chủ</a></li>
+          <li class="breadcrumb-item active">Ứng viên</li>
+        </ol>
+      </nav>
+    </div>
+
+    <section class="section">
+      <!-- Flash messages -->
+      <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <span th:text="${success}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+      <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+
+      <!-- Stats Cards -->
+      <div class="row g-3 mb-3">
+        <div class="col-md-4">
+          <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+              <div class="text-muted small">Tổng ứng viên</div>
+              <div class="fs-4 fw-semibold" th:text="${stats.totalCandidates}">0</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+              <div class="text-muted small">Ứng viên có CV</div>
+              <div class="fs-4 fw-semibold text-success" th:text="${stats.withCv}">0</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+              <div class="text-muted small">CV cập nhật 30 ngày gần đây</div>
+              <div class="fs-4 fw-semibold text-primary" th:text="${stats.recentCv}">0</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters and List Card -->
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <!-- Filter Form -->
+          <form class="row gy-2 gx-3 align-items-end mb-4" method="get" th:action="@{/admin/candidates}">
+            <div class="col-sm-6 col-lg-3">
+              <label class="form-label" for="filterKeyword">Từ khóa</label>
+              <input type="text" id="filterKeyword" name="keyword" class="form-control" 
+                     placeholder="Tên, email hoặc tiêu đề" th:value="${filters.keyword}">
+            </div>
+            <div class="col-sm-6 col-lg-3">
+              <label class="form-label" for="filterLocation">Địa điểm</label>
+              <input type="text" id="filterLocation" name="location" class="form-control" 
+                     placeholder="Ví dụ: Hà Nội" th:value="${filters.location}">
+            </div>
+            <div class="col-sm-6 col-lg-3">
+              <label class="form-label" for="filterSkill">Kỹ năng</label>
+              <input type="text" id="filterSkill" name="skill" class="form-control" 
+                     placeholder="Ví dụ: Java" th:value="${filters.skill}">
+            </div>
+            <div class="col-sm-6 col-lg-2">
+              <label class="form-label" for="filterCvStatus">Trạng thái CV</label>
+              <select id="filterCvStatus" name="cvStatus" class="form-select">
+                <option value="" th:selected="${filters.cvStatus == ''}">Tất cả</option>
+                <option value="has" th:selected="${filters.cvStatus == 'has'}">Đã có CV</option>
+                <option value="missing" th:selected="${filters.cvStatus == 'missing'}">Thiếu CV</option>
+              </select>
+            </div>
+            <div class="col-sm-12 col-lg-1 text-lg-end">
+              <button type="submit" class="btn btn-primary w-100">
+                <i class="bi bi-filter"></i>
+              </button>
+            </div>
+            <div class="col-sm-12 col-lg-12 text-lg-end">
+              <a th:href="@{/admin/candidates}" class="btn btn-light btn-sm">Đặt lại</a>
+            </div>
+          </form>
+
+          <!-- Candidates Table -->
+          <div class="table-responsive">
+            <table class="table table-striped table-hover align-middle" id="candidatesTable">
+              <thead class="table-light">
+                <tr>
+                  <th scope="col">ID</th>
+                  <th scope="col">Ứng viên</th>
+                  <th scope="col">Tiêu đề</th>
+                  <th scope="col">Địa điểm</th>
+                  <th scope="col">Kỹ năng nổi bật</th>
+                  <th scope="col">Kinh nghiệm</th>
+                  <th scope="col">CV</th>
+                  <th scope="col">Cập nhật</th>
+                  <th scope="col" class="text-end">Hành động</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr th:if="${#lists.isEmpty(candidates)}">
+                  <td colspan="9" class="text-center text-muted">Chưa có ứng viên phù hợp bộ lọc.</td>
+                </tr>
+                <tr th:each="candidate : ${candidates}">
+                  <td th:text="${candidate.candidate_id != null ? candidate.candidate_id : '—'}">—</td>
+                  <td>
+                    <div class="fw-semibold" th:text="${candidate.full_name}">Tên ứng viên</div>
+                    <div class="text-muted small" th:text="${candidate.email}">email@example.com</div>
+                  </td>
+                  <td th:text="${candidate.headline}">Chưa cập nhật</td>
+                  <td th:text="${candidate.location}">Chưa cập nhật</td>
+                  <td th:text="${candidate.skills_display}">Chưa cập nhật</td>
+                  <td th:text="${candidate.experience}">Chưa cập nhật</td>
+                  <td>
+                    <a th:if="${candidate.cv_path != null and !candidate.cv_path.isEmpty()}" 
+                       th:href="@{'/' + ${candidate.cv_path}}" 
+                       target="_blank" 
+                       class="btn btn-sm btn-outline-primary">
+                      <i class="bi bi-file-earmark-arrow-down"></i> Tải
+                    </a>
+                    <span th:unless="${candidate.cv_path != null and !candidate.cv_path.isEmpty()}" 
+                          class="badge bg-secondary">Không có</span>
+                  </td>
+                  <td>
+                    <span th:if="${candidate.cv_updated_at != null}" 
+                          th:text="${#temporals.format(candidate.cv_updated_at, 'dd/MM/yyyy HH:mm')}">—</span>
+                    <span th:unless="${candidate.cv_updated_at != null}" 
+                          th:text="${candidate.user_created_at != null ? #temporals.format(candidate.user_created_at, 'dd/MM/yyyy') : '—'}">—</span>
+                  </td>
+                  <td class="text-end">
+                    <div class="btn-group">
+                      <a th:href="@{'/candidate/profile?user=' + ${candidate.user_id}}" 
+                         target="_blank" 
+                         class="btn btn-sm btn-outline-secondary" 
+                         title="Xem hồ sơ">
+                        <i class="bi bi-eye"></i>
+                      </a>
+                      <a th:href="@{'mailto:' + ${candidate.email}}" 
+                         class="btn btn-sm btn-outline-success" 
+                         title="Gửi email">
+                        <i class="bi bi-envelope"></i>
+                      </a>
+                      <a th:href="@{'/admin/candidates/delete/' + ${candidate.user_id}}" 
+                         class="btn btn-sm btn-outline-danger" 
+                         title="Xóa ứng viên">
+                        <i class="bi bi-trash"></i>
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+</div>
+</body>
+</html>

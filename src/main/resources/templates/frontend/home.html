@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="vi">
+<head th:replace="~{fragments/header :: head}"></head>
+<body class="home-page">
+
+<!-- Header -->
+<div th:replace="~{fragments/header :: header}"></div>
+
+<!-- Main Content -->
+<main class="home-main">
+    <!-- Hero Section -->
+    <section class="home-hero jf-hero">
+        <div class="container">
+            <div class="row align-items-center g-5">
+                <div class="col-lg-7">
+                    <div class="hero-content">
+                        <span class="hero-eyebrow">
+                            <i class="fa-solid fa-bolt"></i> TopCV Experience
+                        </span>
+                        <h1 class="hero-title">Tìm việc nhanh 24h – Chạm gần hơn với công việc mơ ước</h1>
+                        <p class="hero-subtitle">Hàng nghìn cơ hội mới từ các doanh nghiệp uy tín được cập nhật mỗi ngày. JobFind đồng hành cùng bạn trên hành trình sự nghiệp chuyên nghiệp.</p>
+                        
+                        <!-- Search Form -->
+                        <div class="home-search-card jf-search-card">
+                            <form class="row g-3 home-search-form" method="get" action="/jobs">
+                                <div class="col-lg-5">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control" id="keyword" name="keyword" th:value="${prefilledKeyword}" placeholder="Vị trí, kỹ năng, công ty">
+                                        <label for="keyword">
+                                            <i class="fa-solid fa-magnifying-glass me-2 text-success"></i>Vị trí, kỹ năng, công ty
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="form-floating">
+                                        <select class="form-select" id="location" name="location">
+                                            <option value="" selected>Toàn quốc</option>
+                                            <option value="Hà Nội">Hà Nội</option>
+                                            <option value="TP. Hồ Chí Minh">TP. Hồ Chí Minh</option>
+                                            <option value="Đà Nẵng">Đà Nẵng</option>
+                                            <option value="Remote">Remote</option>
+                                        </select>
+                                        <label for="location">
+                                            <i class="fa-solid fa-location-dot me-2 text-success"></i>Địa điểm
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-lg-3">
+                                    <button type="submit" class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2" style="height: 58px;">
+                                        <i class="fa-solid fa-search"></i> Tìm kiếm
+                                    </button>
+                                </div>
+                            </form>
+                            
+                            <!-- Popular Keywords -->
+                            <div class="home-search-tags">
+                                <span class="tag-label">Từ khóa nổi bật:</span>
+                                <a th:each="keyword : ${searchKeywords}" 
+                                   th:href="@{/jobs(keyword=${keyword})}" 
+                                   class="badge" 
+                                   th:text="'#' + ${keyword}">#Keyword</a>
+                            </div>
+                        </div>
+                        
+                        <!-- Hero Metrics -->
+                        <div class="hero-metrics">
+                            <div th:each="metric : ${heroMetrics}" class="hero-metric-card" data-metric>
+                                <div class="hero-metric-value" th:text="${metric.formatted}">0</div>
+                                <p class="hero-metric-label mb-0" th:text="${metric.label}">Label</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-5">
+                    <div class="hero-visual">
+                        <div class="hero-card">
+                            <img th:src="@{/assets/img/slides-2.jpg}" alt="Ứng viên JobFind" class="img-fluid">
+                            <div class="highlight-panel">
+                                <p class="mb-2 fw-semibold">Top ngành nổi bật</p>
+                                <ul class="list-unstyled mb-0">
+                                    <li th:if="${#lists.isEmpty(heroCategories)}" class="text-muted">
+                                        Chưa có dữ liệu ngành nghề.
+                                    </li>
+                                    <li th:each="cat : ${heroCategories}" class="d-flex align-items-center gap-2 mb-1">
+                                        <span class="text-success"><i class="fa-solid fa-circle"></i></span>
+                                        <span th:text="${cat.name} + ' – ' + ${cat.job_count} + ' vị trí'">Category</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Highlight Cards -->
+    <section class="home-highlight jf-highlight">
+        <div class="container">
+            <div class="row g-4">
+                <div th:each="card : ${highlightCards}" class="col-md-4">
+                    <div class="highlight-card jf-highlight-card fade-in-element">
+                        <div class="highlight-icon" th:style="'background: ' + ${card.background} + '; color: ' + ${card.color} + ';'">
+                            <i th:class="${card.icon}"></i>
+                        </div>
+                        <h5 th:text="${card.title}">Title</h5>
+                        <p th:text="${card.description}">Description</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Categories Section -->
+    <section class="home-categories jf-categories py-5">
+        <div class="container">
+            <div class="section-heading">
+                <div>
+                    <h2>Ngành nghề nổi bật</h2>
+                    <p>Khám phá cơ hội theo lĩnh vực bạn yêu thích</p>
+                </div>
+                <a class="btn-link-primary" href="/jobs">
+                    Xem tất cả việc làm <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </div>
+            
+            <div class="row g-4">
+                <div th:if="${#lists.isEmpty(topCategories)}" class="col-12">
+                    <div class="alert alert-light border text-center mb-0">
+                        Chưa có dữ liệu ngành nghề. Hãy thêm danh mục và việc làm để khởi động!
+                    </div>
+                </div>
+                
+                <div th:each="cat : ${topCategories}" class="col-xl-4 col-md-6">
+                    <a class="jf-category-card fade-in-element" href="/jobs">
+                        <div class="icon">
+                            <i th:class="'fa-solid ' + ${cat.icon}"></i>
+                        </div>
+                        <div>
+                            <h5 th:text="${cat.name}">Category</h5>
+                            <p>
+                                <span th:text="${cat.job_count}">0</span> việc làm đang tuyển
+                            </p>
+                        </div>
+                        <i class="fa-solid fa-arrow-right-long"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Jobs -->
+    <section class="jf-featured-jobs py-5">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="fw-bold mb-1">Việc làm hot</h2>
+                    <p class="text-muted mb-0">Được nhiều ứng viên quan tâm nhất trong thời gian gần đây</p>
+                </div>
+                <a class="btn btn-link text-success text-decoration-none fw-semibold" href="/jobs/hot">
+                    Xem thêm việc làm <i class="fa-solid fa-arrow-right ms-1"></i>
+                </a>
+            </div>
+            
+            <div class="row g-4">
+                <div th:if="${#lists.isEmpty(hotJobs)}" class="col-12">
+                    <div class="alert alert-light border text-center mb-0">
+                        Chưa có việc làm nào được đăng. Nhà tuyển dụng hãy tạo tin tuyển dụng đầu tiên ngay!
+                    </div>
+                </div>
+                
+                <div th:each="job : ${hotJobs}" class="col-xl-3 col-lg-4 col-md-6">
+                    <div class="card h-100 border rounded-3 shadow-sm hover-shadow position-relative" style="transition: all 0.3s ease;">
+                        <!-- Save Button -->
+                        <button class="btn btn-link position-absolute top-0 end-0 m-2 p-2 text-muted" 
+                                style="z-index: 1; background: white; border-radius: 50%; width: 36px; height: 36px;">
+                            <i class="fa-regular fa-heart"></i>
+                        </button>
+                        
+                        <div class="card-body d-flex flex-column">
+                            <!-- Company Logo & Info -->
+                            <div class="d-flex align-items-start gap-3 mb-3">
+                                <div class="flex-shrink-0">
+                                    <div th:if="${job['employer'] != null and job['employer']['logoPath'] != null}" 
+                                         class="rounded" 
+                                         style="width: 56px; height: 56px; background: #f8f9fa; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                                        <img th:src="@{'/uploads/' + ${job['employer']['logoPath']}}" 
+                                             alt="Logo" 
+                                             style="width: 100%; height: 100%; object-fit: cover;">
+                                    </div>
+                                    <div th:unless="${job['employer'] != null and job['employer']['logoPath'] != null}"
+                                         class="rounded text-white fw-bold d-flex align-items-center justify-content-center"
+                                         th:style="'width: 56px; height: 56px; background: ' + ${job['employer']['initial'] != null ? job['employer']['initial']['color'] : '#00b14f'} + ';'"
+                                         th:text="${job['employer']['initial'] != null ? job['employer']['initial']['text'] : 'CT'}">
+                                        CT
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="fw-semibold mb-1 text-dark" 
+                                        th:text="${job['title']}" 
+                                        style="font-size: 15px; line-height: 1.4;">
+                                        Chuyên viên Marketing Online
+                                    </h6>
+                                    <p class="text-muted small mb-0" 
+                                       th:text="${job['employer'] != null ? job['employer']['companyName'] : 'Công ty'}">
+                                        Công ty Công nghệ TechCorp
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <!-- Job Details -->
+                            <div class="mb-3 flex-grow-1">
+                                <div class="d-flex align-items-center text-muted small mb-2">
+                                    <i class="fa-solid fa-location-dot me-2 text-success"></i>
+                                    <span th:text="${job['location']}">Đà Nẵng</span>
+                                </div>
+                                <div class="d-flex align-items-center text-muted small">
+                                    <i class="fa-solid fa-dollar-sign me-2 text-success"></i>
+                                    <span th:text="${job['salary']}">8-10 triệu</span>
+                                </div>
+                            </div>
+                            
+                            <!-- View Count & Actions -->
+                            <div class="d-flex justify-content-between align-items-center mt-auto pt-3 border-top">
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="badge bg-light text-dark border d-flex align-items-center gap-1" style="font-weight: 500;">
+                                        <i class="fa-solid fa-eye text-success"></i>
+                                        <span th:text="${job['viewCount']}">5</span>
+                                    </span>
+                                    <span class="badge bg-success bg-opacity-10 text-success border border-success" 
+                                          th:text="${job['employmentType']}">
+                                        Full-time
+                                    </span>
+                                </div>
+                                <a th:href="@{'/jobs/' + ${job['id']}}" 
+                                   class="btn btn-sm btn-outline-success rounded-pill px-3">
+                                    Xem chi tiết <i class="fa-solid fa-arrow-right ms-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <style>
+        .hover-shadow {
+            transition: all 0.3s ease;
+        }
+        .hover-shadow:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+        }
+    </style>
+
+    <!-- Gradient Divider -->
+    <div class="home-gradient-divider"></div>
+
+    <!-- Trusted Employers -->
+    <section class="jf-trusted">
+        <div class="container">
+            <div class="text-center mb-5">
+                <span class="hero-eyebrow" style="background: rgba(0,177,79,0.12); color: var(--home-primary);">
+                    Đối tác chiến lược
+                </span>
+                <h2 class="mt-3">Những thương hiệu đồng hành cùng JobFind</h2>
+                <p class="text-muted">Từ tập đoàn công nghệ tới startup tiềm năng, hơn 5.000 doanh nghiệp tin tưởng vào JobFind</p>
+            </div>
+            
+            <div class="row row-cols-2 row-cols-md-3 row-cols-lg-6 g-3 align-items-center">
+                <div th:if="${#lists.isEmpty(topEmployers)}" class="col-12">
+                    <div class="alert alert-light border text-center mb-0">
+                        Chưa có dữ liệu nhà tuyển dụng nổi bật.
+                    </div>
+                </div>
+                
+                <div th:each="employer : ${topEmployers}" class="col">
+                    <div class="jf-brand-card fade-in-element">
+                        <span class="d-block mb-1 fw-semibold" th:text="${employer.company_name}">Company</span>
+                        <small class="text-muted">
+                            <span th:text="${employer.job_count}">0</span> việc làm
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Blog Section -->
+    <section class="jf-blog">
+        <div class="container">
+            <div class="section-heading">
+                <div>
+                    <h2>Cẩm nang nghề nghiệp</h2>
+                    <p>Xu hướng mới và lời khuyên từ chuyên gia nhân sự</p>
+                </div>
+                <a class="btn-link-primary" href="#">
+                    Xem tất cả bài viết <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </div>
+            
+            <div class="row g-4">
+                <div th:each="article : ${blogArticles}" class="col-lg-4">
+                    <a class="jf-blog-card fade-in-element" href="#">
+                        <div class="tag">
+                            <i class="fa-solid fa-hashtag"></i> 
+                            <span th:text="${article.category}">Category</span>
+                        </div>
+                        <h5 th:text="${article.title}">Article Title</h5>
+                        <span>
+                            <i class="fa-regular fa-clock me-1"></i>
+                            <span th:text="${article.readTime}">5 phút đọc</span>
+                        </span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<!-- Footer -->
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<!-- Back to Top -->
+<div th:replace="~{fragments/footer :: backToTop}"></div>
+
+<!-- Scripts -->
+<div th:replace="~{fragments/footer :: scripts}"></div>
+
+</body>
+</html>

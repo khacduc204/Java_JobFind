@@ -1,0 +1,528 @@
+/* ========================================
+   DASHBOARD - TopCV Style
+   ======================================== */
+
+:root {
+  --jf-primary: #00b14f;
+  --jf-primary-dark: #009246;
+  --jf-primary-light: #e8f5e9;
+  --jf-text: #2d3846;
+  --jf-text-light: #6c757d;
+  --jf-bg: #f5f7fb;
+  --jf-white: #ffffff;
+  --jf-border: #e0e6ed;
+  --jf-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  --jf-shadow-hover: 0 8px 24px rgba(0,0,0,0.12);
+  --jf-radius: 12px;
+  --jf-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Dashboard Container */
+.dashboard-container {
+  background: var(--jf-bg);
+  min-height: 100vh;
+  padding-top: 2rem;
+  padding-bottom: 4rem;
+}
+
+/* Welcome Banner */
+.dashboard-welcome-banner {
+  background: linear-gradient(135deg, #00b14f 0%, #19c36d 50%, #33d687 100%);
+  border-radius: var(--jf-radius);
+  padding: 2.5rem;
+  color: white;
+  position: relative;
+  overflow: auto;
+  box-shadow: var(--jf-shadow);
+  animation: slideInDown 0.6s ease-out;
+}
+
+.dashboard-welcome-banner::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -10%;
+  width: 300px;
+  height: 300px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 50%;
+  animation: float 6s ease-in-out infinite;
+}
+
+.dashboard-welcome-banner::after {
+  content: '';
+  position: absolute;
+  bottom: -30%;
+  left: -5%;
+  width: 200px;
+  height: 200px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 50%;
+  animation: float 8s ease-in-out infinite reverse;
+}
+
+.welcome-content {
+  position: relative;
+  z-index: 2;
+}
+
+.welcome-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.welcome-meta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  opacity: 0.9;
+}
+
+.welcome-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-logout {
+  background: rgba(255,255,255,0.2);
+  border: 2px solid rgba(255,255,255,0.4);
+  color: white;
+  padding: 0.6rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: var(--jf-transition);
+  backdrop-filter: blur(10px);
+}
+
+.btn-logout:hover {
+  background: rgba(255,255,255,0.3);
+  border-color: rgba(255,255,255,0.6);
+  color: white;
+  transform: translateY(-2px);
+}
+
+/* Stats Cards Row */
+.dashboard-stats-row {
+  margin-top: -2rem;
+  margin-bottom: 2rem;
+  position: relative;
+  z-index: 3;
+}
+
+.stat-card {
+  background: white;
+  border-radius: var(--jf-radius);
+  padding: 1.5rem;
+  box-shadow: var(--jf-shadow);
+  transition: var(--jf-transition);
+  border: 1px solid transparent;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--jf-shadow-hover);
+  border-color: var(--jf-primary);
+}
+
+.stat-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.stat-icon.bg-success-custom {
+  background: linear-gradient(135deg, rgba(0,177,79,0.1) 0%, rgba(0,177,79,0.2) 100%);
+  color: var(--jf-primary);
+}
+
+.stat-icon.bg-info-custom {
+  background: linear-gradient(135deg, rgba(13,110,253,0.1) 0%, rgba(13,110,253,0.2) 100%);
+  color: #0d6efd;
+}
+
+.stat-icon.bg-warning-custom {
+  background: linear-gradient(135deg, rgba(255,193,7,0.1) 0%, rgba(255,193,7,0.2) 100%);
+  color: #ffc107;
+}
+
+.stat-icon.bg-danger-custom {
+  background: linear-gradient(135deg, rgba(220,53,69,0.1) 0%, rgba(220,53,69,0.2) 100%);
+  color: #dc3545;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--jf-text);
+  margin-bottom: 0.25rem;
+  animation: countUp 1s ease-out;
+}
+
+.stat-label {
+  color: var(--jf-text-light);
+  font-size: 0.875rem;
+  margin-bottom: 0;
+}
+
+/* Quick Action Cards */
+.quick-action-card {
+  background: white;
+  border-radius: var(--jf-radius);
+  padding: 2rem;
+  box-shadow: var(--jf-shadow);
+  transition: var(--jf-transition);
+  text-decoration: none;
+  color: var(--jf-text);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  border: 2px solid transparent;
+  position: relative;
+  overflow: auto;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.quick-action-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--jf-primary), #33d687);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.quick-action-card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--jf-shadow-hover);
+  border-color: var(--jf-primary);
+}
+
+.quick-action-card:hover::before {
+  transform: scaleX(1);
+}
+
+.action-icon-box {
+  width: 80px;
+  height: 80px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  font-size: 2rem;
+  transition: var(--jf-transition);
+}
+
+.quick-action-card:hover .action-icon-box {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.action-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--jf-text);
+  margin-bottom: 0.5rem;
+}
+
+.action-description {
+  color: var(--jf-text-light);
+  font-size: 0.9rem;
+  margin-bottom: 0;
+}
+
+/* Recent Activity Section */
+.dashboard-section {
+  background: white;
+  border-radius: var(--jf-radius);
+  padding: 2rem;
+  box-shadow: var(--jf-shadow);
+  margin-bottom: 2rem;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: between;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--jf-border);
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--jf-text);
+  margin-bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.section-title i {
+  color: var(--jf-primary);
+}
+
+/* Activity Timeline */
+.activity-timeline {
+  position: relative;
+  padding-left: 2rem;
+}
+
+.activity-timeline::before {
+  content: '';
+  position: absolute;
+  left: 8px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--jf-border);
+}
+
+.activity-item {
+  position: relative;
+  padding-bottom: 1.5rem;
+  animation: fadeInLeft 0.6s ease-out;
+}
+
+.activity-item:last-child {
+  padding-bottom: 0;
+}
+
+.activity-dot {
+  position: absolute;
+  left: -1.6rem;
+  top: 0.3rem;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--jf-primary);
+  border: 3px solid white;
+  box-shadow: 0 0 0 2px var(--jf-border);
+  z-index: 2;
+}
+
+.activity-content {
+  background: var(--jf-bg);
+  padding: 1rem;
+  border-radius: 8px;
+  border-left: 3px solid var(--jf-primary);
+}
+
+.activity-title {
+  font-weight: 600;
+  color: var(--jf-text);
+  margin-bottom: 0.25rem;
+}
+
+.activity-time {
+  font-size: 0.875rem;
+  color: var(--jf-text-light);
+}
+
+/* Progress Card */
+.progress-card {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: var(--jf-radius);
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.progress-label {
+  font-weight: 600;
+  color: var(--jf-text);
+}
+
+.progress-percentage {
+  font-weight: 700;
+  color: var(--jf-primary);
+  font-size: 1.1rem;
+}
+
+.progress-bar-custom {
+  height: 8px;
+  background: rgba(0,0,0,0.1);
+  border-radius: 10px;
+  overflow: auto;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--jf-primary), #33d687);
+  border-radius: 10px;
+  transition: width 1s ease-out;
+  animation: progressAnimation 1.5s ease-out;
+}
+
+/* Notification Badge */
+.notification-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #dc3545;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(220,53,69,0.4);
+  animation: pulse 2s infinite;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+}
+
+.empty-state-icon {
+  font-size: 4rem;
+  color: var(--jf-border);
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.empty-state-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--jf-text-light);
+  margin-bottom: 0.5rem;
+}
+
+.empty-state-description {
+  color: var(--jf-text-light);
+  margin-bottom: 1.5rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .dashboard-welcome-banner {
+    padding: 1.5rem;
+  }
+  
+  .welcome-title {
+    font-size: 1.5rem;
+  }
+  
+  .dashboard-stats-row {
+    margin-top: 1rem;
+  }
+  
+  .quick-action-card {
+    padding: 1.5rem;
+  }
+  
+  .action-icon-box {
+    width: 60px;
+    height: 60px;
+    font-size: 1.5rem;
+  }
+}
+
+/* Animations */
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-20px) rotate(5deg);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+@keyframes countUp {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes progressAnimation {
+  from {
+    width: 0;
+  }
+}
+
+/* Delay animations for staggered effect */
+.stat-card:nth-child(1) { animation-delay: 0.1s; }
+.stat-card:nth-child(2) { animation-delay: 0.2s; }
+.stat-card:nth-child(3) { animation-delay: 0.3s; }
+.stat-card:nth-child(4) { animation-delay: 0.4s; }
+
+.quick-action-card:nth-child(1) { animation-delay: 0.1s; }
+.quick-action-card:nth-child(2) { animation-delay: 0.2s; }
+.quick-action-card:nth-child(3) { animation-delay: 0.3s; }
+.quick-action-card:nth-child(4) { animation-delay: 0.4s; }
+
+.activity-item:nth-child(1) { animation-delay: 0.1s; }
+.activity-item:nth-child(2) { animation-delay: 0.2s; }
+.activity-item:nth-child(3) { animation-delay: 0.3s; }
+.activity-item:nth-child(4) { animation-delay: 0.4s; }

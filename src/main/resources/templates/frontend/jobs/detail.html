@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{fragments/header :: head}" />
+    <style>
+        .job-detail-page { background: #f8f9fa; min-height: 100vh; padding: 2rem 0; }
+        .job-meta { font-size: 0.95rem; }
+        .job-meta .text-success { font-size: 1.1rem; }
+        .job-description, .job-requirements { line-height: 1.7; color: #333; }
+        .job-description p, .job-requirements p { margin-bottom: 0.75rem; }
+        .apply-widget { display: flex; flex-direction: column; gap: 1.5rem; }
+        .apply-widget__candidate { display: flex; justify-content: space-between; align-items: start; padding: 1rem; background: #f8f9fa; border-radius: 8px; gap: 1rem; }
+        .apply-widget__candidate-info { flex: 1; }
+        .apply-widget__actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        .apply-widget__section { display: flex; flex-direction: column; gap: 0.75rem; }
+        .apply-widget__cv-options { display: flex; flex-direction: column; gap: 1rem; }
+        .apply-widget__radio { padding: 0.75rem; border: 1px solid #dee2e6; border-radius: 8px; transition: all 0.2s; }
+        .apply-widget__radio:hover { border-color: #00b14f; background: #f8fff8; }
+        .apply-widget__upload { padding: 1rem; background: #f8f9fa; border-radius: 8px; margin-top: 0.5rem; }
+        .apply-widget__disclaimer { padding: 0.75rem; background: #e3f2fd; border-radius: 4px; text-align: center; }
+    </style>
+</head>
+<body>
+    <th:block th:replace="~{fragments/header :: header}" />
+    
+    <main class="job-detail-page">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-8">
+                    <article class="card border-0 shadow-sm mb-4">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center gap-3 mb-4">
+                                <div>
+                                    <h1 class="h3 mb-1" th:text="${job.title}">Tiêu đề công việc</h1>
+                                    <div class="text-muted fw-semibold" th:text="${job.companyName}">Tên công ty</div>
+                                </div>
+                            </div>
+                            
+                            <div class="row row-cols-1 row-cols-md-2 g-3 mb-4 job-meta">
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="text-success"><i class="fa-solid fa-location-dot"></i></span>
+                                    <div>
+                                        <div class="small text-muted">Địa điểm</div>
+                                        <div class="fw-semibold" th:text="${job.location != null ? job.location : 'Chưa cập nhật'}">Đà Nẵng</div>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="text-success"><i class="fa-solid fa-coins"></i></span>
+                                    <div>
+                                        <div class="small text-muted">Mức lương</div>
+                                        <div class="fw-semibold" th:text="${job.salary != null ? job.salary : 'Thỏa thuận'}">8-10 triệu</div>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="text-success"><i class="fa-solid fa-suitcase"></i></span>
+                                    <div>
+                                        <div class="small text-muted">Hình thức làm việc</div>
+                                        <div class="fw-semibold" th:text="${job.employmentType != null ? job.employmentType : 'Full-time'}">Full-time</div>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="text-success"><i class="fa-solid fa-users"></i></span>
+                                    <div>
+                                        <div class="small text-muted">Số lượng cần tuyển</div>
+                                        <div class="fw-semibold" th:text="${job.quantity != null ? job.quantity + ' vị trí' : 'Không giới hạn'}">2 vị trí</div>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="text-success"><i class="fa-solid fa-calendar-day"></i></span>
+                                    <div>
+                                        <div class="small text-muted">Hạn nộp hồ sơ</div>
+                                        <div class="fw-semibold" th:text="${job.deadlineFormatted != null ? job.deadlineFormatted : 'Không giới hạn'}">31/12/2025</div>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="text-success"><i class="fa-solid fa-clock"></i></span>
+                                    <div>
+                                        <div class="small text-muted">Đăng vào</div>
+                                        <div class="fw-semibold" th:text="${job.postedAgo != null ? job.postedAgo : 'Vừa xong'}">2 ngày trước</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex flex-wrap gap-2 mb-4" th:if="${job.categories != null && !#lists.isEmpty(job.categories)}">
+                                <span class="badge bg-success bg-opacity-10 text-success border border-success" 
+                                      th:each="category : ${job.categories}" 
+                                      th:text="${category.name}">Marketing</span>
+                            </div>
+                            
+                            <h2 class="h5 mb-3">Mô tả công việc</h2>
+                            <div class="job-description" th:utext="${job.description != null ? job.description : '<p class=&quot;text-muted&quot;>Nhà tuyển dụng chưa cập nhật mô tả chi tiết cho vị trí này.</p>'}">
+                                <p>Mô tả công việc sẽ hiển thị ở đây...</p>
+                            </div>
+                            
+                            <h2 class="h5 mt-4 mb-3">Yêu cầu ứng viên</h2>
+                            <div class="job-requirements" th:utext="${job.requirements != null ? job.requirements : '<p class=&quot;text-muted&quot;>Nhà tuyển dụng chưa cập nhật yêu cầu chi tiết cho vị trí này.</p>'}">
+                                <p>Yêu cầu ứng viên sẽ hiển thị ở đây...</p>
+                            </div>
+                        </div>
+                    </article>
+                    
+                    <section class="card border-0 shadow-sm mb-4">
+                        <div class="card-body p-4">
+                            <h2 class="h5 mb-3">Cách ứng tuyển</h2>
+                            <p class="mb-0" th:if="${isLoggedIn}">
+                                Điền thư giới thiệu (không bắt buộc) và gửi CV để nhà tuyển dụng xem xét. Bạn sẽ nhận được thông báo khi có phản hồi.
+                            </p>
+                            <p class="mb-0" th:unless="${isLoggedIn}">
+                                Nhấn nút <strong>Ứng tuyển ngay</strong> để đăng nhập/đăng ký và gửi CV đến nhà tuyển dụng.
+                            </p>
+                        </div>
+                    </section>
+                    
+                    <section class="card border-0 shadow-sm" th:if="${job.location != null}">
+                        <div class="card-body p-4">
+                            <h2 class="h5 mb-3">Vị trí trên bản đồ</h2>
+                            <div class="ratio ratio-16x9">
+                                <iframe th:src="'https://www.google.com/maps?q=' + ${#strings.replace(job.location, ' ', '+')} + '&output=embed'"
+                                        allowfullscreen
+                                        loading="lazy"
+                                        referrerpolicy="no-referrer-when-downgrade"
+                                        aria-label="Bản đồ vị trí công việc"
+                                        style="border:0;">
+                                </iframe>
+                            </div>
+                            <p class="small text-muted mb-0 mt-3">
+                                <i class="fa-solid fa-location-dot me-2"></i><span th:text="${job.location}">Đà Nẵng</span>
+                            </p>
+                        </div>
+                    </section>
+                </div>
+                
+                <div class="col-lg-4">
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-body p-4">
+                            <h5 class="card-title">Thông tin chung</h5>
+                            <ul class="list-unstyled mb-0 small text-muted">
+                                <li class="d-flex justify-content-between mb-2">
+                                    <span>Loại công việc</span>
+                                    <strong th:text="${job.employmentType != null ? job.employmentType : 'Full-time'}">Full-time</strong>
+                                </li>
+                                <li class="d-flex justify-content-between mb-2">
+                                    <span>Địa điểm</span>
+                                    <strong th:text="${job.location != null ? job.location : 'Toàn quốc'}">Đà Nẵng</strong>
+                                </li>
+                                <li class="d-flex justify-content-between mb-2">
+                                    <span>Ngành nghề</span>
+                                    <strong th:text="${job.categoryNames != null ? job.categoryNames : 'Chưa cập nhật'}">Marketing</strong>
+                                </li>
+                                <li class="d-flex justify-content-between mb-2">
+                                    <span>Mức lương</span>
+                                    <strong th:text="${job.salary != null ? job.salary : 'Thỏa thuận'}">8-10 triệu</strong>
+                                </li>
+                                <li class="d-flex justify-content-between mb-2">
+                                    <span>Số lượng cần tuyển</span>
+                                    <strong th:text="${job.quantity != null ? job.quantity + ' vị trí' : 'Không giới hạn'}">2 vị trí</strong>
+                                </li>
+                                <li class="d-flex justify-content-between mb-2">
+                                    <span>Hạn nộp hồ sơ</span>
+                                    <strong th:text="${job.deadlineFormatted != null ? job.deadlineFormatted : 'Không giới hạn'}">31/12/2025</strong>
+                                </li>
+                                <li class="d-flex justify-content-between mb-0">
+                                    <span>Ngày đăng</span>
+                                    <strong th:text="${job.postedAgo != null ? job.postedAgo : 'Vừa xong'}">2 ngày trước</strong>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-body p-4">
+                            <h5 class="card-title mb-3">Về nhà tuyển dụng</h5>
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <div style="width: 60px; height: 60px; background: #f3f4f6; border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                                    <img th:if="${job.logoPath != null and job.logoPath != ''}"
+                                         th:src="${job.logoPath.startsWith('/') ? job.logoPath : ('/' + job.logoPath)}"
+                                         th:alt="${job.companyName}"
+                                         style="width: 100%; height: 100%; object-fit: cover;"
+                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                    <div class="text-success fw-bold fs-5" 
+                                         th:style="${job.logoPath != null and job.logoPath != '' ? 'display:none;' : ''}"
+                                         th:text="${job.companyName != null and #strings.length(job.companyName) >= 2 ? #strings.substring(job.companyName, 0, 2) : 'CT'}">CT</div>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <p class="mb-1 fw-semibold" th:text="${job.companyName ?: 'Công ty'}">Công ty</p>
+                                    <p class="text-muted small mb-0" th:if="${job.employer != null && job.employer.address != null && job.employer.address != ''}">
+                                        <i class="fa-solid fa-location-dot me-1"></i><span th:text="${job.employer.address}">Địa chỉ</span>
+                                    </p>
+                                </div>
+                            </div>
+                            <p class="text-muted small mb-3" th:text="${job.employer != null && job.employer.about != null ? job.employer.about : 'Doanh nghiệp đang cập nhật thông tin giới thiệu.'}">
+                                Thông tin về công ty...
+                            </p>
+                            <a th:if="${job.employer != null && job.employer.website != null && job.employer.website != ''}" 
+                               th:href="${job.employer.website}" 
+                               target="_blank" 
+                               class="btn btn-outline-success btn-sm w-100">
+                                <i class="fa-solid fa-globe me-2"></i>Xem website
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <div th:if="${flashMessage}" 
+                                 th:class="'alert alert-' + ${flashType}" 
+                                 role="alert"
+                                 th:text="${flashMessage}"></div>
+                            
+                            <div th:if="${!isLoggedIn}">
+                                <p class="mb-3">Đăng nhập để ứng tuyển và theo dõi trạng thái hồ sơ của bạn.</p>
+                                <div class="d-grid gap-2">
+                                    <a class="btn btn-success" th:href="@{/auth/login(redirect=/jobs/{id}(id=${job.id}))}">
+                                        Đăng nhập &amp; ứng tuyển
+                                    </a>
+                                    <a class="btn btn-outline-success" th:href="@{/auth/register}">
+                                        Tạo tài khoản miễn phí
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <div th:if="${isLoggedIn && job.hasApplied}">
+                                <div class="alert alert-info" role="alert">
+                                    <strong>Đã ứng tuyển</strong><br>
+                                    <span class="small">Nhà tuyển dụng sẽ xem xét và phản hồi sớm nhất.</span>
+                                </div>
+                                <div class="d-grid gap-2">
+                                    <a class="btn btn-outline-success" th:href="@{/applications}">Xem đơn ứng tuyển</a>
+                                    <a class="btn btn-outline-secondary" th:href="@{/jobs}">Khám phá việc làm khác</a>
+                                </div>
+                            </div>
+                            
+                            <form th:if="${isLoggedIn && !job.hasApplied}" 
+                                  method="post" 
+                                  th:action="@{/applications/apply}" 
+                                  enctype="multipart/form-data" 
+                                  class="apply-widget">
+                                <input type="hidden" name="jobId" th:value="${job.id}">
+                                
+                                <div class="apply-widget__candidate">
+                                    <div class="apply-widget__candidate-info">
+                                        <div class="fw-semibold" th:text="${candidateName}">Tên ứng viên</div>
+                                        <div class="text-muted small" th:text="${candidateEmail}">email@example.com</div>
+                                        <div class="text-muted small" th:if="${candidateLocation}">
+                                            <i class="fa-solid fa-location-dot me-1"></i><span th:text="${candidateLocation}">Địa chỉ</span>
+                                        </div>
+                                    </div>
+                                    <div class="apply-widget__actions">
+                                        <a class="btn btn-outline-secondary btn-sm" th:href="@{/candidate/profile}" target="_blank">Xem hồ sơ</a>
+                                        <a class="btn btn-outline-success btn-sm" th:href="@{/candidate/cv}" target="_blank">Quản lý CV</a>
+                                    </div>
+                                </div>
+                                
+                                <div class="apply-widget__section">
+                                    <label class="form-label fw-semibold">Chọn CV gửi cho nhà tuyển dụng</label>
+                                    <div class="apply-widget__cv-options">
+                                        <div class="form-check apply-widget__radio" th:if="${hasCv}">
+                                            <input class="form-check-input" type="radio" name="cvOption" id="cvOptionExisting" value="existing" checked>
+                                            <label class="form-check-label" for="cvOptionExisting">
+                                                Sử dụng CV đã lưu trên JobFind
+                                                <div class="text-muted small" th:if="${cvFileName}">
+                                                    Tệp: <span th:text="${cvFileName}">resume.pdf</span>
+                                                </div>
+                                            </label>
+                                        </div>
+                                        
+                                        <div class="form-check apply-widget__radio">
+                                            <input class="form-check-input" type="radio" name="cvOption" id="cvOptionUpload" value="upload" th:checked="${!hasCv}">
+                                            <label class="form-check-label" for="cvOptionUpload">
+                                                Tải CV mới từ máy của bạn
+                                                <div class="text-muted small">Hỗ trợ PDF, DOC, DOCX (tối đa 5MB).</div>
+                                            </label>
+                                        </div>
+                                        
+                                        <div id="cvUploadWrapper" class="apply-widget__upload" th:classappend="${!hasCv ? '' : 'd-none'}">
+                                            <label for="cvFile" class="form-label">Chọn tệp CV</label>
+                                            <input class="form-control" type="file" id="cvFile" name="cvFile" accept=".pdf,.doc,.docx">
+                                            <div class="form-text">Đảm bảo thông tin cá nhân, kinh nghiệm và kỹ năng được cập nhật mới nhất.</div>
+                                        </div>
+                                        
+                                        <div class="form-check apply-widget__radio">
+                                            <input class="form-check-input" type="radio" name="cvOption" id="cvOptionSkip" value="skip">
+                                            <label class="form-check-label" for="cvOptionSkip">
+                                                Gửi đơn không kèm CV
+                                                <div class="text-muted small">Không khuyến khích. Nhà tuyển dụng có thể bỏ qua hồ sơ thiếu CV.</div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="apply-widget__section">
+                                    <label for="coverLetter" class="form-label fw-semibold">
+                                        Thư giới thiệu <span class="text-muted fw-normal">(không bắt buộc)</span>
+                                    </label>
+                                    <textarea id="coverLetter" name="coverLetter" class="form-control" rows="6" maxlength="4000" 
+                                              placeholder="Tóm tắt kinh nghiệm nổi bật, thành tựu cụ thể và lý do bạn phù hợp với vị trí này."></textarea>
+                                    <div class="d-flex justify-content-between align-items-center mt-2 small text-muted">
+                                        <span>Gợi ý: liên hệ người tham chiếu, thời gian có thể đi làm, kỳ vọng nổi bật.</span>
+                                        <span><span id="coverLetterCounter">0</span>/4000 ký tự</span>
+                                    </div>
+                                </div>
+                                
+                                <button class="btn btn-success w-100" type="submit">
+                                    <i class="fa-solid fa-paper-plane me-2"></i>Gửi đơn ứng tuyển ngay
+                                </button>
+                                
+                                <div class="apply-widget__disclaimer text-muted small">
+                                    Khi gửi đơn, bạn đồng ý chia sẻ thông tin hồ sơ cho nhà tuyển dụng và tuân thủ quy định bảo mật của JobFind.
+                                </div>
+                            </form>
+                            
+                            <hr class="my-4" th:if="${isLoggedIn}">
+                            <a class="btn btn-outline-success w-100" th:href="@{/jobs}">Quay lại danh sách</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <th:block th:replace="~{fragments/footer :: footer}" />
+    <th:block th:replace="~{fragments/footer :: backToTop}" />
+    <th:block th:replace="~{fragments/footer :: scripts}" />
+    
+    <script th:if="${isLoggedIn && !job.hasApplied}">
+    (function() {
+        var coverLetter = document.getElementById('coverLetter');
+        var counter = document.getElementById('coverLetterCounter');
+        
+        function updateCounter() {
+            if (!coverLetter || !counter) return;
+            if (coverLetter.value.length > 4000) {
+                coverLetter.value = coverLetter.value.substring(0, 4000);
+            }
+            counter.textContent = coverLetter.value.length;
+        }
+        
+        if (coverLetter && counter) {
+            coverLetter.addEventListener('input', updateCounter);
+            updateCounter();
+        }
+        
+        var uploadWrapper = document.getElementById('cvUploadWrapper');
+        var fileInput = document.getElementById('cvFile');
+        var optionRadios = document.querySelectorAll('input[name="cvOption"]');
+        
+        function toggleUpload() {
+            if (!uploadWrapper) return;
+            var selected = document.querySelector('input[name="cvOption"]:checked');
+            var isUpload = selected && selected.value === 'upload';
+            if (isUpload) {
+                uploadWrapper.classList.remove('d-none');
+                if (fileInput) fileInput.required = true;
+            } else {
+                uploadWrapper.classList.add('d-none');
+                if (fileInput) {
+                    fileInput.required = false;
+                    fileInput.value = '';
+                }
+            }
+        }
+        
+        optionRadios.forEach(function(radio) {
+            radio.addEventListener('change', toggleUpload);
+        });
+        toggleUpload();
+    })();
+    </script>
+</body>
+</html>

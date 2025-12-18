@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin-layout}">
+<head>
+    <title>Sửa thông tin nhà tuyển dụng</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="pagetitle">
+        <h1>Sửa thông tin nhà tuyển dụng</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/admin}">Trang chủ</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/admin/employers}">Nhà tuyển dụng</a></li>
+                <li class="breadcrumb-item active">Sửa</li>
+            </ol>
+        </nav>
+    </div>
+
+    <section class="section">
+        <div class="card p-4 shadow-sm">
+            <!-- Error Messages -->
+            <div th:if="${error}" class="alert alert-danger">
+                <span th:text="${error}"></span>
+            </div>
+
+            <form method="POST" th:action="@{/admin/employers/edit/{id}(id=${employer.id})}" 
+                  enctype="multipart/form-data" class="row g-4" novalidate>
+                
+                <div class="col-lg-4">
+                    <label class="form-label fw-semibold">Logo doanh nghiệp</label>
+                    <div class="border rounded p-3 text-center">
+                        <img th:if="${employer.logoPath != null}" 
+                             th:src="@{${employer.logoPath}}" 
+                             alt="Logo" class="img-fluid" style="max-height: 140px;">
+                        <span th:if="${employer.logoPath == null}" class="text-muted small d-block">Chưa có logo</span>
+                    </div>
+                    <input type="file" name="companyLogo" class="form-control mt-3" 
+                           accept="image/png,image/jpeg,image/gif,image/webp">
+                    <div class="form-text">Tùy chọn · PNG, JPG, GIF, WEBP · tối đa 3MB.</div>
+                    <div class="form-check mt-2" th:if="${employer.logoPath != null}">
+                        <input class="form-check-input" type="checkbox" name="removeLogo" id="removeLogo">
+                        <label class="form-check-label" for="removeLogo">
+                            Xóa logo hiện tại
+                        </label>
+                    </div>
+                </div>
+
+                <div class="col-lg-8">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label fw-semibold" for="companyName">
+                                Tên công ty <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" name="companyName" id="companyName" 
+                                   class="form-control" th:value="${employer.companyName}" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold" for="website">Website</label>
+                            <input type="url" name="website" id="website" class="form-control" 
+                                   placeholder="https://example.com" th:value="${employer.website}">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold" for="address">Địa chỉ</label>
+                            <input type="text" name="address" id="address" class="form-control" 
+                                   placeholder="Tòa nhà, đường, thành phố" th:value="${employer.address}">
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-semibold" for="about">Giới thiệu doanh nghiệp</label>
+                            <textarea name="about" id="about" class="form-control" rows="5" 
+                                      placeholder="Tầm nhìn, sứ mệnh, phúc lợi nổi bật..."
+                                      th:text="${employer.about}"></textarea>
+                        </div>
+
+                        <div class="col-12" th:if="${employer.user != null}">
+                            <div class="alert alert-light border d-flex align-items-center gap-3 mb-0">
+                                <i class="bi bi-person-badge fs-4 text-primary"></i>
+                                <div>
+                                    <div class="fw-semibold mb-1">Tài khoản liên kết</div>
+                                    <div class="small text-muted" th:text="'Email: ' + ${employer.user.email}">Email: email@example.com</div>
+                                    <div class="small text-muted" th:if="${employer.user.name != null}" 
+                                         th:text="'Người liên hệ: ' + ${employer.user.name}">Người liên hệ: Tên người dùng</div>
+                                    <div class="small text-muted" th:if="${employer.user.phone != null}" 
+                                         th:text="'SĐT: ' + ${employer.user.phone}">SĐT: 0123456789</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 d-flex justify-content-end gap-2">
+                    <a th:href="@{/admin/employers}" class="btn btn-light">
+                        <i class="bi bi-arrow-left"></i> Quay lại
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i> Lưu thay đổi
+                    </button>
+                </div>
+            </form>
+        </div>
+    </section>
+</div>
+</body>
+</html>

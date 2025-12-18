@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết hồ sơ - JobFinder</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>TEST - Chi tiết hồ sơ ứng viên</h1>
+        
+        <div class="alert alert-info">
+            <h4>Debug Info:</h4>
+            <p>Application object exists: <span th:text="${application != null}">false</span></p>
+            <p>Application toString: <span th:text="${application}">-</span></p>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-body">
+                <h3>Application Info (Direct Access)</h3>
+                <p><strong>ID:</strong> <span th:text="${application != null ? application.id : 'NULL'}">-</span></p>
+                <p><strong>Status:</strong> <span th:text="${application != null ? application.status : 'NULL'}">-</span></p>
+                <p><strong>Applied At:</strong> <span th:text="${application != null ? application.appliedAt : 'NULL'}">-</span></p>
+                <p><strong>Cover Letter:</strong> <span th:text="${application != null ? (application.coverLetter != null ? 'HAS DATA' : 'NULL') : 'APP NULL'}">-</span></p>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-body">
+                <h3>Candidate Info</h3>
+                <p><strong>Candidate exists:</strong> <span th:text="${application != null and application.candidate != null}">false</span></p>
+                <div th:if="${application != null and application.candidate != null}">
+                    <p><strong>Candidate ID:</strong> <span th:text="${application.candidate.id}">-</span></p>
+                    <p><strong>User exists:</strong> <span th:text="${application.candidate.user != null}">false</span></p>
+                    <div th:if="${application.candidate.user != null}">
+                        <p><strong>Name:</strong> <span th:text="${application.candidate.user.name}">-</span></p>
+                        <p><strong>Email:</strong> <span th:text="${application.candidate.user.email}">-</span></p>
+                        <p><strong>Phone:</strong> <span th:text="${application.candidate.user.phone}">-</span></p>
+                    </div>
+                    <p><strong>Headline:</strong> <span th:text="${application.candidate.headline != null ? application.candidate.headline : 'NULL'}">-</span></p>
+                    <p><strong>Summary:</strong> <span th:text="${application.candidate.summary != null ? 'HAS DATA' : 'NULL'}">-</span></p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-body">
+                <h3>Job Info</h3>
+                <p><strong>Job exists:</strong> <span th:text="${application != null and application.job != null}">false</span></p>
+                <div th:if="${application != null and application.job != null}">
+                    <p><strong>Job ID:</strong> <span th:text="${application.job.id}">-</span></p>
+                    <p><strong>Title:</strong> <span th:text="${application.job.title}">-</span></p>
+                    <p><strong>Location:</strong> <span th:text="${application.job.location}">-</span></p>
+                    <p><strong>Salary:</strong> <span th:text="${application.job.salary}">-</span></p>
+                    <p><strong>Employment Type:</strong> <span th:text="${application.job.employmentType}">-</span></p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-body">
+                <h3>Raw Data Display</h3>
+                <pre th:if="${application != null}">
+Application ID: [[${application.id}]]
+Status: [[${application.status}]]
+Candidate ID: [[${application.candidate != null ? application.candidate.id : 'NULL'}]]
+Job ID: [[${application.job != null ? application.job.id : 'NULL'}]]
+                </pre>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

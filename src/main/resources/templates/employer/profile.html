@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle} + ' - JobFinder'">Hồ sơ doanh nghiệp - JobFinder</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --page-bg: #f5f7fb;
+            --card-bg: #ffffff;
+            --accent: #1f8f6d;
+            --text-dark: #111827;
+            --muted: #6b7280;
+            --border: #e1e6f0;
+        }
+
+        body {
+            font-family: 'Be Vietnam Pro', 'Segoe UI', sans-serif;
+            background: var(--page-bg);
+            color: var(--text-dark);
+            min-height: 100vh;
+        }
+
+        .profile-shell {
+            min-height: 100vh;
+            background: var(--page-bg);
+        }
+
+        .profile-wrapper {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 48px 16px 72px;
+        }
+
+        .page-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 18px;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .back-link i {
+            font-size: 0.95rem;
+        }
+
+        .preview-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 999px;
+            border: 1px solid rgba(31, 143, 109, 0.2);
+            background: #e5f7f1;
+            color: #0f5a42;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .preview-link:hover {
+            border-color: rgba(31, 143, 109, 0.4);
+        }
+
+        .profile-card {
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 30px 60px rgba(15, 23, 42, 0.08);
+        }
+
+        .card-heading .eyebrow {
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            font-size: 12px;
+            color: var(--muted);
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .card-heading h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .card-heading p {
+            color: var(--muted);
+            margin-bottom: 0;
+        }
+
+        .logo-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            align-items: center;
+            border: 1px dashed var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            background: #fbfdff;
+        }
+
+        .logo-preview {
+            width: 140px;
+            height: 140px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            background: #f3f4f8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .logo-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .logo-placeholder {
+            color: var(--muted);
+            font-size: 14px;
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        .logo-meta small {
+            color: var(--muted);
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .required-field::after {
+            content: "*";
+            color: #f14f66;
+            margin-left: 4px;
+        }
+
+        .form-control,
+        textarea {
+            border-radius: 12px;
+            border-color: var(--border);
+            padding: 12px 16px;
+        }
+
+        .form-control:focus,
+        textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(31, 143, 109, 0.15);
+        }
+
+        textarea {
+            min-height: 140px;
+        }
+
+        .form-text {
+            color: var(--muted);
+        }
+
+        .alert-custom {
+            border-radius: 16px;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn-cancel {
+            border-radius: 999px;
+            padding: 12px 26px;
+            border: 1px solid var(--border);
+            color: var(--text-dark);
+            background: #fff;
+            font-weight: 600;
+        }
+
+        .btn-save {
+            border-radius: 999px;
+            padding: 12px 32px;
+            font-weight: 600;
+            background: var(--accent);
+            border: none;
+        }
+
+        @media (max-width: 768px) {
+            .profile-card {
+                padding: 28px 20px;
+            }
+            .logo-grid {
+                padding: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="profile-shell">
+        <div class="profile-wrapper">
+            <div class="page-nav">
+                <a class="back-link" href="/employer/dashboard">
+                    <i class="bi bi-arrow-left"></i>
+                    <span>Quay lại hồ sơ doanh nghiệp</span>
+                </a>
+                <a class="preview-link" th:if="${employer != null}" th:href="@{'/employers/' + ${employer.id}}" target="_blank">
+                    <i class="bi bi-eye"></i>
+                    <span>Xem trước hồ sơ</span>
+                </a>
+            </div>
+
+            <div th:if="${flashMessage}" th:class="'alert alert-' + (${flashType} != null ? ${flashType} : 'primary') + ' alert-custom border-0 shadow-sm'" role="alert">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-info-circle"></i>
+                    <span th:text="${flashMessage}"></span>
+                </div>
+            </div>
+
+            <div class="profile-card mt-3">
+                <div class="card-heading mb-4">
+                    <p class="eyebrow">Hồ sơ doanh nghiệp</p>
+                    <h1>Cập nhật hồ sơ của bạn</h1>
+                    <p>Chia sẻ văn hóa, phúc lợi và thông tin liên hệ để thu hút ứng viên phù hợp.</p>
+                </div>
+
+                <form th:action="@{/employer/profile/update}" method="post" enctype="multipart/form-data" class="row g-4">
+                    <div class="col-12">
+                        <label class="form-label">Logo doanh nghiệp</label>
+                        <div class="logo-grid">
+                            <div class="logo-preview">
+                                <img th:if="${employer.logoPath != null && !employer.logoPath.isEmpty()}"
+                                     th:src="@{${employer.logoPath}}"
+                                     alt="Logo doanh nghiệp">
+                                <div th:if="${employer.logoPath == null || employer.logoPath.isEmpty()}" class="logo-placeholder">
+                                    Logo doanh nghiệp
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 logo-meta">
+                                <input type="file"
+                                       class="form-control mb-2"
+                                       id="companyLogo"
+                                       name="companyLogo"
+                                       accept="image/png,image/jpeg,image/gif,image/webp">
+                                <small>Hỗ trợ PNG, JPG, GIF hoặc WEBP · Tối đa 3MB · Nên dùng nền trong suốt.</small>
+                                <div class="form-check mt-3" th:if="${employer.logoPath != null && !employer.logoPath.isEmpty()}">
+                                    <input class="form-check-input" type="checkbox" value="true" id="removeLogo" name="removeLogo">
+                                    <label class="form-check-label" for="removeLogo">Xóa logo hiện tại</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <label for="companyName" class="form-label required-field">Tên công ty</label>
+                        <input type="text"
+                               class="form-control"
+                               id="companyName"
+                               name="companyName"
+                               th:value="${employer.companyName}"
+                               placeholder="Công ty Công nghệ TechCorp"
+                               required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="website" class="form-label">Website</label>
+                        <input type="url"
+                               class="form-control"
+                               id="website"
+                               name="website"
+                               th:value="${employer.website}"
+                               placeholder="https://techcorp.vn">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="address" class="form-label">Địa chỉ</label>
+                        <input type="text"
+                               class="form-control"
+                               id="address"
+                               name="address"
+                               th:value="${employer.address}"
+                               placeholder="Hà Nội, Việt Nam">
+                    </div>
+
+                    <div class="col-12">
+                        <label for="about" class="form-label">Giới thiệu doanh nghiệp</label>
+                        <textarea class="form-control"
+                                  id="about"
+                                  name="about"
+                                  placeholder="Tầm nhìn, văn hóa và các dự án nổi bật của doanh nghiệp."
+                                  th:text="${employer.about}"></textarea>
+                        <div class="form-text">Mô tả về công ty, phúc lợi nổi bật hoặc môi trường làm việc...</div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="contactName" class="form-label">Người liên hệ</label>
+                        <input type="text"
+                               class="form-control"
+                               id="contactName"
+                               name="contactName"
+                               th:value="${employer.user != null ? employer.user.name : ''}"
+                               placeholder="Nguyễn Đình Đức">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="contactPhone" class="form-label">Số điện thoại liên hệ</label>
+                        <input type="text"
+                               class="form-control"
+                               id="contactPhone"
+                               name="contactPhone"
+                               th:value="${employer.user != null ? employer.user.phone : ''}"
+                               placeholder="VD: 0901 234 567">
+                    </div>
+
+                    <div class="col-12 form-actions pt-2">
+                        <a href="/employer/dashboard" class="btn btn-cancel">Hủy</a>
+                        <button type="submit" class="btn btn-save text-white">
+                            <i class="bi bi-check-circle me-2"></i>Lưu cập nhật
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+# Avatar Upload Directory
+
+This directory stores user avatar images.
+
+## Auto-created
+This folder will be automatically created by the application if it doesn't exist.
+
+## File Access
+- Public URL: `/uploads/avatars/{filename}`
+- Physical path: `src/main/resources/static/uploads/avatars/`
+
+## .gitkeep
+This file ensures the directory is tracked by git even when empty.

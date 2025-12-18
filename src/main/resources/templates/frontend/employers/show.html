@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="vi">
+<head th:replace="~{fragments/header :: head}"></head>
+<body class="employer-profile">
+
+<div th:replace="~{fragments/header :: header}"></div>
+
+<main class="employer-profile">
+    <!-- Hero Section -->
+    <section class="employer-hero py-5">
+        <div class="container">
+            <div class="hero-card bg-white shadow-sm rounded-4 p-4">
+                <div class="company-header d-flex gap-4 mb-4">
+                    <div class="company-logo bg-success bg-opacity-10 rounded-4 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 88px; height: 88px;">
+                        <img th:if="${employer.logo_path != null and !employer.logo_path.isEmpty()}" th:src="${employer.logo_path}" th:alt="${employer.company_name}" class="w-100 h-100 object-fit-cover rounded-4">
+                        <span th:unless="${employer.logo_path != null and !employer.logo_path.isEmpty()}" class="fs-1 fw-bold text-success" th:text="${employer.company_initial}">JF</span>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h1 class="display-6 fw-bold mb-3" th:text="${employer.company_name}">Tên công ty</h1>
+                        <div class="company-meta d-flex flex-wrap gap-3 text-muted">
+                            <span th:if="${employer.address != null and !employer.address.isEmpty()}"><i class="fa-solid fa-location-dot me-2"></i><span th:text="${employer.address}">Địa chỉ</span></span>
+                            <span th:if="${employer.website != null and !employer.website.isEmpty()}"><i class="fa-solid fa-globe me-2"></i><a th:href="${employer.website}" target="_blank" rel="noopener" class="text-decoration-none">Website chính thức</a></span>
+                            <span><i class="fa-solid fa-briefcase me-2"></i><span th:text="${stats.totalJobs}">0</span> việc làm đang mở</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex flex-column flex-md-row justify-content-between gap-4">
+                    <p th:if="${employer.about != null and !employer.about.isEmpty()}" class="mb-0 text-muted flex-grow-1" th:text="${#strings.abbreviate(employer.about, 200)}">Mô tả ngắn về công ty...</p>
+                    <p th:unless="${employer.about != null and !employer.about.isEmpty()}" class="mb-0 text-muted flex-grow-1 fst-italic">Doanh nghiệp đang cập nhật thông tin giới thiệu chi tiết.</p>
+                    <div class="company-actions d-flex gap-2">
+                        <a class="btn btn-success" href="#employer-jobs">Xem việc đang tuyển</a>
+                        <a th:if="${employer.website != null and !employer.website.isEmpty()}" class="btn btn-outline-success" th:href="${employer.website}" target="_blank" rel="noopener">Ghé thăm website</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="employer-stats py-4 bg-light">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-md-3">
+                    <div class="stat-card bg-white shadow-sm p-4 rounded-4 text-center">
+                        <span class="stat-label text-muted d-block mb-2">Việc đang tuyển</span>
+                        <span class="stat-value text-success fw-bold fs-2 d-block" th:text="${stats.totalJobs}">0</span>
+                        <small class="text-muted">Số lượng tin tuyển dụng đang hiển thị</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card bg-white shadow-sm p-4 rounded-4 text-center">
+                        <span class="stat-label text-muted d-block mb-2">Tin đăng mới</span>
+                        <span class="stat-value text-primary fw-bold fs-2 d-block" th:text="${stats.recentJobs}">0</span>
+                        <small class="text-muted">Trong 30 ngày gần nhất</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card bg-white shadow-sm p-4 rounded-4 text-center">
+                        <span class="stat-label text-muted d-block mb-2">Lượt xem</span>
+                        <span class="stat-value text-info fw-bold fs-2 d-block" th:text="${#numbers.formatInteger(stats.totalViews, 0, 'COMMA')}">0</span>
+                        <small class="text-muted">Tổng lượt xem việc làm</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card bg-white shadow-sm p-4 rounded-4 text-center">
+                        <span class="stat-label text-muted d-block mb-2">Địa điểm</span>
+                        <span class="stat-value text-warning fw-bold fs-2 d-block" th:text="${stats.uniqueLocations}">1</span>
+                        <small class="text-muted">Khu vực đang tuyển dụng</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Content Section -->
+    <section class="employer-content py-5">
+        <div class="container">
+            <div class="row g-4">
+                <!-- Main Content -->
+                <div class="col-lg-8">
+                    <article class="profile-card bg-white shadow-sm rounded-4 p-4 mb-4">
+                        <h2 class="h4 fw-bold mb-3">Về <span th:text="${employer.company_name}">công ty</span></h2>
+                        <div class="profile-description" th:if="${employer.about != null and !employer.about.isEmpty()}">
+                            <p th:each="paragraph : ${#strings.arraySplit(employer.about, '\n')}" th:unless="${#strings.isEmpty(paragraph)}" th:text="${paragraph}">Đoạn văn mô tả</p>
+                        </div>
+                        <p th:unless="${employer.about != null and !employer.about.isEmpty()}" class="text-muted fst-italic">Doanh nghiệp đang cập nhật thông tin giới thiệu chi tiết.</p>
+                    </article>
+
+                    <!-- Benefits -->
+                    <section th:unless="${#lists.isEmpty(benefits)}" class="employer-benefits mb-4">
+                        <div class="bg-white shadow-sm rounded-4 p-4">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <div>
+                                    <h2 class="h4 fw-bold mb-1">Phúc lợi dành cho bạn</h2>
+                                    <p class="text-muted mb-0">Những đãi ngộ tiêu biểu dành cho nhân viên</p>
+                                </div>
+                                <span class="badge rounded-pill bg-success bg-opacity-10 text-success">Cân bằng phúc lợi & phát triển</span>
+                            </div>
+                            <div class="row g-3">
+                                <div th:each="benefit : ${benefits}" class="col-lg-4 col-md-6">
+                                    <div class="benefit-card bg-light rounded-3 p-3 h-100">
+                                        <div class="benefit-icon text-success mb-2"><i class="fa-solid fa-circle-check"></i></div>
+                                        <p class="benefit-text mb-0 small" th:text="${benefit}">Phúc lợi</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Culture Highlights -->
+                    <section th:unless="${#lists.isEmpty(cultureHighlights)}" class="employer-culture mb-4">
+                        <div class="bg-white shadow-sm rounded-4 p-4">
+                            <div class="mb-4">
+                                <h2 class="h4 fw-bold mb-1">Văn hóa & môi trường làm việc</h2>
+                                <p class="text-muted mb-0">Những điểm nổi bật giúp ứng viên hiểu hơn về <span th:text="${employer.company_name}">công ty</span></p>
+                            </div>
+                            <div class="row g-4">
+                                <div th:each="highlight : ${cultureHighlights}" class="col-lg-3 col-sm-6">
+                                    <div class="culture-card text-center h-100 p-3">
+                                        <div class="culture-icon text-success fs-2 mb-3"><i th:class="'fa-solid ' + ${highlight.icon}"></i></div>
+                                        <h3 class="h6 fw-semibold mb-2" th:text="${highlight.title}">Tiêu đề</h3>
+                                        <p class="mb-0 text-muted small" th:text="${highlight.description}">Mô tả</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Jobs Section -->
+                    <section id="employer-jobs" class="employer-jobs">
+                        <div class="bg-white shadow-sm rounded-4 p-4">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <div>
+                                    <h2 class="h4 fw-bold mb-1">Việc làm đang tuyển</h2>
+                                    <p class="text-muted mb-0" th:text="${stats.totalJobs > 0 ? 'Cơ hội phù hợp từ ' + employer.company_name : 'Chưa có tin tuyển dụng đang mở.'}">Cơ hội việc làm</p>
+                                </div>
+                                <a class="btn btn-outline-success" href="/jobs">Khám phá thêm việc làm</a>
+                            </div>
+                            
+                            <div th:if="${#lists.isEmpty(jobs)}" class="alert alert-light border text-center py-5">
+                                <h5 class="fw-semibold mb-2">Nhà tuyển dụng chưa đăng tin tuyển dụng mới</h5>
+                                <p class="text-muted mb-0">Quay lại sau để khám phá các cơ hội mới nhất từ <span th:text="${employer.company_name}">công ty</span>.</p>
+                            </div>
+                            
+                            <div th:unless="${#lists.isEmpty(jobs)}" class="row g-4">
+                                <div th:each="job : ${jobs}" class="col-12">
+                                    <article class="job-card border rounded-3 p-4">
+                                        <div class="d-flex justify-content-between align-items-start mb-3">
+                                            <div class="flex-grow-1">
+                                                <h3 class="h5 fw-bold mb-2">
+                                                    <a th:href="@{/jobs/{id}(id=${job.id})}" class="text-decoration-none text-dark" th:text="${job.title}">Tiêu đề công việc</a>
+                                                </h3>
+                                                <div class="job-meta text-muted small d-flex flex-wrap gap-3">
+                                                    <span><i class="fa-solid fa-location-dot me-1"></i><span th:text="${job.location}">Địa điểm</span></span>
+                                                    <span><i class="fa-solid fa-sack-dollar me-1"></i><span th:text="${job.salary}">Mức lương</span></span>
+                                                    <span><i class="fa-regular fa-clock me-1"></i><span th:text="${job.employmentType}">Loại hình</span></span>
+                                                </div>
+                                            </div>
+                                            <span class="badge bg-success bg-opacity-10 text-success">Đang tuyển</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="text-muted small"><i class="fa-solid fa-eye me-1"></i><span th:text="${job.viewCount}">0</span> lượt xem</span>
+                                            <a th:href="@{/jobs/{id}(id=${job.id})}" class="btn btn-outline-success btn-sm">Xem chi tiết <i class="fa-solid fa-arrow-right ms-2"></i></a>
+                                        </div>
+                                    </article>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Sidebar -->
+                <aside class="col-lg-4">
+                    <div class="profile-card bg-white shadow-sm rounded-4 p-4 mb-4">
+                        <h2 class="h5 fw-bold mb-3">Thông tin liên hệ</h2>
+                        <ul class="contact-list list-unstyled">
+                            <li th:if="${employer.address != null and !employer.address.isEmpty()}" class="d-flex gap-3 mb-3">
+                                <i class="fa-solid fa-location-dot text-success"></i>
+                                <span th:text="${employer.address}">Địa chỉ</span>
+                            </li>
+                            <li th:if="${employer.website != null and !employer.website.isEmpty()}" class="d-flex gap-3 mb-3">
+                                <i class="fa-solid fa-globe text-success"></i>
+                                <a th:href="${employer.website}" target="_blank" rel="noopener" class="text-decoration-none" th:text="${employer.website}">Website</a>
+                            </li>
+                        </ul>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </section>
+
+    <!-- Related Jobs -->
+    <section th:unless="${#lists.isEmpty(relatedJobs)}" class="employer-related py-5 bg-light">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="h4 fw-bold mb-1">Việc làm gợi ý cho bạn</h2>
+                    <p class="text-muted mb-0">Khám phá thêm cơ hội tương tự từ các nhà tuyển dụng khác</p>
+                </div>
+                <a class="btn btn-outline-success" href="/jobs">Xem bảng xếp hạng việc hot</a>
+            </div>
+            <div class="row g-4">
+                <div th:each="job : ${relatedJobs}" class="col-lg-4 col-md-6">
+                    <article class="related-card bg-white shadow-sm rounded-4 p-4 h-100">
+                        <h3 class="h6 fw-bold mb-3">
+                            <a th:href="@{/jobs/{id}(id=${job.id})}" class="text-decoration-none text-dark" th:text="${job.title}">Tiêu đề công việc</a>
+                        </h3>
+                        <div class="related-company text-muted small mb-3">
+                            <i class="fa-solid fa-building me-2"></i><strong th:text="${job.companyName}">Tên công ty</strong>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="badge bg-light text-success border border-success" th:text="${job.employmentType}">Full-time</span>
+                            <a th:href="@{/jobs/{id}(id=${job.id})}" class="btn btn-success btn-sm">Xem chi tiết<i class="fa-solid fa-arrow-right ms-2"></i></a>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+<div th:replace="~{fragments/footer :: backToTop}"></div>
+<div th:replace="~{fragments/footer :: scripts}"></div>
+
+</body>
+</html>

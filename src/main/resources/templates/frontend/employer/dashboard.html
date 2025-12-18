@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employer Dashboard - JobFind</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" />
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">
+                <i class="fa-solid fa-briefcase"></i> JobFind - Nhà tuyển dụng
+            </a>
+            <div class="ms-auto">
+                <span class="text-white me-3">
+                    <i class="fa-solid fa-user-tie"></i> <span th:text="${currentUser}"></span>
+                </span>
+                <a class="btn btn-outline-light btn-sm" th:href="@{/auth/logout}">
+                    <i class="fa-solid fa-sign-out-alt"></i> Đăng xuất
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <div class="row">
+            <div class="col-12 mb-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <h1 class="h3 mb-0">
+                            <i class="fa-solid fa-chart-line text-primary"></i>
+                            Dashboard Nhà tuyển dụng
+                        </h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <i class="fa-solid fa-file-text fa-3x text-primary mb-3"></i>
+                        <h5 class="card-title">Đăng tin tuyển dụng</h5>
+                        <p class="card-text text-muted">Tạo và quản lý các tin tuyển dụng của bạn</p>
+                        <button class="btn btn-primary" disabled>Sắp ra mắt</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <i class="fa-solid fa-users fa-3x text-success mb-3"></i>
+                        <h5 class="card-title">Quản lý ứng viên</h5>
+                        <p class="card-text text-muted">Xem và quản lý hồ sơ ứng tuyển</p>
+                        <button class="btn btn-success" disabled>Sắp ra mắt</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <i class="fa-solid fa-building fa-3x text-info mb-3"></i>
+                        <h5 class="card-title">Hồ sơ công ty</h5>
+                        <p class="card-text text-muted">Cập nhật thông tin doanh nghiệp</p>
+                        <button class="btn btn-info" disabled>Sắp ra mắt</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fa-solid fa-info-circle text-primary"></i>
+                            Thông báo
+                        </h5>
+                        <p class="mb-0 text-muted">
+                            Chào mừng bạn đến với JobFind! Dashboard đầy đủ tính năng sẽ được phát triển trong các sprint tiếp theo.
+                            Bạn đang đăng nhập với vai trò <strong>Nhà tuyển dụng</strong>.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+</body>
+</html>
