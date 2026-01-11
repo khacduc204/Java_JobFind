@@ -2,7 +2,48 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout/admin-layout}">
 <head>
-    <title>Quản lý ứng viên</title>
+  <title>Quản lý ứng viên</title>
+  <style>
+    .candidate-skill-badge {
+      background: #f4f6fb;
+      color: #1a2942;
+      border: 1px solid #e1e6f0;
+      font-size: 0.75rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+    }
+    .candidate-skill-badge + .candidate-skill-badge {
+      margin-left: 0.25rem;
+    }
+    .experience-badge {
+      background: rgba(0, 176, 79, 0.12);
+      color: #00b14f;
+      border-radius: 999px;
+      padding: 0.2rem 0.75rem;
+      font-weight: 600;
+    }
+    .cv-pill {
+      border-radius: 999px !important;
+      font-weight: 600;
+    }
+    .filter-card .form-control,
+    .filter-card .form-select {
+      border-radius: 0.75rem;
+    }
+    .table thead th {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+    .action-btns .btn {
+      border-radius: 0.6rem;
+      width: 38px;
+      height: 36px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
 </head>
 <body>
 <div layout:fragment="content">
@@ -56,7 +97,7 @@
       </div>
 
       <!-- Filters and List Card -->
-      <div class="card shadow-sm">
+      <div class="card shadow-sm filter-card">
         <div class="card-body">
           <!-- Filter Form -->
           <form class="row gy-2 gx-3 align-items-end mb-4" method="get" th:action="@{/admin/candidates}">
@@ -121,13 +162,25 @@
                   </td>
                   <td th:text="${candidate.headline}">Chưa cập nhật</td>
                   <td th:text="${candidate.location}">Chưa cập nhật</td>
-                  <td th:text="${candidate.skills_display}">Chưa cập nhật</td>
-                  <td th:text="${candidate.experience}">Chưa cập nhật</td>
+                  <td>
+                    <div class="d-flex flex-wrap gap-1" th:if="${candidate.skills_display_list != null and !candidate.skills_display_list.isEmpty()}">
+                      <span class="candidate-skill-badge"
+                            th:each="skill : ${candidate.skills_display_list}"
+                            th:text="${skill}">PHP</span>
+                    </div>
+                    <span class="text-muted" th:unless="${candidate.skills_display_list != null and !candidate.skills_display_list.isEmpty()}">Chưa cập nhật</span>
+                  </td>
+                  <td>
+                    <span th:if="${candidate.experience_count != null and candidate.experience_count > 0}"
+                          class="experience-badge"
+                          th:text="${candidate.experience_summary}">1 vị trí</span>
+                    <span class="text-muted" th:unless="${candidate.experience_count != null and candidate.experience_count > 0}">Chưa cập nhật</span>
+                  </td>
                   <td>
                     <a th:if="${candidate.cv_path != null and !candidate.cv_path.isEmpty()}" 
                        th:href="@{'/' + ${candidate.cv_path}}" 
                        target="_blank" 
-                       class="btn btn-sm btn-outline-primary">
+                       class="btn btn-sm btn-outline-primary cv-pill">
                       <i class="bi bi-file-earmark-arrow-down"></i> Tải
                     </a>
                     <span th:unless="${candidate.cv_path != null and !candidate.cv_path.isEmpty()}" 
@@ -140,7 +193,7 @@
                           th:text="${candidate.user_created_at != null ? #temporals.format(candidate.user_created_at, 'dd/MM/yyyy') : '—'}">—</span>
                   </td>
                   <td class="text-end">
-                    <div class="btn-group">
+                    <div class="btn-group action-btns">
                       <a th:href="@{'/candidate/profile?user=' + ${candidate.user_id}}" 
                          target="_blank" 
                          class="btn btn-sm btn-outline-secondary" 

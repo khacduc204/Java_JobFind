@@ -54,10 +54,14 @@ public class CandidateAdminService {
                 // Parse skills JSON to get first few skills
                 List<String> skillList = parseSkills(candidate.getSkills());
                 candidateData.put("skills_list", skillList);
-                candidateData.put("skills_display", skillList.isEmpty() ? "Chưa cập nhật" : 
-                    String.join(", ", skillList.subList(0, Math.min(3, skillList.size()))));
+                candidateData.put("skills_display_list", getTopSkills(skillList, 4));
                 
-                candidateData.put("experience", candidate.getExperience() != null ? candidate.getExperience() : "Chưa cập nhật");
+                List<Map<String, Object>> experienceList = parseExperience(candidate.getExperience());
+                candidateData.put("experience_list", experienceList);
+                candidateData.put("experience_count", experienceList.size());
+                candidateData.put("experience_summary", experienceList.isEmpty()
+                    ? "Chưa cập nhật"
+                    : experienceList.size() + " vị trí");
             } else {
                 candidateData.put("candidate_id", null);
                 candidateData.put("headline", "Chưa cập nhật");
@@ -65,8 +69,10 @@ public class CandidateAdminService {
                 candidateData.put("cv_path", null);
                 candidateData.put("cv_updated_at", null);
                 candidateData.put("skills_list", Collections.emptyList());
-                candidateData.put("skills_display", "Chưa cập nhật");
-                candidateData.put("experience", "Chưa cập nhật");
+                candidateData.put("skills_display_list", Collections.emptyList());
+                candidateData.put("experience_list", Collections.emptyList());
+                candidateData.put("experience_count", 0);
+                candidateData.put("experience_summary", "Chưa cập nhật");
             }
             
             candidates.add(candidateData);
@@ -137,6 +143,25 @@ public class CandidateAdminService {
                 .filter(s -> s != null && !s.trim().isEmpty())
                 .map(String::trim)
                 .collect(Collectors.toList());
+        } catch (Exception e) {
+            return Collections.emptyList();
+        }
+    }
+
+    private List<String> getTopSkills(List<String> skills, int limit) {
+        if (skills.isEmpty()) {
+            return Collections.emptyList();
+        }
+        int actualLimit = Math.min(limit, skills.size());
+        return new ArrayList<>(skills.subList(0, actualLimit));
+    }
+
+    private List<Map<String, Object>> parseExperience(String experienceJson) {
+        if (experienceJson == null || experienceJson.trim().isEmpty()) {
+            return Collections.emptyList();
+        }
+        try {
+            return objectMapper.readValue(experienceJson, new TypeReference<List<Map<String, Object>>>() {});
         } catch (Exception e) {
             return Collections.emptyList();
         }

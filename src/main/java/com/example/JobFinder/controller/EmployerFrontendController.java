@@ -64,22 +64,23 @@ public class EmployerFrontendController {
         
         model.addAttribute("employer", employer);
         model.addAttribute("pageTitle", employer.get("company_name") + " | Hồ sơ nhà tuyển dụng JobFind");
-        
-        // Get employer jobs
-        model.addAttribute("jobs", employerService.getEmployerJobs(employerId));
-        
-        // Get employer statistics
-        model.addAttribute("stats", employerService.getEmployerStats(employerId));
-        
-        // Get benefits and culture
-        model.addAttribute("benefits", employerService.getEmployerBenefits(employerId));
-        model.addAttribute("cultureHighlights", employerService.getCultureHighlights(employer));
-        
-        // Get hiring timeline
+
+        var jobs = employerService.getEmployerJobs(employerId);
+        var stats = employerService.getEmployerStats(employerId);
+        var benefits = employerService.getEmployerBenefits(employerId);
+        var cultureHighlights = employerService.getCultureHighlights(employer, stats);
+
+        model.addAttribute("jobs", jobs);
+        model.addAttribute("stats", stats);
+        model.addAttribute("benefits", benefits);
+        model.addAttribute("cultureHighlights", cultureHighlights);
         model.addAttribute("hiringTimeline", employerService.getHiringTimeline(employerId));
-        
-        // Related jobs (from other employers)
         model.addAttribute("relatedJobs", employerService.getRelatedJobs(employerId, 3));
+
+        String mapAddress = employerService.pickPrimaryMapAddress(employer, stats);
+        model.addAttribute("mapAddress", mapAddress);
+        model.addAttribute("mapEmbedUrl", employerService.buildMapEmbedUrl(mapAddress));
+        model.addAttribute("locationTags", stats.getOrDefault("locationTags", java.util.List.of()));
         
         return "frontend/employers/show";
     }

@@ -92,7 +92,8 @@ CREATE TABLE IF NOT EXISTS `applications` (
   `candidate_id` INT NOT NULL,
   `cover_letter` TEXT DEFAULT NULL,
   `resume_snapshot` TEXT DEFAULT NULL,
-  `status` ENUM('applied','viewed','shortlisted','rejected','hired') DEFAULT 'applied',
+  `status` ENUM('applied','viewed','shortlisted','rejected','hired','withdrawn') DEFAULT 'applied',
+  `decision_note` TEXT DEFAULT NULL,
   `applied_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (`job_id`) REFERENCES `jobs`(`id`) ON DELETE CASCADE,
   FOREIGN KEY (`candidate_id`) REFERENCES `candidates`(`id`) ON DELETE CASCADE

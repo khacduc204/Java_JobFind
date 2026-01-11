@@ -14,6 +14,9 @@ public interface JobViewRepository extends JpaRepository<JobView, Integer> {
      */
     @Query("SELECT COUNT(jv) FROM JobView jv WHERE jv.job.id = :jobId")
     long countByJobId(@Param("jobId") Integer jobId);
+
+    @Query("SELECT COUNT(jv) FROM JobView jv WHERE jv.job.employer.id = :employerId")
+    long countByEmployerId(@Param("employerId") Integer employerId);
     
     /**
      * Check if IP already viewed a job (to prevent duplicate counting in same session)

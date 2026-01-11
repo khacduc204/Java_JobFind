@@ -1,8 +1,15 @@
 package com.example.JobFinder.service;
 
-import com.example.JobFinder.repository.UserRepository;
+import com.example.JobFinder.repository.ApplicationRepository;
+import com.example.JobFinder.repository.CategoryRepository;
+import com.example.JobFinder.repository.CategoryRepository.CategoryStatsProjection;
 import com.example.JobFinder.repository.EmployerRepository;
+import com.example.JobFinder.repository.EmployerRepository.EmployerStatsProjection;
+import com.example.JobFinder.repository.JobRepository;
+import com.example.JobFinder.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.text.DecimalFormat;
@@ -14,19 +21,68 @@ public class HomeService {
 
     private final UserRepository userRepository;
     private final EmployerRepository employerRepository;
+    private final CategoryRepository categoryRepository;
+    private final JobRepository jobRepository;
+    private final ApplicationRepository applicationRepository;
     private final JobService jobService;
+
+    private static final List<String> FALLBACK_KEYWORDS = List.of(
+        "Product Manager",
+        "Frontend Developer",
+        "Backend Engineer",
+        "Data Analyst",
+        "UI/UX Designer",
+        "Digital Marketing"
+    );
+
+    private static final List<Map<String, Object>> FALLBACK_ARTICLES = List.of(
+        Map.of(
+            "title", "5 bí kíp nâng cấp CV khiến nhà tuyển dụng ấn tượng ngay lập tức",
+            "category", "CV & Hồ sơ",
+            "readTime", "5 phút đọc"
+        ),
+        Map.of(
+            "title", "Checklist phỏng vấn: Chuẩn bị gì để không bị hỏi khó?",
+            "category", "Phỏng vấn",
+            "readTime", "7 phút đọc"
+        ),
+        Map.of(
+            "title", "Kỹ năng phân tích dữ liệu cho marketer thời 4.0",
+            "category", "Kỹ năng",
+            "readTime", "6 phút đọc"
+        )
+    );
+
+    private static final Map<String, String> CATEGORY_ICON_LOOKUP;
+
+    static {
+    Map<String, String> icons = new HashMap<>();
+    icons.put("công nghệ", "fa-code");
+    icons.put("it", "fa-code");
+    icons.put("marketing", "fa-bullhorn");
+    icons.put("kinh doanh", "fa-chart-line");
+    icons.put("bán hàng", "fa-store");
+    icons.put("nhân sự", "fa-users");
+    icons.put("thiết kế", "fa-pen-ruler");
+    icons.put("kế toán", "fa-calculator");
+    icons.put("tài chính", "fa-sack-dollar");
+    icons.put("xây dựng", "fa-building");
+    CATEGORY_ICON_LOOKUP = Collections.unmodifiableMap(icons);
+    }
 
     public Map<String, Object> getStatistics() {
         Map<String, Object> stats = new HashMap<>();
         
         // Count users by role
         long candidates = userRepository.countByRoleId(3); // candidate role
-        long employersCount = employerRepository.count();  // actual employers from employer table
-        long jobs = 0; // TODO: implement job counting when Job entity is ready
+    long employersCount = employerRepository.count();  // actual employers from employer table
+    long jobs = jobRepository.countByStatus("published");
+    long applications = applicationRepository.count();
         
         stats.put("candidates", candidates);
         stats.put("employers", employersCount);
         stats.put("jobs", jobs);
+    stats.put("applications", applications);
         
         return stats;
     }
@@ -54,6 +110,13 @@ public class HomeService {
         jobsMetric.put("value", stats.get("jobs"));
         jobsMetric.put("formatted", formatNumber((Long) stats.get("jobs")));
         metrics.add(jobsMetric);
+
+        Map<String, Object> applicationsMetric = new HashMap<>();
+        applicationsMetric.put("label", "Hồ sơ ứng tuyển đã gửi");
+        Long applications = (Long) stats.getOrDefault("applications", 0L);
+        applicationsMetric.put("value", applications);
+        applicationsMetric.put("formatted", formatNumber(applications));
+        metrics.add(applicationsMetric);
         
         return metrics;
     }
@@ -100,70 +163,43 @@ public class HomeService {
     }
 
     public List<Map<String, Object>> getTopCategories(int limit) {
-        // TODO: implement when Category and Job entities are ready
+        if (limit <= 0) {
+            return Collections.emptyList();
+        }
+
+        Pageable pageable = PageRequest.of(0, limit);
+        List<CategoryStatsProjection> stats = categoryRepository.findTopCategoriesWithJobCounts(pageable);
+
+        if (stats.isEmpty()) {
+            return buildSampleCategories(limit);
+        }
+
         List<Map<String, Object>> categories = new ArrayList<>();
-        
-        // Sample data for now
-        if (limit >= 1) {
-            Map<String, Object> cat1 = new HashMap<>();
-            cat1.put("name", "Công nghệ thông tin");
-            cat1.put("jobCount", 120);
-            cat1.put("job_count", 120);
-            cat1.put("icon", "fa-code");
-            categories.add(cat1);
+        for (CategoryStatsProjection stat : stats) {
+            Map<String, Object> category = new HashMap<>();
+            category.put("id", stat.getId());
+            category.put("name", stat.getName());
+            category.put("jobCount", stat.getJobCount());
+            category.put("job_count", stat.getJobCount());
+            category.put("icon", resolveCategoryIcon(stat.getName()));
+            categories.add(category);
         }
-        
-        if (limit >= 2) {
-            Map<String, Object> cat2 = new HashMap<>();
-            cat2.put("name", "Kinh doanh");
-            cat2.put("jobCount", 85);
-            cat2.put("job_count", 85);
-            cat2.put("icon", "fa-chart-line");
-            categories.add(cat2);
-        }
-        
-        if (limit >= 3) {
-            Map<String, Object> cat3 = new HashMap<>();
-            cat3.put("name", "Marketing");
-            cat3.put("jobCount", 60);
-            cat3.put("job_count", 60);
-            cat3.put("icon", "fa-bullhorn");
-            categories.add(cat3);
-        }
-        
-        if (limit >= 4) {
-            Map<String, Object> cat4 = new HashMap<>();
-            cat4.put("name", "Thiết kế");
-            cat4.put("jobCount", 45);
-            cat4.put("job_count", 45);
-            cat4.put("icon", "fa-palette");
-            categories.add(cat4);
-        }
-        
-        if (limit >= 5) {
-            Map<String, Object> cat5 = new HashMap<>();
-            cat5.put("name", "Nhân sự");
-            cat5.put("jobCount", 38);
-            cat5.put("job_count", 38);
-            cat5.put("icon", "fa-users");
-            categories.add(cat5);
-        }
-        
-        if (limit >= 6) {
-            Map<String, Object> cat6 = new HashMap<>();
-            cat6.put("name", "Kế toán");
-            cat6.put("jobCount", 30);
-            cat6.put("job_count", 30);
-            cat6.put("icon", "fa-calculator");
-            categories.add(cat6);
-        }
-        
         return categories;
     }
 
     public List<String> getPopularKeywords(int limit) {
-        // TODO: implement when Job entity is ready
-        return Arrays.asList("Product Manager", "Frontend", "Marketing", "UI/UX", "Data Analyst", "Sales");
+        int size = Math.max(limit, 1);
+        Pageable pageable = PageRequest.of(0, size);
+        LinkedHashSet<String> keywords = new LinkedHashSet<>(jobRepository.findRecentJobTitles(pageable));
+        
+        if (keywords.size() < size) {
+            for (String fallback : FALLBACK_KEYWORDS) {
+                if (keywords.size() >= size) break;
+                keywords.add(fallback);
+            }
+        }
+        
+        return keywords.stream().limit(limit).toList();
     }
 
     public List<Map<String, Object>> getHotJobs(int limit) {
@@ -172,28 +208,38 @@ public class HomeService {
     }
 
     public List<Map<String, Object>> getTopEmployers(int limit) {
-        // Get real employers from database
+        if (limit <= 0) {
+            return Collections.emptyList();
+        }
+
+        Pageable pageable = PageRequest.of(0, limit);
+        List<EmployerStatsProjection> stats = employerRepository.findTopEmployersWithStats(pageable);
         List<Map<String, Object>> employers = new ArrayList<>();
         
-        var allEmployers = employerRepository.findAll();
-        for (var employer : allEmployers) {
-            if (employers.size() >= limit) break;
-            
+        for (EmployerStatsProjection stat : stats) {
             Map<String, Object> emp = new HashMap<>();
-            emp.put("id", employer.getId());
-            emp.put("company_name", employer.getCompanyName());
-            emp.put("logo_path", employer.getLogoPath());
-            emp.put("address", employer.getAddress());
-            emp.put("job_count", 0); // TODO: count actual jobs when Job entity ready
+            emp.put("id", stat.getId());
+            emp.put("company_name", stat.getCompanyName());
+            emp.put("logo_path", stat.getLogoPath());
+            emp.put("address", stat.getAddress());
+            emp.put("job_count", stat.getJobCount());
+            emp.put("application_count", stat.getApplicationCount());
             employers.add(emp);
         }
         
-        // If not enough real employers, add sample data
         if (employers.size() < limit) {
-            while (employers.size() < limit) {
+            var fallbackEmployers = employerRepository.findAll();
+            for (var employer : fallbackEmployers) {
+                if (employers.size() >= limit) break;
+                boolean alreadyAdded = employers.stream()
+                        .anyMatch(existing -> Objects.equals(existing.get("id"), employer.getId()));
+                if (alreadyAdded) continue;
                 Map<String, Object> emp = new HashMap<>();
-                emp.put("company_name", "Công ty " + (employers.size() + 1));
-                emp.put("job_count", 0);
+                emp.put("id", employer.getId());
+                emp.put("company_name", employer.getCompanyName());
+                emp.put("logo_path", employer.getLogoPath());
+                emp.put("address", employer.getAddress());
+                emp.put("job_count", 0L);
                 employers.add(emp);
             }
         }
@@ -202,26 +248,57 @@ public class HomeService {
     }
 
     public List<Map<String, Object>> getBlogArticles() {
+        List<Map<String, Object>> jobs = jobService.getTopViewedJobs(3);
+        if (jobs.isEmpty()) {
+            return new ArrayList<>(FALLBACK_ARTICLES);
+        }
+        
         List<Map<String, Object>> articles = new ArrayList<>();
-        
-        Map<String, Object> article1 = new HashMap<>();
-        article1.put("title", "5 bí kíp nâng cấp CV khiến nhà tuyển dụng ấn tượng ngay lập tức");
-        article1.put("category", "CV & Hồ sơ");
-        article1.put("readTime", "5 phút đọc");
-        articles.add(article1);
-        
-        Map<String, Object> article2 = new HashMap<>();
-        article2.put("title", "Checklist phỏng vấn: Chuẩn bị gì để không bị hỏi khó?");
-        article2.put("category", "Phỏng vấn");
-        article2.put("readTime", "7 phút đọc");
-        articles.add(article2);
-        
-        Map<String, Object> article3 = new HashMap<>();
-        article3.put("title", "Kỹ năng phân tích dữ liệu cho marketer thời 4.0");
-        article3.put("category", "Kỹ năng");
-        article3.put("readTime", "6 phút đọc");
-        articles.add(article3);
-        
+        for (Map<String, Object> job : jobs) {
+            Map<String, Object> article = new HashMap<>();
+            article.put("title", job.getOrDefault("title", "Cơ hội nghề nghiệp nổi bật"));
+            article.put("category", job.getOrDefault("categoryNames", job.getOrDefault("employmentType", "Tuyển dụng")));
+            article.put("readTime", job.getOrDefault("postedAgo", "Mới"));
+            articles.add(article);
+        }
         return articles;
+    }
+
+    private List<Map<String, Object>> buildSampleCategories(int limit) {
+        List<Map<String, Object>> samples = new ArrayList<>();
+        List<Map<String, Object>> predefined = List.of(
+                createCategorySample("Công nghệ thông tin", 120, "fa-code"),
+                createCategorySample("Kinh doanh", 85, "fa-chart-line"),
+                createCategorySample("Marketing", 60, "fa-bullhorn"),
+                createCategorySample("Thiết kế", 45, "fa-pen-ruler"),
+                createCategorySample("Nhân sự", 38, "fa-users"),
+                createCategorySample("Kế toán", 30, "fa-calculator")
+        );
+        for (Map<String, Object> cat : predefined) {
+            if (samples.size() >= limit) break;
+            samples.add(new HashMap<>(cat));
+        }
+        return samples;
+    }
+
+    private Map<String, Object> createCategorySample(String name, int jobCount, String icon) {
+        Map<String, Object> cat = new HashMap<>();
+        cat.put("name", name);
+        cat.put("jobCount", jobCount);
+        cat.put("job_count", jobCount);
+        cat.put("icon", icon);
+        return cat;
+    }
+
+    private String resolveCategoryIcon(String name) {
+        if (name == null) {
+            return "fa-briefcase";
+        }
+        String normalized = name.trim().toLowerCase(Locale.ROOT);
+        return CATEGORY_ICON_LOOKUP.entrySet().stream()
+                .filter(entry -> normalized.contains(entry.getKey()))
+                .map(Map.Entry::getValue)
+                .findFirst()
+                .orElse("fa-briefcase");
     }
 }

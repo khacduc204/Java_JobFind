@@ -3,6 +3,7 @@ package com.example.JobFinder.controller;
 import com.example.JobFinder.model.User;
 import com.example.JobFinder.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,6 +17,7 @@ public class CandidateController {
 
     private final UserRepository userRepository;
 
+    @PreAuthorize("hasRole('CANDIDATE')")
     @GetMapping("/dashboard")
     public String candidateDashboard(Authentication authentication, Model model) {
         if (authentication != null && authentication.isAuthenticated()) {

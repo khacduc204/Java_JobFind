@@ -37,4 +37,31 @@ public interface EmployerRepository extends JpaRepository<Employer, Integer> {
     Page<Employer> findByFilters(@Param("searchTerm") String searchTerm, @Param("location") String location, Pageable pageable);
     
     Optional<Employer> findById(Long id);
+
+       @Query("""
+              SELECT e.id AS id,
+                     e.companyName AS companyName,
+                     e.logoPath AS logoPath,
+                     e.address AS address,
+                     COUNT(DISTINCT j.id) AS jobCount,
+                     COUNT(a.id) AS applicationCount,
+                     SUM(CASE WHEN a.status = 'hired' THEN 1 ELSE 0 END) AS hiredCount
+              FROM Employer e
+              LEFT JOIN Job j ON j.employer.id = e.id AND j.status = 'published' AND (j.deadline IS NULL OR j.deadline >= CURRENT_DATE)
+              LEFT JOIN Application a ON a.job.id = j.id
+              GROUP BY e.id, e.companyName, e.logoPath, e.address
+              HAVING COUNT(DISTINCT j.id) > 0 OR COUNT(a.id) > 0
+              ORDER BY COUNT(DISTINCT j.id) DESC, COUNT(a.id) DESC
+              """)
+       List<EmployerStatsProjection> findTopEmployersWithStats(Pageable pageable);
+
+       interface EmployerStatsProjection {
+              Integer getId();
+              String getCompanyName();
+              String getLogoPath();
+              String getAddress();
+              Long getJobCount();
+              Long getApplicationCount();
+              Long getHiredCount();
+       }
 }

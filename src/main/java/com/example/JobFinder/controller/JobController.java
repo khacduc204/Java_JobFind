@@ -161,6 +161,7 @@ public class JobController {
         
         model.addAttribute("fullTimeCount", fullTimeCount);
         model.addAttribute("remoteCount", remoteCount);
+        model.addAttribute("pageScripts", List.of("saved-jobs.js"));
         
         return "frontend/jobs/index";
     }
@@ -197,6 +198,8 @@ public class JobController {
             List<Integer> savedJobIds = jobService.getSavedJobIds(candidateId);
             model.addAttribute("savedJobIds", savedJobIds);
         }
+
+        model.addAttribute("pageScripts", List.of("saved-jobs.js"));
         
         return "frontend/jobs/hot";
     }    

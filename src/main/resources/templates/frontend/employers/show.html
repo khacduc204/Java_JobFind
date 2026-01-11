@@ -21,6 +21,7 @@
                             <span th:if="${employer.address != null and !employer.address.isEmpty()}"><i class="fa-solid fa-location-dot me-2"></i><span th:text="${employer.address}">Địa chỉ</span></span>
                             <span th:if="${employer.website != null and !employer.website.isEmpty()}"><i class="fa-solid fa-globe me-2"></i><a th:href="${employer.website}" target="_blank" rel="noopener" class="text-decoration-none">Website chính thức</a></span>
                             <span><i class="fa-solid fa-briefcase me-2"></i><span th:text="${stats.totalJobs}">0</span> việc làm đang mở</span>
+                            <span><i class="fa-solid fa-clock me-2"></i>Cập nhật gần nhất <span th:text="${stats.latestActivity}">Đang cập nhật</span></span>
                         </div>
                     </div>
                 </div>
@@ -178,11 +179,37 @@
                                 <i class="fa-solid fa-location-dot text-success"></i>
                                 <span th:text="${employer.address}">Địa chỉ</span>
                             </li>
+                            <li th:if="${employer['contact_email'] != null && !#strings.isEmpty(employer['contact_email'])}" class="d-flex gap-3 mb-3">
+                                <i class="fa-solid fa-envelope text-success"></i>
+                                <a th:href="${'mailto:' + employer['contact_email']}" class="text-decoration-none" th:text="${employer['contact_email']}">Email</a>
+                            </li>
+                            <li th:if="${employer['contact_phone'] != null && !#strings.isEmpty(employer['contact_phone'])}" class="d-flex gap-3 mb-3">
+                                <i class="fa-solid fa-phone text-success"></i>
+                                <a th:href="${'tel:' + employer['contact_phone']}" class="text-decoration-none" th:text="${employer['contact_phone']}">Số điện thoại</a>
+                            </li>
                             <li th:if="${employer.website != null and !employer.website.isEmpty()}" class="d-flex gap-3 mb-3">
                                 <i class="fa-solid fa-globe text-success"></i>
                                 <a th:href="${employer.website}" target="_blank" rel="noopener" class="text-decoration-none" th:text="${employer.website}">Website</a>
                             </li>
                         </ul>
+                        <div th:if="${mapEmbedUrl != null}" class="ratio ratio-16x9 mt-4">
+                            <iframe th:src="${mapEmbedUrl}"
+                                    allowfullscreen
+                                    loading="lazy"
+                                    referrerpolicy="no-referrer-when-downgrade"
+                                    aria-label="Bản đồ vị trí doanh nghiệp"
+                                    style="border:0;"></iframe>
+                        </div>
+                        <p th:if="${mapAddress != null}" class="small text-muted mt-2 mb-0">
+                            <i class="fa-solid fa-location-dot me-2"></i>
+                            <span th:text="${mapAddress}">Địa điểm</span>
+                        </p>
+                        <div th:if="${locationTags != null and !locationTags.isEmpty()}" class="mt-4">
+                            <h3 class="h6 text-uppercase text-muted">Đang tuyển tại</h3>
+                            <div class="tag-cloud mt-2 d-flex flex-wrap gap-2">
+                                <span th:each="tag : ${locationTags}" class="badge rounded-pill bg-light text-success border" th:text="${tag}">Hà Nội</span>
+                            </div>
+                        </div>
                     </div>
                 </aside>
             </div>

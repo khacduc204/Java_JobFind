@@ -1,455 +1,349 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head th:fragment="head">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="_csrf" th:content="${_csrf.token}"/>
-    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
-    <title th:text="${pageTitle} ?: 'JobFind - Nền tảng việc làm chuẩn TopCV'">JobFind</title>
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+    <title th:text="${pageTitle} ?: 'JobFind - Việc làm chất lượng, chuẩn TopCV'">JobFind</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css">
-    <link rel="stylesheet" th:href="@{/assets/css/style.css}" />
+    <link rel="stylesheet" th:href="@{/assets/css/style.css}">
     <th:block th:if="${pageStyles != null}">
-        <link th:each="styleHref : ${pageStyles}" rel="stylesheet" th:href="@{'/assets/css/' + ${styleHref}}" />
+        <link th:each="styleHref : ${pageStyles}" rel="stylesheet" th:href="@{'/assets/css/' + ${styleHref}}">
     </th:block>
     <style>
         :root {
             --jf-primary: #00b14f;
             --jf-primary-dark: #019146;
-            --jf-primary-light: #e8f9f0;
-            --jf-secondary: #1f2a44;
-            --jf-bg: #f4f6fb;
-            --jf-text: #243047;
-            --jf-text-muted: #6c7a93;
-            --jf-border: #e4e9f2;
-            --jf-radius: 22px;
-            --jf-radius-sm: 14px;
-            --jf-shadow: 0 20px 60px rgba(19, 28, 67, 0.15);
-            --jf-transition: all 0.35s cubic-bezier(0.23, 1, 0.32, 1);
+            --jf-text: #1f2937;
+            --jf-border: rgba(15, 23, 42, 0.08);
         }
-        
+
         body {
             font-family: 'Be Vietnam Pro', sans-serif;
-            background: var(--jf-bg);
-            color: var(--jf-text);
         }
-        
-        /* Header Styles */
+
         .jf-header {
             position: sticky;
             top: 0;
             z-index: 1030;
-            transition: var(--jf-transition);
-            background: white;
-            box-shadow: 0 2px 12px rgba(15, 23, 42, 0.08);
+            background: #ffffff;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
         }
-        
-        .jf-header.scroll-down {
-            transform: translateY(-100%);
-        }
-        
-        .jf-topbar {
-            background: linear-gradient(135deg, var(--jf-secondary) 0%, #2d3a58 100%);
-            color: rgba(255, 255, 255, 0.85);
-            padding: 0.5rem 0;
-            font-size: 0.875rem;
-        }
-        
-        .jf-topbar a {
-            color: rgba(255, 255, 255, 0.85);
-            text-decoration: none;
-            transition: var(--jf-transition);
-        }
-        
-        .jf-topbar a:hover {
-            color: white;
-        }
-        
+
         .jf-navbar {
             padding: 1rem 0;
         }
-        
+
         .navbar-brand {
-            font-size: 1.5rem;
             font-weight: 700;
             color: var(--jf-primary) !important;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+            gap: 0.75rem;
         }
-        
+
+        .navbar-brand span {
+            font-size: 1.35rem;
+        }
+
         .nav-link {
             font-weight: 500;
             color: var(--jf-text) !important;
-            padding: 0.5rem 1rem !important;
-            transition: var(--jf-transition);
         }
-        
+
         .nav-link:hover {
             color: var(--jf-primary) !important;
         }
-        
+
         .dropdown-menu {
+            border-radius: 16px;
             border: 1px solid var(--jf-border);
-            border-radius: var(--jf-radius-sm);
-            box-shadow: 0 12px 32px rgba(19, 28, 67, 0.12);
-            padding: 0.5rem 0;
+            box-shadow: 0 20px 60px rgba(15, 23, 42, 0.12);
         }
-        
+
         .dropdown-item {
-            padding: 0.625rem 1.25rem;
-            transition: var(--jf-transition);
+            font-weight: 500;
         }
-        
-        .dropdown-item:hover {
-            background: var(--jf-primary-light);
-            color: var(--jf-primary);
-        }
-        
-        .jf-profile-dropdown {
-            min-width: 280px;
-        }
-        
-        .jf-profile-header {
-            padding: 1.25rem;
-            border-bottom: 1px solid var(--jf-border);
-            background: linear-gradient(135deg, var(--jf-primary-light) 0%, white 100%);
-        }
-        
-        .jf-profile-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 12px;
-            background: var(--jf-primary);
-            color: white;
-            display: flex;
+
+        .jf-nav-actions {
             align-items: center;
-            justify-content: center;
-            font-size: 1.25rem;
-            font-weight: 700;
         }
-        
-        .jf-profile-section {
-            padding: 0.5rem 0;
-            border-bottom: 1px solid var(--jf-border);
+
+        .jf-recruiter-cta {
+            line-height: 1.2;
         }
-        
-        .jf-profile-section:last-child {
-            border-bottom: none;
-        }
-        
-        .notification-badge {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background: #dc3545;
-            color: white;
-            border-radius: 10px;
-            padding: 2px 6px;
-            font-size: 0.7rem;
-            font-weight: 600;
-        }
-        
-        .btn-success {
-            background: var(--jf-primary);
-            border-color: var(--jf-primary);
-            font-weight: 600;
-        }
-        
-        .btn-success:hover {
-            background: var(--jf-primary-dark);
-            border-color: var(--jf-primary-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(0, 177, 79, 0.3);
-        }
-        
-        .btn-outline-success {
+
+        .jf-link-arrow {
             color: var(--jf-primary);
-            border-color: var(--jf-primary);
             font-weight: 600;
+            text-decoration: none;
         }
-        
-        .btn-outline-success:hover {
-            background: var(--jf-primary);
-            border-color: var(--jf-primary);
-            color: white;
+
+        .jf-link-arrow:hover {
+            color: var(--jf-primary-dark);
         }
-        
-        /* Footer Styles */
-        .jf-footer {
-            background: linear-gradient(135deg, #1f2a44 0%, #2d3a58 100%);
-            color: rgba(255, 255, 255, 0.85);
-            padding: 3rem 0 1.5rem;
-            margin-top: 5rem;
-        }
-        
-        .jf-footer-brand p {
-            color: rgba(255, 255, 255, 0.7);
-            line-height: 1.6;
-            margin-bottom: 1.5rem;
-        }
-        
-        .jf-footer-brand .social-link {
-            width: 40px;
-            height: 40px;
+
+        .btn-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            border: 1px solid var(--jf-border);
+            background: #fff;
+            color: var(--jf-text);
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            color: white;
-            transition: all 0.3s;
-            margin-right: 0.5rem;
-            text-decoration: none;
+            position: relative;
         }
-        
-        .jf-footer-brand .social-link:hover {
-            background: var(--jf-primary);
-            transform: translateY(-3px);
-        }
-        
-        .jf-footer h6 {
-            color: white;
-            font-weight: 700;
-            font-size: 1.1rem;
-            margin-bottom: 1.5rem;
-        }
-        
-        .jf-footer-links {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        
-        .jf-footer-links li {
-            margin-bottom: 0.75rem;
-        }
-        
-        .jf-footer-links a {
-            color: rgba(255, 255, 255, 0.7);
-            text-decoration: none;
-            transition: color 0.3s;
-            display: block;
-        }
-        
-        .jf-footer-links a:hover {
+
+        .btn-icon:hover {
+            border-color: var(--jf-primary);
             color: var(--jf-primary);
         }
-        
-        .jf-footer-bottom {
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            padding-top: 1.5rem;
-            margin-top: 2rem;
+
+        .btn-icon:disabled {
+            opacity: 0.5;
         }
-        
-        .jf-footer-bottom-copyright {
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 0.9rem;
+
+        .jf-avatar-image {
+            width: 38px;
+            height: 38px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 1px solid rgba(15, 23, 42, 0.08);
         }
-        
-        .jf-footer-bottom-links {
-            text-align: right;
+
+        .jf-avatar-initials {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: #f1f5f9;
+            color: #0f172a;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
-        
-        .jf-footer-bottom-links a {
-            color: rgba(255, 255, 255, 0.7);
-            margin-left: 1.5rem;
-            text-decoration: none;
-            font-size: 0.9rem;
+
+        .jf-avatar-caret {
+            font-size: 0.75rem;
+            color: #94a3b8;
         }
-        
-        .jf-footer-bottom-links a:hover {
+
+        .jf-profile-menu {
+            min-width: 280px;
+            border-radius: 18px;
+            border: 1px solid var(--jf-border);
+            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.15);
+        }
+
+        .jf-profile-section {
+            padding: 0.75rem 0;
+            border-top: 1px solid rgba(15, 23, 42, 0.08);
+        }
+
+        .jf-profile-section:first-of-type {
+            border-top: 0;
+        }
+
+        .jf-profile-section .dropdown-header {
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            color: #94a3b8;
+        }
+
+        .jf-profile-section .dropdown-item {
+            font-weight: 500;
+            color: var(--jf-text);
+        }
+
+        .jf-profile-section .dropdown-item i {
+            width: 18px;
+            text-align: center;
+        }
+
+        .jf-saved-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            font-size: 0.65rem;
+            font-weight: 600;
+        }
+
+        .jf-dropdown-label {
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: #94a3b8;
+        }
+
+        .jf-category-count {
+            font-size: 0.85rem;
             color: var(--jf-primary);
+            font-weight: 600;
         }
-        
-        @media (max-width: 768px) {
-            .jf-footer-bottom-links {
-                text-align: left;
-                margin-top: 1rem;
-            }
-            
-            .jf-footer-bottom-links a {
-                margin-left: 0;
-                margin-right: 1.5rem;
+
+        @media (max-width: 991px) {
+            .jf-recruiter-cta {
+                display: none;
             }
         }
     </style>
 </head>
 
 <header th:fragment="header" class="jf-header">
-    <!-- Topbar (only for non-authenticated users) -->
-    <div sec:authorize="!isAuthenticated()" class="jf-topbar d-none d-lg-block">
-        <div class="container">
-            <div class="d-flex justify-content-between align-items-center">
-                <div class="d-flex gap-4">
-                    <a href="tel:02471076480" class="text-decoration-none">
-                        <i class="fa-solid fa-phone me-2"></i>Hotline: 1900-123-456
-                    </a>
-                    <a href="mailto:contact@jobfind.vn" class="text-decoration-none">
-                        <i class="fa-solid fa-envelope me-2"></i>support@jobfind.vn
-                    </a>
-                </div>
-                <div>
-                    <span>Bạn là nhà tuyển dụng? <a th:href="@{/auth/register(role=employer)}" class="fw-semibold">Đăng tuyển ngay</a></span>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Main Navbar -->
     <nav class="navbar navbar-expand-lg navbar-light jf-navbar">
         <div class="container">
-            <a class="navbar-brand" th:href="@{/}">
-                <i class="fa-solid fa-briefcase"></i>
+            <a class="navbar-brand d-flex align-items-center" th:href="@{/}">
+                <img th:src="@{/assets/img/logo.png}" alt="JobFind" height="36" class="me-2">
                 <span>JobFind</span>
             </a>
-            
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#jfMainNav" aria-controls="jfMainNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            
-            <div class="collapse navbar-collapse" id="navbarMain">
-                <ul class="navbar-nav me-auto">
-                    <!-- Việc làm -->
+            <div class="collapse navbar-collapse" id="jfMainNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 jf-main-menu">
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Việc làm</a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="/jobs"><i class="fa-solid fa-magnifying-glass me-2"></i>Tìm việc làm</a></li>
-                            <li sec:authorize="isAuthenticated()"><a class="dropdown-item" href="/jobs/saved"><i class="fa-solid fa-heart me-2"></i>Việc làm đã lưu</a></li>
-                            <li sec:authorize="isAuthenticated()"><a class="dropdown-item" href="/applications"><i class="fa-solid fa-file-circle-check me-2"></i>Việc đã ứng tuyển</a></li>
+                        <a class="nav-link dropdown-toggle" href="#" id="jobsMenu" data-bs-toggle="dropdown" aria-expanded="false">Việc làm</a>
+                        <ul class="dropdown-menu" aria-labelledby="jobsMenu">
+                            <li><a class="dropdown-item" th:href="@{/jobs}">Tất cả việc làm</a></li>
+                            <li><a class="dropdown-item" th:href="@{/jobs(filter='hot')}">Việc làm hot</a></li>
+                            <li><a class="dropdown-item" th:href="@{/jobs(filter='remote')}">Việc làm remote</a></li>
+                            <li><a class="dropdown-item" th:href="@{/jobs(filter='intern')}">Việc làm thực tập</a></li>
+                            <li th:if="${navCategories != null and !#lists.isEmpty(navCategories)}"><hr class="dropdown-divider"></li>
+                            <li class="px-3 jf-dropdown-label" th:if="${navCategories != null and !#lists.isEmpty(navCategories)}">Ngành nổi bật</li>
+                            <li th:each="cat : ${navCategories}">
+                                <a class="dropdown-item d-flex justify-content-between align-items-center" th:href="@{/jobs(categoryId=${cat.id})}">
+                                    <span th:text="${cat.name}">Danh mục</span>
+                                    <span class="jf-category-count" th:text="${cat.jobCount} + ' việc'"></span>
+                                </a>
+                            </li>
                         </ul>
                     </li>
-                    
-                    <!-- Hồ sơ & CV (for candidates only) -->
-                    <li sec:authorize="hasRole('CANDIDATE')" class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Hồ sơ &amp; CV</a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="/candidate/profile"><i class="fa-regular fa-user me-2"></i>Hồ sơ của tôi</a></li>
-                            <li><a class="dropdown-item" href="/candidate/cv"><i class="fa-regular fa-file-lines me-2"></i>Quản lý CV</a></li>
-                            <li><a class="dropdown-item" href="/cv/templates"><i class="fa-solid fa-wand-magic-sparkles me-2"></i>Thư viện mẫu CV</a></li>
-                        </ul>
-                    </li>
-                    
-                    <!-- Phát triển sự nghiệp -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Phát triển sự nghiệp</a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="/blog"><i class="fa-solid fa-newspaper me-2"></i>Cẩm nang nghề nghiệp</a></li>
-                            <li><a class="dropdown-item" href="/tools/salary"><i class="fa-solid fa-calculator me-2"></i>Tính lương gộp - ròng</a></li>
-                            <li><a class="dropdown-item" href="/tips/interview"><i class="fa-solid fa-lightbulb me-2"></i>Bí quyết phỏng vấn</a></li>
+                        <a class="nav-link dropdown-toggle" href="#" id="cvMenu" data-bs-toggle="dropdown" aria-expanded="false">CV &amp; Hồ sơ</a>
+                        <ul class="dropdown-menu" aria-labelledby="cvMenu">
+                            <li><a class="dropdown-item" th:href="@{/candidate/profile}">Quản lý hồ sơ</a></li>
+                            <li><a class="dropdown-item" th:href="@{/candidate/cv}">CV của tôi</a></li>
+                            <li><a class="dropdown-item" href="#">Thư viện mẫu CV</a></li>
                         </ul>
                     </li>
-                    
-                    <!-- Top công ty -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="careerMenu" data-bs-toggle="dropdown" aria-expanded="false">Phát triển sự nghiệp</a>
+                        <ul class="dropdown-menu" aria-labelledby="careerMenu">
+                            <li><a class="dropdown-item" th:href="@{/blog}">Cẩm nang nghề nghiệp</a></li>
+                            <li><a class="dropdown-item" th:href="@{/tools/salary}">Tính lương gộp - ròng</a></li>
+                            <li><a class="dropdown-item" th:href="@{/tips/interview}">Bí quyết phỏng vấn</a></li>
+                        </ul>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link" th:href="@{/employers}">Top công ty</a>
                     </li>
-                    
-                    <!-- Admin link (only for admin) -->
-                    <li sec:authorize="hasRole('ADMIN')" class="nav-item">
-                        <a class="nav-link" th:href="@{/admin/dashboard}"><i class="fa-solid fa-shield-halved me-1"></i>Quản trị</a>
+                    <li class="nav-item" th:if="${headerUser != null and headerUser.isAdmin()}">
+                        <a class="nav-link" th:href="@{/admin/dashboard}">Quản trị</a>
                     </li>
                 </ul>
-                
-                <!-- Right Side Menu -->
-                <div class="d-flex align-items-center gap-2">
-                    <!-- For Non-Authenticated Users -->
-                    <div sec:authorize="!isAuthenticated()" class="d-flex gap-2">
-                        <a th:href="@{/auth/login}" class="btn btn-outline-success">Đăng nhập</a>
-                        <a th:href="@{/auth/register}" class="btn btn-success">Đăng ký ngay</a>
-                    </div>
-                    
-                    <!-- For Authenticated Users -->
-                    <div sec:authorize="isAuthenticated()" class="dropdown">
-                        <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" role="button" data-bs-toggle="dropdown">
-                            <div class="jf-profile-avatar" style="width: 36px; height: 36px; font-size: 0.875rem;">
-                                <span sec:authentication="name" th:text="${#strings.substring(#authentication.name, 0, 1).toUpperCase()}">U</span>
-                            </div>
-                            <span class="d-none d-md-inline fw-semibold" sec:authentication="name">User</span>
+                <div class="d-flex gap-2 gap-lg-3 jf-nav-actions">
+                    <div class="d-none d-lg-flex flex-column text-end me-2 jf-recruiter-cta">
+                        <span class="small text-muted">Bạn là nhà tuyển dụng?</span>
+                        <a class="jf-link-arrow"
+                           th:href="${headerUser != null and headerUser.isEmployer()} ? @{/employer/jobs/create} : @{/403}">
+                            Đăng tuyển ngay <i class="fa-solid fa-angles-right ms-1"></i>
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end jf-profile-dropdown">
-                            <li>
-                                <div class="jf-profile-header">
-                                    <div class="d-flex align-items-center gap-3">
-                                        <div class="jf-profile-avatar">
-                                            <span sec:authentication="name" th:text="${#strings.substring(#authentication.name, 0, 1).toUpperCase()}">U</span>
-                                        </div>
-                                        <div>
-                                            <h6 class="mb-0 fw-bold" sec:authentication="name">User</h6>
-                                            <small class="text-muted">Xin chào!</small>
+                    </div>
+                    <div class="d-flex align-items-center gap-2" th:if="${headerUser == null}">
+                        <a class="btn btn-link text-decoration-none" th:href="@{/auth/login}">Đăng nhập</a>
+                        <a class="btn btn-success" th:href="@{/auth/register}">Đăng ký ngay</a>
+                        <a class="btn btn-outline-success d-none d-lg-inline-flex" th:href="@{/employer/admin/jobs}">Dành cho NTD</a>
+                    </div>
+                    <div class="d-flex align-items-center gap-2" th:if="${headerUser != null}">
+                        <div class="dropdown">
+                            <button class="btn btn-icon position-relative" type="button" id="jfNotificationDropdown" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Thông báo">
+                                <i class="fa-solid fa-bell"></i>
+                                <span id="jfNotificationDot" class="jf-notification-dot" th:style="${headerUser.hasUnreadNotifications()} ? '' : 'display:none'"></span>
+                                <span id="jfNotificationCount" class="jf-notification-count" th:style="${headerUser.hasUnreadNotifications()} ? '' : 'display:none'" th:text="${headerUser.unreadNotifications > 99 ? '99+' : headerUser.unreadNotifications}">0</span>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-end shadow jf-profile-menu p-0 overflow-hidden" aria-labelledby="jfNotificationDropdown">
+                                <div class="px-3 py-2 border-bottom d-flex justify-content-between align-items-center">
+                                    <span class="fw-semibold">Thông báo</span>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <a id="jfNotificationMarkRead" class="small text-decoration-none" href="#" th:classappend="${headerUser.hasUnreadNotifications()} ? '' : ' d-none'">Đánh dấu đã đọc</a>
+                                        <span id="jfNotificationBadge" class="badge bg-light text-dark" th:text="${headerUser.unreadNotifications > 99 ? '99+' : headerUser.unreadNotifications}">0</span>
+                                    </div>
+                                </div>
+                                <div id="jfNotificationList" class="jf-notification-list" th:classappend="${#lists.isEmpty(headerNotifications)} ? ' d-none'">
+                                    <div class="px-3 py-3 border-bottom jf-notification-item" th:each="notice : ${headerNotifications}"
+                                         th:classappend="${!notice.read()} ? ' unread' : ''">
+                                        <div class="d-flex align-items-start gap-3">
+                                            <div class="text-primary mt-1">
+                                                <i th:class="${notice.icon()} ?: 'fa-solid fa-bell'"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <div class="jf-notification-title" th:text="${notice.title()}">Thông báo</div>
+                                                <div class="text-muted small" th:text="${notice.message()}">Nội dung</div>
+                                                <div class="jf-notification-time" th:text="${notice.relativeTime()}" th:attr="title=${notice.exactTime()}">Vừa xong</div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </li>
-                            <li><hr class="dropdown-divider m-0"></li>
-                            
-                            <!-- Dashboard link based on role -->
-                            <li class="jf-profile-section">
-                                <a sec:authorize="hasRole('CANDIDATE')" class="dropdown-item" href="/candidate/dashboard">
-                                    <i class="fa-solid fa-gauge-high me-2"></i>Dashboard
-                                </a>
-                                <a sec:authorize="hasRole('EMPLOYER')" class="dropdown-item" href="/employer/admin/dashboard">
-                                    <i class="fa-solid fa-gauge-high me-2"></i>Bảng điều khiển
-                                </a>
-                                <a sec:authorize="hasRole('ADMIN')" class="dropdown-item" th:href="@{/admin/dashboard}">
-                                    <i class="fa-solid fa-gauge-high me-2"></i>Admin Dashboard
-                                </a>
-                            </li>
-                            
-                            <!-- Profile links based on role -->
-                            <li class="jf-profile-section">
-                                <a sec:authorize="hasRole('CANDIDATE')" class="dropdown-item" href="/candidate/profile">
-                                    <i class="fa-regular fa-user me-2"></i>Hồ sơ của tôi
-                                </a>
-                                <a sec:authorize="hasRole('EMPLOYER')" class="dropdown-item" href="/employer/profile">
-                                    <i class="fa-regular fa-building me-2"></i>Hồ sơ doanh nghiệp
-                                </a>
-                            </li>
-                            
-                            <!-- Candidate specific -->
-                            <li sec:authorize="hasRole('CANDIDATE')" class="jf-profile-section">
-                                <a class="dropdown-item" href="/candidate/cv">
-                                    <i class="fa-regular fa-file-lines me-2"></i>CV của tôi
-                                </a>
-                                <a class="dropdown-item" href="/jobs/applied">
-                                    <i class="fa-solid fa-file-circle-check me-2"></i>Việc đã ứng tuyển
-                                </a>
-                                <a class="dropdown-item" href="/jobs/saved">
-                                    <i class="fa-solid fa-heart me-2"></i>Việc làm đã lưu
-                                </a>
-                            </li>
-                            
-                            <!-- Employer specific -->
-                            <li sec:authorize="hasRole('EMPLOYER')" class="jf-profile-section">
-                                <a class="dropdown-item" href="/employer/admin/jobs">
-                                    <i class="fa-solid fa-briefcase me-2"></i>Tin tuyển dụng
-                                </a>
-                                <a class="dropdown-item" href="/employer/admin/applications">
-                                    <i class="fa-regular fa-id-card me-2"></i>Hồ sơ ứng viên
-                                </a>
-                            </li>
-                            
-                            <li><hr class="dropdown-divider m-0"></li>
-                            
-                            <!-- Settings -->
-                            <li class="jf-profile-section">
-                                <a class="dropdown-item" href="/dashboard">
-                                    <i class="fa-solid fa-gear me-2"></i>Cài đặt tài khoản
-                                </a>
-                            </li>
-                            
-                            <!-- Logout -->
-                            <li class="jf-profile-section">
-                                <form th:action="@{/auth/logout}" method="post" class="d-inline w-100">
-                                    <button type="submit" class="dropdown-item text-danger w-100 text-start">
-                                        <i class="fa-solid fa-arrow-right-from-bracket me-2"></i>Đăng xuất
-                                    </button>
-                                </form>
-                            </li>
-                        </ul>
+                                <div id="jfNotificationEmpty" class="px-3 py-4 text-muted small" th:classappend="${!#lists.isEmpty(headerNotifications)} ? ' d-none'">
+                                    Hiện chưa có thông báo nào.
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn btn-icon" type="button" title="Tin nhắn (sắp ra mắt)">
+                            <i class="fa-solid fa-envelope"></i>
+                        </button>
+                        <a class="btn btn-icon position-relative" th:href="${headerUser.isCandidate()} ? @{/jobs/saved} : @{/dashboard}" aria-label="Việc làm yêu thích">
+                            <i th:class="${headerUser.isCandidate()} ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"></i>
+                            <span class="badge bg-danger rounded-pill jf-saved-badge" th:if="${headerUser.savedJobsCount > 0}" th:text="${headerUser.savedJobsCount > 99 ? '99+' : headerUser.savedJobsCount}">1</span>
+                        </a>
+                        <div class="dropdown">
+                            <button class="btn btn-icon jf-avatar-trigger p-0 d-flex align-items-center" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Tài khoản của bạn">
+                                <img th:if="${headerUser.avatarUrl != null}" class="jf-avatar-image" th:src="${headerUser.avatarUrl}" alt="Avatar">
+                                <span th:unless="${headerUser.avatarUrl != null}" class="jf-avatar-initials" th:text="${headerUser.initials()}">U</span>
+                                <i class="fa-solid fa-chevron-down jf-avatar-caret ms-2"></i>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-end jf-profile-menu p-0 overflow-hidden">
+                                <div class="px-3 py-3 border-bottom">
+                                    <div class="text-muted small">Đăng nhập bằng</div>
+                                    <div class="fw-semibold" th:text="${headerUser.displayName}">Người dùng</div>
+                                    <div class="text-muted small" th:text="${headerUser.email}">email@example.com</div>
+                                </div>
+                                <div class="jf-profile-section">
+                                    <h6 class="dropdown-header">Quản lý tài khoản</h6>
+                                    <a class="dropdown-item" th:href="${headerUser.dashboardUrl}"><i class="fa-solid fa-gauge-high me-2"></i>Bảng điều khiển</a>
+                                    <a class="dropdown-item" th:if="${headerUser.isAdmin()}" th:href="@{/admin/dashboard}"><i class="fa-solid fa-shield-halved me-2"></i>Quản trị hệ thống</a>
+                                </div>
+                                <div class="jf-profile-section" th:if="${headerUser.isCandidate()}">
+                                    <h6 class="dropdown-header">Quản lý tìm việc</h6>
+                                    <a class="dropdown-item" th:href="@{/jobs/saved}"><i class="fa-regular fa-bookmark me-2"></i>Việc làm đã lưu</a>
+                                    <a class="dropdown-item" th:href="@{/applications}"><i class="fa-regular fa-paper-plane me-2"></i>Việc làm đã ứng tuyển</a>
+                                    <a class="dropdown-item" th:href="@{/jobs(filter='match')}"><i class="fa-solid fa-wand-magic-sparkles me-2"></i>Việc làm phù hợp</a>
+                                </div>
+                                <div class="jf-profile-section" th:if="${headerUser.isCandidate()}">
+                                    <h6 class="dropdown-header">CV &amp; Hồ sơ</h6>
+                                    <a class="dropdown-item" th:href="@{/candidate/cv}"><i class="fa-regular fa-file-lines me-2"></i>CV của tôi</a>
+                                    <a class="dropdown-item" th:href="@{/candidate/profile}"><i class="fa-regular fa-id-card me-2"></i>Hồ sơ cá nhân</a>
+                                </div>
+                                <div class="jf-profile-section" th:if="${headerUser.isEmployer()}">
+                                    <h6 class="dropdown-header">Dành cho NTD</h6>
+                                    <a class="dropdown-item" th:href="@{/employer/admin/jobs}"><i class="fa-solid fa-briefcase me-2"></i>Tin tuyển dụng</a>
+                                    <a class="dropdown-item" th:href="@{/employer/admin/applications}"><i class="fa-regular fa-address-card me-2"></i>Hồ sơ ứng viên</a>
+                                    <a class="dropdown-item" th:href="@{/employer/profile}"><i class="fa-solid fa-building me-2"></i>Hồ sơ doanh nghiệp</a>
+                                </div>
+                                <div class="jf-profile-section">
+                                    <a class="dropdown-item" th:href="@{/dashboard}"><i class="fa-solid fa-gear me-2"></i>Cài đặt tài khoản</a>
+                                    <form th:action="@{/auth/logout}" method="post" class="mt-2">
+                                        <button type="submit" class="dropdown-item text-danger"><i class="fa-solid fa-arrow-right-from-bracket me-2"></i>Đăng xuất</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -457,3 +351,118 @@
     </nav>
 </header>
 </html>
+<script th:if="${headerUser != null}" th:inline="javascript">
+    (function() {
+        const badge = document.getElementById('jfNotificationBadge');
+        const dot = document.getElementById('jfNotificationDot');
+        const bellCount = document.getElementById('jfNotificationCount');
+        const list = document.getElementById('jfNotificationList');
+        const emptyState = document.getElementById('jfNotificationEmpty');
+        const markRead = document.getElementById('jfNotificationMarkRead');
+        const csrfToken = (document.querySelector('meta[name="_csrf"]') || {}).content;
+        const csrfHeader = (document.querySelector('meta[name="_csrf_header"]') || {}).content;
+        if (!badge || !list || !emptyState) {
+            return;
+        }
+
+        function renderItems(items) {
+            if (!items || items.length === 0) {
+                list.innerHTML = '';
+                list.classList.add('d-none');
+                emptyState.classList.remove('d-none');
+                return;
+            }
+            list.classList.remove('d-none');
+            emptyState.classList.add('d-none');
+            const html = items.map(function(n) {
+                const unreadClass = n.read ? '' : ' unread';
+                const iconClass = n.icon ? n.icon : 'fa-solid fa-bell';
+                return [
+                    '<div class="px-3 py-3 border-bottom jf-notification-item', unreadClass, '">',
+                        '<div class="d-flex align-items-start gap-3">',
+                            '<div class="text-primary mt-1"><i class="', iconClass, '"></i></div>',
+                            '<div class="flex-grow-1">',
+                                '<div class="fw-semibold">', escapeHtml(n.title || 'Thông báo'), '</div>',
+                                '<div class="text-muted small">', escapeHtml(n.message || ''), '</div>',
+                                '<div class="text-muted tiny" title="', escapeHtml(n.exactTime || ''), '">', escapeHtml(n.relativeTime || ''), '</div>',
+                            '</div>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+            }).join('');
+            list.innerHTML = html;
+        }
+
+        function escapeHtml(str) {
+            return String(str || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function updateBadge(unread) {
+            const val = unread > 99 ? '99+' : unread;
+            badge.textContent = val;
+            if (dot) {
+                dot.style.display = unread > 0 ? 'inline-block' : 'none';
+            }
+            if (bellCount) {
+                bellCount.style.display = unread > 0 ? 'inline-block' : 'none';
+                bellCount.textContent = val;
+            }
+            if (markRead) {
+                markRead.classList.toggle('d-none', unread === 0);
+            }
+        }
+
+        function markAllRead(evt) {
+            if (evt) evt.preventDefault();
+            if (!csrfToken || !csrfHeader) {
+                updateBadge(0);
+                markItemsRead();
+                return;
+            }
+            fetch('/api/notifications/mark-read', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    [csrfHeader]: csrfToken
+                },
+                credentials: 'same-origin'
+            }).then(function(res) {
+                if (!res.ok) return;
+                updateBadge(0);
+                markItemsRead();
+            }).catch(function() {});
+        }
+
+        function markItemsRead() {
+            list.querySelectorAll('.jf-notification-item.unread').forEach(function(item) {
+                item.classList.remove('unread');
+            });
+        }
+
+        function poll() {
+            fetch('/api/notifications/poll', {
+                headers: { 'Accept': 'application/json' },
+                credentials: 'same-origin'
+            })
+                .then(function(res) { return res.ok ? res.json() : null; })
+                .then(function(data) {
+                    if (!data) return;
+                    updateBadge(data.unread || 0);
+                    renderItems(data.items || []);
+                })
+                .catch(function() {});
+        }
+
+        poll();
+        setInterval(poll, 30000);
+
+        if (markRead) {
+            markRead.addEventListener('click', markAllRead);
+        }
+    })();
+</script>

@@ -6,6 +6,7 @@ import com.example.JobFinder.repository.CandidateRepository;
 import com.example.JobFinder.repository.UserRepository;
 import com.example.JobFinder.service.CandidateAdminService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -17,6 +18,7 @@ import java.util.Map;
 @Controller
 @RequestMapping("/admin/candidates")
 @RequiredArgsConstructor
+@PreAuthorize("hasAuthority('manage_users')")
 public class CandidateAdminController {
 
     private final CandidateAdminService candidateAdminService;

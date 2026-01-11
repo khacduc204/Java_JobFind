@@ -139,11 +139,38 @@
             <div class="col-lg-6">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Trạng thái xử lý hồ sơ</h5>
-                        <div class="chart-container mb-4" style="min-height: 260px;">
-                            <canvas id="pipelineStatusChart" height="260" aria-label="Biểu đồ trạng thái xử lý hồ sơ"></canvas>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">Trạng thái xử lý hồ sơ</h5>
+                            <span class="text-muted small">Theo thời gian thực</span>
                         </div>
-                        <div class="alert alert-light border mb-0 small">Biểu đồ sẽ hiển thị khi có dữ liệu ứng tuyển trong hệ thống.</div>
+                        <div class="row g-3 align-items-center mt-2">
+                            <div class="col-md-7">
+                                <div th:if="${hasPipelineData}" class="chart-container mb-2" style="min-height: 260px;">
+                                    <canvas id="pipelineStatusChart" height="260" aria-label="Biểu đồ trạng thái xử lý hồ sơ"></canvas>
+                                </div>
+                                <div th:unless="${hasPipelineData}" class="alert alert-light border mb-0 small">
+                                    Biểu đồ sẽ hiển thị khi có dữ liệu ứng tuyển đầu tiên.
+                                </div>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="list-group list-group-flush" th:if="${pipelineStatuses}">
+                                    <div class="list-group-item px-0 py-2" th:each="status : ${pipelineStatuses}">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <span class="rounded-circle" style="display:inline-block;width:12px;height:12px;" th:styleappend="'background-color:' + ${status.color}"></span>
+                                                <div>
+                                                    <div class="fw-semibold" th:text="${status.label}">Đã ứng tuyển</div>
+                                                    <div class="text-muted small">Tỉ trọng <span th:text="${#numbers.formatDecimal(status.percentage, 1, 1)} + '%'">0%</span></div>
+                                                </div>
+                                            </div>
+                                            <div class="text-end">
+                                                <div class="fw-bold" th:text="${status.count}">0</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -155,10 +182,39 @@
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">Hoạt động theo tháng <span class="text-muted">6 tháng gần đây</span></h5>
-                        <div class="chart-container mb-4" style="min-height: 320px;">
+                        <div th:if="${hasActivityData}" class="chart-container mb-4" style="min-height: 320px;">
                             <canvas id="activityTimelineChart" height="320" aria-label="Biểu đồ hoạt động theo tháng"></canvas>
                         </div>
-                        <p class="small text-muted mb-0">Sử dụng bảng số liệu để đánh giá hiệu quả chiến dịch tuyển dụng và xác định tháng có biến động bất thường.</p>
+                        <div th:unless="${hasActivityData}" class="alert alert-light border mb-4 small">
+                            Chưa có hoạt động đủ dữ liệu để vẽ biểu đồ. Khi có tin đăng hoặc hồ sơ mới, biểu đồ sẽ cập nhật ngay.
+                        </div>
+                        <div class="table-responsive border-top pt-3">
+                            <table class="table align-middle mb-0">
+                                <thead>
+                                <tr>
+                                    <th>Tháng</th>
+                                    <th class="text-center">Tin đăng</th>
+                                    <th class="text-center">Hồ sơ</th>
+                                    <th class="text-center">Phỏng vấn</th>
+                                    <th class="text-center">Tuyển dụng</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="month : ${monthlyActivity}">
+                                    <td>
+                                        <div class="fw-semibold" th:text="${month.label}">10/2025</div>
+                                    </td>
+                                    <td class="text-center fw-semibold" th:text="${month.jobs}">0</td>
+                                    <td class="text-center" th:text="${month.applications}">0</td>
+                                    <td class="text-center" th:text="${month.interviews}">0</td>
+                                    <td class="text-center">
+                                        <span class="badge bg-success bg-opacity-10 text-success" th:text="${month.hires}">0</span>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="small text-muted mb-0 mt-3">Sử dụng bảng số liệu để đánh giá hiệu quả chiến dịch tuyển dụng và xác định tháng có biến động bất thường.</p>
                     </div>
                 </div>
             </div>
@@ -168,8 +224,37 @@
                 <div class="card h-100">
                     <div class="card-body">
                         <h5 class="card-title">Doanh nghiệp nổi bật</h5>
-                        <div class="alert alert-light border mb-0">Chưa có dữ liệu doanh nghiệp đủ lớn để thống kê.</div>
-                        <p class="text-muted small mt-3 mb-0">Quản trị viên có thể ưu tiên hỗ trợ các doanh nghiệp có lượng hồ sơ cao hoặc tỉ lệ tuyển dụng thấp để tối ưu hiệu quả.</p>
+                        <th:block th:if="${hasFeaturedEmployers}">
+                            <div class="table-responsive mb-3">
+                                <table class="table align-middle mb-0">
+                                    <thead>
+                                    <tr>
+                                        <th>Doanh nghiệp</th>
+                                        <th class="text-center">Tin đăng</th>
+                                        <th class="text-center">Hồ sơ</th>
+                                        <th class="text-center">Tuyển dụng</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="company : ${featuredEmployers}">
+                                        <td>
+                                            <div class="fw-semibold" th:text="${company.companyName}">Công ty A</div>
+                                            <div class="text-muted small" th:text="${company.employerId != null ? 'ID #' + company.employerId : 'ID N/A'}">ID #1</div>
+                                        </td>
+                                        <td class="text-center" th:text="${company.jobCount}">0</td>
+                                        <td class="text-center" th:text="${company.applicationCount}">0</td>
+                                        <td class="text-center">
+                                            <span class="badge bg-success text-white" th:text="${company.hiredCount}">0</span>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </th:block>
+                        <div class="alert alert-light border mb-3" th:if="${!hasFeaturedEmployers}">
+                            Chưa có dữ liệu doanh nghiệp đủ lớn để thống kê.
+                        </div>
+                        <p class="text-muted small mb-0">Quản trị viên có thể ưu tiên hỗ trợ các doanh nghiệp có lượng hồ sơ cao hoặc tỉ lệ tuyển dụng thấp để tối ưu hiệu quả.</p>
                     </div>
                 </div>
             </div>
@@ -181,8 +266,115 @@
     <script th:inline="javascript">
     /*<![CDATA[*/
     document.addEventListener('DOMContentLoaded', function () {
-        // Chart.js initialization code will go here
-        console.log('Dashboard charts ready');
+        const pipelineChartData = /*[[${pipelineChartData}]]*/ [];
+        const activityChartData = /*[[${activityChartData}]]*/ [];
+
+        const pipelineCtx = document.getElementById('pipelineStatusChart');
+        if (pipelineCtx && pipelineChartData && pipelineChartData.some(item => item.count > 0) && window.Chart) {
+            new Chart(pipelineCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: pipelineChartData.map(item => item.label),
+                    datasets: [{
+                        data: pipelineChartData.map(item => item.count),
+                        backgroundColor: pipelineChartData.map(item => item.color),
+                        borderWidth: 0,
+                        hoverOffset: 6
+                    }]
+                },
+                options: {
+                    cutout: '68%',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => {
+                                    const label = context.label || '';
+                                    const value = context.parsed;
+                                    return `${label}: ${value} hồ sơ`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        const timelineCtx = document.getElementById('activityTimelineChart');
+        if (timelineCtx && activityChartData && activityChartData.some(item => (item.jobs + item.applications + item.interviews + item.hires) > 0) && window.Chart) {
+            const labels = activityChartData.map(item => item.label);
+            const jobsSeries = activityChartData.map(item => item.jobs);
+            const applicationsSeries = activityChartData.map(item => item.applications);
+            const interviewsSeries = activityChartData.map(item => item.interviews);
+            const hiresSeries = activityChartData.map(item => item.hires);
+
+            new Chart(timelineCtx, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [
+                        {
+                            label: 'Tin đăng',
+                            data: jobsSeries,
+                            borderColor: '#6366F1',
+                            backgroundColor: 'rgba(99,102,241,0.12)',
+                            tension: 0.35,
+                            borderWidth: 3,
+                            fill: true,
+                            pointRadius: 3
+                        },
+                        {
+                            label: 'Hồ sơ',
+                            data: applicationsSeries,
+                            borderColor: '#F59E0B',
+                            backgroundColor: '#F59E0B',
+                            tension: 0.35,
+                            borderWidth: 2,
+                            fill: false,
+                            pointRadius: 3
+                        },
+                        {
+                            label: 'Phỏng vấn',
+                            data: interviewsSeries,
+                            borderColor: '#0EA5E9',
+                            backgroundColor: '#0EA5E9',
+                            tension: 0.35,
+                            borderWidth: 2,
+                            fill: false,
+                            pointRadius: 3
+                        },
+                        {
+                            label: 'Tuyển dụng',
+                            data: hiresSeries,
+                            borderColor: '#22C55E',
+                            backgroundColor: '#22C55E',
+                            tension: 0.35,
+                            borderWidth: 2,
+                            fill: false,
+                            pointRadius: 3
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { display: true },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => `${context.dataset.label}: ${context.parsed.y}`
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 1 }
+                        }
+                    }
+                }
+            });
+        }
     });
     /*]]>*/
     </script>

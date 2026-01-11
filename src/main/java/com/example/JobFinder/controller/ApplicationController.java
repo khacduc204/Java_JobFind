@@ -8,8 +8,11 @@ import com.example.JobFinder.repository.ApplicationRepository;
 import com.example.JobFinder.repository.CandidateRepository;
 import com.example.JobFinder.repository.JobRepository;
 import com.example.JobFinder.repository.UserRepository;
+import com.example.JobFinder.service.NotificationService;
+import com.example.JobFinder.service.EmailService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -29,12 +32,16 @@ import java.util.stream.Collectors;
 @Controller
 @RequestMapping("/applications")
 @RequiredArgsConstructor
+@PreAuthorize("hasAuthority('apply_jobs')")
 public class ApplicationController {
 
     private final ApplicationRepository applicationRepository;
     private final CandidateRepository candidateRepository;
     private final JobRepository jobRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
+    private final EmailService emailService;
+    private static final List<String> STATUS_STAGES = List.of("applied", "viewed", "shortlisted", "hired");
 
     /**
      * Get candidate from authenticated user
@@ -109,6 +116,14 @@ public class ApplicationController {
 
         long total = filteredApplications.size();
         int totalPages = (int) Math.ceil((double) total / pageSize);
+        totalPages = Math.max(totalPages, 1);
+        if (page < 1) {
+            page = 1;
+        }
+        if (page > totalPages) {
+            page = totalPages;
+        }
+
         int fromIndex = (page - 1) * pageSize;
         int toIndex = Math.min(fromIndex + pageSize, filteredApplications.size());
         
@@ -120,8 +135,10 @@ public class ApplicationController {
                 Map<String, Object> appMap = new HashMap<>();
                 appMap.put("id", app.getId());
                 appMap.put("status", app.getStatus());
+                appMap.put("statusLabel", getStatusLabel(app.getStatus()));
                 appMap.put("appliedAt", app.getAppliedAt());
                 appMap.put("coverLetter", app.getCoverLetter());
+                appMap.put("statusIndex", getStatusIndex(app.getStatus()));
 
                 if (app.getJob() != null) {
                     appMap.put("jobTitle", app.getJob().getTitle());
@@ -148,6 +165,10 @@ public class ApplicationController {
         statusCounts.put("rejected", allApplications.stream().filter(a -> "rejected".equals(a.getStatus())).count());
         statusCounts.put("hired", allApplications.stream().filter(a -> "hired".equals(a.getStatus())).count());
 
+        if (candidate.getUser() != null) {
+            notificationService.markAllAsRead(candidate.getUser().getId());
+        }
+
         model.addAttribute("applications", applicationList);
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", totalPages);
@@ -156,6 +177,16 @@ public class ApplicationController {
         model.addAttribute("filterStatus", status);
         model.addAttribute("filterKeyword", keyword);
         model.addAttribute("pageTitle", "Ứng tuyển của tôi - JobFind");
+        model.addAttribute("pageStyles", List.of("applications.css"));
+        model.addAttribute("statusStages", STATUS_STAGES);
+        model.addAttribute("statusFilters", List.of(
+            buildStatusFilter("", "Tất cả", total),
+            buildStatusFilter("applied", "Đã ứng tuyển", statusCounts.getOrDefault("applied", 0L)),
+            buildStatusFilter("viewed", "Đã xem", statusCounts.getOrDefault("viewed", 0L)),
+            buildStatusFilter("shortlisted", "Được shortlist", statusCounts.getOrDefault("shortlisted", 0L)),
+            buildStatusFilter("hired", "Đã tuyển", statusCounts.getOrDefault("hired", 0L)),
+            buildStatusFilter("rejected", "Từ chối", statusCounts.getOrDefault("rejected", 0L))
+        ));
 
         return "frontend/applications/list";
     }
@@ -195,6 +226,8 @@ public class ApplicationController {
         Map<String, Object> appData = new HashMap<>();
         appData.put("id", application.getId());
         appData.put("status", application.getStatus());
+        appData.put("statusLabel", getStatusLabel(application.getStatus()));
+        appData.put("statusIndex", getStatusIndex(application.getStatus()));
         appData.put("appliedAt", application.getAppliedAt());
         appData.put("coverLetter", application.getCoverLetter());
         appData.put("resumeSnapshot", application.getResumeSnapshot());
@@ -216,6 +249,8 @@ public class ApplicationController {
 
         model.addAttribute("application", appData);
         model.addAttribute("pageTitle", "Chi tiết ứng tuyển - JobFind");
+        model.addAttribute("pageStyles", List.of("applications.css"));
+        model.addAttribute("statusStages", STATUS_STAGES);
 
         return "frontend/applications/detail";
     }
@@ -286,6 +321,8 @@ public class ApplicationController {
             application.setStatus("applied");
 
             applicationRepository.save(application);
+
+            emailService.sendNewApplicationToEmployer(application);
 
             Map<String, String> flash = new HashMap<>();
             flash.put("type", "success");
@@ -399,5 +436,40 @@ public class ApplicationController {
         return contentType.equals("application/pdf") ||
                contentType.equals("application/msword") ||
                contentType.equals("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+    }
+
+    private Map<String, Object> buildStatusFilter(String value, String label, long count) {
+        Map<String, Object> filter = new HashMap<>();
+        filter.put("value", value);
+        filter.put("label", label);
+        filter.put("count", count);
+        return filter;
+    }
+
+    private int getStatusIndex(String status) {
+        if (status == null) {
+            return -1;
+        }
+        return switch (status) {
+            case "applied" -> 0;
+            case "viewed" -> 1;
+            case "shortlisted" -> 2;
+            case "hired" -> 3;
+            default -> -1;
+        };
+    }
+
+    private String getStatusLabel(String status) {
+        if (status == null) {
+            return "Chưa cập nhật";
+        }
+        return switch (status) {
+            case "applied" -> "Đã ứng tuyển";
+            case "viewed" -> "Nhà tuyển dụng đã xem";
+            case "shortlisted" -> "Được shortlist";
+            case "rejected" -> "Từ chối";
+            case "hired" -> "Đã tuyển dụng";
+            default -> status;
+        };
     }
 }

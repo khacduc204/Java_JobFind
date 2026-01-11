@@ -5,6 +5,7 @@ import com.example.JobFinder.model.User;
 import com.example.JobFinder.repository.RoleRepository;
 import com.example.JobFinder.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -24,6 +25,7 @@ import java.util.UUID;
 @RequestMapping("/admin/users")
 @Slf4j
 @SuppressWarnings("null")
+@PreAuthorize("hasAuthority('manage_users')")
 public class UserAdminController {
 
     private final UserRepository userRepository;

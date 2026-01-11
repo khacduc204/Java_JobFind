@@ -28,6 +28,20 @@
                         </a>
                     </div>
                 </div>
+                <div class="d-flex flex-wrap gap-2 mt-4" th:if="${globalStats != null}">
+                    <div class="jf-footer-metric">
+                        <span class="value" th:text="|${#numbers.formatInteger(globalStats['jobs'], 0, 'POINT')}+|">0+</span>
+                        <small>Việc đang tuyển</small>
+                    </div>
+                    <div class="jf-footer-metric">
+                        <span class="value" th:text="|${#numbers.formatInteger(globalStats['candidates'], 0, 'POINT')}+|">0+</span>
+                        <small>Ứng viên tin dùng</small>
+                    </div>
+                    <div class="jf-footer-metric">
+                        <span class="value" th:text="|${#numbers.formatInteger(globalStats['employers'], 0, 'POINT')}+|">0+</span>
+                        <small>Nhà tuyển dụng</small>
+                    </div>
+                </div>
             </div>
             
             <!-- About Us -->
@@ -44,27 +58,38 @@
             
             <!-- For Candidates -->
             <div class="col-lg-3 col-md-6 col-6">
-                <h6 class="text-white mb-3 fw-bold">Dành cho ứng viên</h6>
+                <h6 class="text-white mb-3 fw-bold">Ngành đang tuyển</h6>
                 <ul class="list-unstyled jf-footer-links">
-                    <li><a href="/jobs">Tìm việc làm</a></li>
-                    <li><a href="/cv/builder">Tạo CV online</a></li>
-                    <li><a href="/cv/templates">Mẫu CV đẹp</a></li>
-                    <li><a href="/blog">Cẩm nang nghề nghiệp</a></li>
-                    <li><a href="/tools/salary">Tính lương NET</a></li>
-                    <li><a href="/tips/interview">Bí quyết phỏng vấn</a></li>
+                    <li th:if="${#lists.isEmpty(navCategories)}" class="text-muted">Đang cập nhật dữ liệu...</li>
+                    <li th:each="cat : ${navCategories}">
+                        <a th:href="@{/jobs(categoryId=${cat.id})}" class="d-flex justify-content-between align-items-center">
+                            <span th:text="${cat.name}">Ngành nghề</span>
+                            <span class="badge bg-light text-dark" th:text="|${cat.jobCount} việc|">0 việc</span>
+                        </a>
+                    </li>
                 </ul>
             </div>
             
-            <!-- For Employers -->
+            <!-- Contact -->
             <div class="col-lg-3 col-md-6">
-                <h6 class="text-white mb-3 fw-bold">Dành cho nhà tuyển dụng</h6>
+                <h6 class="text-white mb-3 fw-bold">Liên hệ</h6>
                 <ul class="list-unstyled jf-footer-links">
-                    <li><a th:href="@{/auth/register(role=employer)}">Đăng tuyển ngay</a></li>
-                    <li><a th:href="@{/employers}">Tìm ứng viên</a></li>
-                    <li><a href="/employer/solutions">Giải pháp HR</a></li>
-                    <li><a href="/employer/pricing">Bảng giá dịch vụ</a></li>
-                    <li><a href="/employer/guide">Hướng dẫn đăng tin</a></li>
-                    <li><a href="/employer/contact">Liên hệ hợp tác</a></li>
+                    <li class="d-flex align-items-start mb-2">
+                        <i class="fa-solid fa-location-dot me-2 mt-1"></i>
+                        <span>Tầng 5, Tòa nhà Sunrise, Số 1 Nguyễn Huy Tưởng, Thanh Xuân, Hà Nội</span>
+                    </li>
+                    <li class="d-flex align-items-center mb-2">
+                        <i class="fa-solid fa-phone me-2"></i>
+                        <a href="tel:02471076480" class="text-decoration-none">(024) 7107 6480</a>
+                    </li>
+                    <li class="d-flex align-items-center mb-2">
+                        <i class="fa-solid fa-envelope me-2"></i>
+                        <a href="mailto:contact@jobfind.vn" class="text-decoration-none">contact@jobfind.vn</a>
+                    </li>
+                    <li class="d-flex align-items-center">
+                        <i class="fa-solid fa-clock me-2"></i>
+                        <span>Thứ 2 - Thứ 6: 8h30 - 18h00</span>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -123,48 +148,5 @@
         }
     </script>
 </th:block>
-
-</html>
-            </div>
-            
-            <div class="col-lg-4 col-md-6">
-                <h6 class="text-white mb-3 fw-bold">Liên hệ</h6>
-                <ul class="list-unstyled jf-footer-links">
-                    <li class="d-flex align-items-start mb-2">
-                        <i class="fa-solid fa-location-dot me-2 mt-1"></i>
-                        <span>Tầng 5, Tòa nhà Sunrise, Số 1 Nguyễn Huy Tưởng, Thanh Xuân, Hà Nội</span>
-                    </li>
-                    <li class="d-flex align-items-center mb-2">
-                        <i class="fa-solid fa-phone me-2"></i>
-                        <a href="tel:02471076480" class="text-decoration-none">(024) 7107 6480</a>
-                    </li>
-                    <li class="d-flex align-items-center mb-2">
-                        <i class="fa-solid fa-envelope me-2"></i>
-                        <a href="mailto:contact@jobfind.vn" class="text-decoration-none">contact@jobfind.vn</a>
-                    </li>
-                    <li class="d-flex align-items-center">
-                        <i class="fa-solid fa-clock me-2"></i>
-                        <span>Thứ 2 - Thứ 6: 8h30 - 18h00</span>
-                    </li>
-                </ul>
-            </div>
-        </div>
-        
-        <hr class="jf-footer-divider">
-        
-        <div class="row jf-footer-bottom">
-            <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
-                <p class="mb-0 small">&copy; 2025 JobFind Vietnam JSC. All Rights Reserved.</p>
-            </div>
-            <div class="col-md-6 text-center text-md-end">
-                <div class="jf-footer-bottom-links">
-                    <a href="#" class="text-decoration-none small me-3">Điều khoản sử dụng</a>
-                    <a href="#" class="text-decoration-none small me-3">Chính sách bảo mật</a>
-                    <a href="#" class="text-decoration-none small">Giải quyết khiếu nại</a>
-                </div>
-            </div>
-        </div>
-    </div>
-</footer>
 
 </html>

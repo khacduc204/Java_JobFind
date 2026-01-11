@@ -6,6 +6,7 @@ import com.example.JobFinder.repository.CandidateRepository;
 import com.example.JobFinder.repository.UserRepository;
 import com.example.JobFinder.service.CandidateProfileService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -83,6 +84,7 @@ public class CandidateProfileController {
     /**
      * Hiển thị form chỉnh sửa hồ sơ
      */
+    @PreAuthorize("hasRole('CANDIDATE')")
     @GetMapping("/edit-profile")
     public String showEditForm(Authentication authentication, Model model, RedirectAttributes redirectAttributes) {
         if (authentication == null || !authentication.isAuthenticated()) {
@@ -115,7 +117,7 @@ public class CandidateProfileController {
         model.addAttribute("location", candidate.getLocation());
         model.addAttribute("skillsList", candidateProfileService.parseSkills(candidate.getSkills()));
         model.addAttribute("experienceList", candidateProfileService.parseExperience(candidate.getExperience()));
-        model.addAttribute("experienceText", candidate.getExperience());
+        model.addAttribute("experienceText", candidateProfileService.formatExperienceTextarea(candidate.getExperience()));
         
         return "frontend/candidate/edit-profile";
     }
@@ -123,6 +125,7 @@ public class CandidateProfileController {
     /**
      * Xử lý cập nhật hồ sơ
      */
+    @PreAuthorize("hasRole('CANDIDATE')")
     @PostMapping("/edit-profile")
     public String updateProfile(@RequestParam String fullName,
                                @RequestParam(required = false) String headline,
@@ -158,6 +161,7 @@ public class CandidateProfileController {
     /**
      * Hiển thị trang upload CV
      */
+    @PreAuthorize("hasRole('CANDIDATE')")
     @GetMapping("/upload-cv")
     public String showUploadCvPage(Authentication authentication, Model model, RedirectAttributes redirectAttributes) {
         if (authentication == null || !authentication.isAuthenticated()) {
@@ -189,6 +193,7 @@ public class CandidateProfileController {
     /**
      * Xử lý upload CV
      */
+    @PreAuthorize("hasRole('CANDIDATE')")
     @PostMapping("/upload-cv")
     public String uploadCv(@RequestParam("cvFile") MultipartFile cvFile,
                           Authentication authentication,

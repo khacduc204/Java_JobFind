@@ -270,9 +270,9 @@
                             <div class="highlight-stat">
                                 <span class="stat-label">Kinh nghiệm</span>
                                 <span class="stat-number">
-                                    <span th:text="${experienceList != null && experienceList.size() > 0 ? 'Dưới ' + experienceList.size() + ' năm' : 'Dưới 1 năm'}">Dưới 1 năm</span>
+                                    <span th:text="${experienceList != null && !experienceList.isEmpty() ? experienceList.size() + ' vị trí' : 'Chưa cập nhật'}">1 vị trí</span>
                                 </span>
-                                <div class="stat-desc">Tổng thời gian làm việc thực tế</div>
+                                <div class="stat-desc">Số vị trí từng đảm nhiệm</div>
                             </div>
                         </div>
                         <div class="col-md-4 col-6">
@@ -310,12 +310,17 @@
                         <div th:each="exp : ${experienceList}" class="experience-item">
                             <div class="experience-title">
                                 <span class="experience-circle"></span>
-                                <span th:text="${exp['title']}">Làm việc ở Campuchia</span>
+                                <div>
+                                    <strong th:text="${exp['title'] != null && exp['title'] != '' ? exp['title'] : 'Chưa cập nhật'}">Chức danh</strong>
+                                    <div class="experience-company" th:text="${exp['company'] != null && exp['company'] != '' ? exp['company'] : 'Đơn vị không xác định'}">Công ty</div>
+                                </div>
                             </div>
                             <div class="experience-period" style="color: #00b14f; margin-left: 1.25rem;">
-                                <span th:text="${exp['startDate']}">- Hiện tại</span> - 
-                                <span th:text="${exp['endDate'] != null ? exp['endDate'] : 'Hiện tại'}">Hiện tại</span>
+                                <span th:text="${exp['startDisplay'] != null && exp['startDisplay'] != '' ? exp['startDisplay'] : '—'}">-</span>
+                                <span class="mx-1">-</span>
+                                <span th:text="${exp['endDisplay'] != null && exp['endDisplay'] != '' ? exp['endDisplay'] : 'Hiện tại'}">Hiện tại</span>
                             </div>
+                            <p class="mb-0 mt-2 text-muted" th:if="${exp['description'] != null && exp['description'] != ''}" th:text="${exp['description']}"></p>
                         </div>
                     </div>
                     <div th:unless="${experienceList != null and !experienceList.isEmpty()}" 
@@ -323,9 +328,12 @@
                         <div class="experience-item">
                             <div class="experience-title">
                                 <span class="experience-circle"></span>
-                                Làm việc ở Campuchia
+                                <div>
+                                    <strong>Chưa cập nhật kinh nghiệm</strong>
+                                    <div class="experience-company">Thêm thông tin để gây ấn tượng hơn</div>
+                                </div>
                             </div>
-                            <div class="experience-period" style="color: #00b14f; margin-left: 1.25rem;">- Hiện tại - Hiện tại</div>
+                            <div class="experience-period" style="color: #00b14f; margin-left: 1.25rem;">— - Hiện tại</div>
                         </div>
                     </div>
                 </div>

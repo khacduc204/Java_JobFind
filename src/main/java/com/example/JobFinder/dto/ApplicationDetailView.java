@@ -1,5 +1,6 @@
 package com.example.JobFinder.dto;
 
+import java.util.List;
 import lombok.Builder;
 import lombok.Value;
 
@@ -18,9 +19,11 @@ public class ApplicationDetailView {
     String candidateExperience;
     String candidateLocation;
     String candidateSkills;
+    List<ExperienceEntry> experienceEntries;
 
     String coverLetter;
     String resumeSnapshot;
+    String decisionNote;
 
     String jobTitle;
     String jobLocation;

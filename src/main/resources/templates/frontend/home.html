@@ -22,7 +22,9 @@
                         
                         <!-- Search Form -->
                         <div class="home-search-card jf-search-card">
-                            <form class="row g-3 home-search-form" method="get" action="/jobs">
+                            <form class="row g-3 home-search-form" method="get"
+                                  th:action="@{/jobs}"
+                                  th:attr="data-search-url=@{/jobs}">
                                 <div class="col-lg-5">
                                     <div class="form-floating">
                                         <input type="text" class="form-control" id="keyword" name="keyword" th:value="${prefilledKeyword}" placeholder="Vị trí, kỹ năng, công ty">
@@ -34,11 +36,11 @@
                                 <div class="col-lg-4">
                                     <div class="form-floating">
                                         <select class="form-select" id="location" name="location">
-                                            <option value="" selected>Toàn quốc</option>
-                                            <option value="Hà Nội">Hà Nội</option>
-                                            <option value="TP. Hồ Chí Minh">TP. Hồ Chí Minh</option>
-                                            <option value="Đà Nẵng">Đà Nẵng</option>
-                                            <option value="Remote">Remote</option>
+                                            <option value="" th:selected="${prefilledLocation == null || #strings.isEmpty(prefilledLocation)}">Toàn quốc</option>
+                                            <option value="Hà Nội" th:selected="${prefilledLocation == 'Hà Nội'}">Hà Nội</option>
+                                            <option value="TP. Hồ Chí Minh" th:selected="${prefilledLocation == 'TP. Hồ Chí Minh'}">TP. Hồ Chí Minh</option>
+                                            <option value="Đà Nẵng" th:selected="${prefilledLocation == 'Đà Nẵng'}">Đà Nẵng</option>
+                                            <option value="Remote" th:selected="${prefilledLocation == 'Remote'}">Remote</option>
                                         </select>
                                         <label for="location">
                                             <i class="fa-solid fa-location-dot me-2 text-success"></i>Địa điểm
@@ -65,7 +67,9 @@
                         <!-- Hero Metrics -->
                         <div class="hero-metrics">
                             <div th:each="metric : ${heroMetrics}" class="hero-metric-card" data-metric>
-                                <div class="hero-metric-value" th:text="${metric.formatted}">0</div>
+                                <div class="hero-metric-value"
+                                     th:attr="data-value=${metric.value}, data-format=${metric.formatted}"
+                                     th:text="${metric.formatted}">0</div>
                                 <p class="hero-metric-label mb-0" th:text="${metric.label}">Label</p>
                             </div>
                         </div>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin-layout}">
+<head>
+    <title th:text="${isEdit} ? 'Chỉnh sửa vai trò' : 'Thêm vai trò'"></title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="pagetitle">
+        <h1 th:text="${isEdit} ? 'Chỉnh sửa vai trò' : 'Thêm vai trò'"></h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}">Trang chủ</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/admin/roles}">Vai trò</a></li>
+                <li class="breadcrumb-item active" th:text="${isEdit} ? 'Chỉnh sửa' : 'Thêm mới'"></li>
+            </ol>
+        </nav>
+    </div>
+
+    <section class="section">
+        <div class="card p-4 shadow-sm">
+
+            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <span th:text="${errorMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
+            </div>
+            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <span th:text="${successMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
+            </div>
+
+            <form th:action="@{/admin/roles/save}" method="post" class="needs-validation" novalidate>
+                <input type="hidden" name="id" th:if="${formData.id() != null}" th:value="${formData.id()}">
+
+                <div class="row g-4">
+                    <div class="col-lg-5">
+                        <div class="border rounded p-3 h-100 bg-light-subtle">
+                            <div class="mb-3">
+                                <label for="roleName" class="form-label">Tên vai trò <span class="text-danger">*</span></label>
+                                        <input type="text" id="roleName" name="name" class="form-control" maxlength="50"
+                                            th:value="${formData.name()}" required>
+                                <div class="form-text">Tên hiển thị duy nhất cho nhóm quyền</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="roleDescription" class="form-label">Mô tả</label>
+                                <textarea id="roleDescription" name="description" rows="4" class="form-control"
+                                          th:text="${formData.description()}"></textarea>
+                                <div class="form-text">Giải thích ngắn gọn về vai trò</div>
+                            </div>
+                            <div class="small text-muted">
+                                Vai trò quyết định các tính năng quản trị mà người dùng có thể truy cập.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-7">
+                        <div class="border rounded p-3 h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <h5 class="mb-0">Phân quyền</h5>
+                                    <small class="text-muted">Chọn các quyền áp dụng cho vai trò này</small>
+                                </div>
+                                <span class="badge bg-primary-subtle text-primary" th:text="${allPermissions.size()} + ' quyền khả dụng'"></span>
+                            </div>
+                            <div class="row row-cols-1 row-cols-md-2 g-2">
+                                <div class="col" th:each="permission : ${allPermissions}">
+                                    <div class="form-check border rounded p-2 h-100">
+                                        <input class="form-check-input" type="checkbox" name="permissionIds"
+                                               th:id="${'perm-' + permission.id}"
+                                               th:value="${permission.id}"
+                                               th:checked="${formData.permissionIds().contains(permission.id)}">
+                                        <label class="form-check-label fw-semibold" th:for="${'perm-' + permission.id}" th:text="${permission.name}"></label>
+                                        <p class="text-muted small mb-0" th:text="${permission.description} ?: '—'"></p>
+                                    </div>
+                                </div>
+                                <div th:if="${allPermissions.isEmpty()}" class="col">
+                                    <div class="alert alert-warning mb-0">Chưa có permission nào trong hệ thống</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2 justify-content-end mt-4">
+                    <a th:href="@{/admin/roles}" class="btn btn-secondary">Hủy</a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i>
+                        <span th:text="${isEdit} ? 'Lưu thay đổi' : 'Tạo vai trò'"></span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </section>
+</div>
+</body>
+</html>

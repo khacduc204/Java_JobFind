@@ -157,13 +157,18 @@
                             </div>
                             
                             <!-- Save button -->
-                            <button th:if="${canSaveJobs}" 
-                                    class="btn btn-sm btn-link p-0 text-muted ms-2 flex-shrink-0"
+                            <button class="btn btn-sm btn-link p-0 ms-2 flex-shrink-0"
                                     style="font-size: 1.5rem;"
+                                    th:classappend="${canSaveJobs and savedJobIds != null and #lists.contains(savedJobIds, job.id) ? 'text-danger' : 'text-muted'}"
                                     th:data-job-id="${job.id}"
+                                    th:data-can-save="${canSaveJobs}"
+                                    data-saved-class="text-danger"
+                                    data-unsaved-class="text-muted"
+                                    data-saved-icon="fa-solid"
+                                    data-unsaved-icon="fa-regular"
                                     onclick="toggleSaveJob(this)"
                                     title="Lưu việc làm">
-                                <i class="fa-solid fa-heart"></i>
+                                <i th:class="${canSaveJobs and savedJobIds != null and #lists.contains(savedJobIds, job.id) ? 'fa-solid fa-heart' : 'fa-regular fa-heart'}"></i>
                             </button>
                         </div>
                         
@@ -258,35 +263,5 @@
     <th:block th:replace="~{fragments/footer :: backToTop}" />
     <th:block th:replace="~{fragments/footer :: scripts}" />
     
-    <script>
-    function toggleSaveJob(btn) {
-        const jobId = btn.dataset.jobId;
-        
-        fetch('/jobs/save', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-            body: 'jobId=' + jobId
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                if (data.saved) {
-                    btn.classList.add('text-danger');
-                    btn.classList.remove('text-muted');
-                } else {
-                    btn.classList.add('text-muted');
-                    btn.classList.remove('text-danger');
-                }
-                alert(data.message);
-            } else {
-                alert(data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Có lỗi xảy ra.');
-        });
-    }
-    </script>
 </body>
 </html>

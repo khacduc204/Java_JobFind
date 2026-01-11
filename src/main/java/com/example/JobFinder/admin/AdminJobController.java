@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/admin/jobs")
+@PreAuthorize("hasAuthority('manage_jobs')")
 public class AdminJobController {
 
     private final JobRepository jobRepository;

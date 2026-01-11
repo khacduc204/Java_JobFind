@@ -53,7 +53,7 @@ public class DebugAuthController {
             @RequestParam String password,
             @RequestParam(defaultValue = "3") Integer roleId) {
         try {
-            RegistrationRequest request = new RegistrationRequest(email, password, "Test User", roleId);
+            RegistrationRequest request = new RegistrationRequest(email, "Test User", password, roleId);
             var user = userService.registerUser(request);
             log.info("Created test user: {}", user.getEmail());
             return ResponseEntity.ok(Map.of(

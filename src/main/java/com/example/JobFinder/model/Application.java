@@ -35,7 +35,10 @@ public class Application {
     private String resumeSnapshot;
     
     @Column(name = "status", length = 20, nullable = false)
-    private String status = "applied"; // applied, viewed, shortlisted, rejected, hired
+    private String status = "applied"; // applied, viewed, shortlisted, rejected, hired, withdrawn
+
+    @Column(name = "decision_note", columnDefinition = "TEXT")
+    private String decisionNote;
     
     @Column(name = "applied_at")
     private LocalDateTime appliedAt;

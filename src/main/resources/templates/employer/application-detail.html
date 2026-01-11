@@ -4,61 +4,83 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${pageTitle} + ' - JobFinder'">Chi tiết hồ sơ - JobFinder</title>
-    
-    <!-- Bootstrap CSS -->
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
-    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
+        :root {
+            --primary-blue: #2563eb;
+            --sidebar-width: 250px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8f9fa;
+        }
+
         .sidebar {
-            min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
             position: fixed;
-            width: 250px;
-            left: 0;
             top: 0;
-            bottom: 0;
-        }
-        
-        .sidebar .company-name {
-            font-size: 20px;
-            font-weight: bold;
-            padding: 15px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            margin-bottom: 20px;
-        }
-        
-        .sidebar .nav-link {
-            color: rgba(255, 255, 255, 0.8);
-            padding: 12px 15px;
-            margin: 5px 0;
-            border-radius: 8px;
-            transition: all 0.3s;
-        }
-        
-        .sidebar .nav-link:hover, .sidebar .nav-link.active {
-            background: rgba(255, 255, 255, 0.2);
+            left: 0;
+            height: 100vh;
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, var(--primary-blue) 0%, #1e40af 100%);
             color: white;
+            padding: 0;
+            z-index: 1000;
+            overflow-y: auto;
         }
-        
-        .sidebar .nav-link i {
-            margin-right: 10px;
+
+        .sidebar-header {
+            padding: 1.5rem;
+            background: rgba(0, 0, 0, 0.2);
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar-menu li {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 0.95rem 1.25rem;
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background: rgba(255, 255, 255, 0.12);
+            color: #fff;
+        }
+
+        .sidebar-menu i {
+            margin-right: 0.75rem;
             width: 20px;
+            text-align: center;
         }
-        
+
         .main-content {
-            margin-left: 250px;
-            padding: 20px;
+            margin-left: var(--sidebar-width);
+            min-height: 100vh;
         }
-        
+
         .content-card {
             background: white;
             padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
             margin-bottom: 20px;
         }
         
@@ -108,30 +130,43 @@
             border-radius: 8px;
             padding: 20px;
         }
+
+        .experience-item {
+            border-left: 3px solid #e9ecef;
+            padding-left: 20px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .experience-item::before {
+            content: '';
+            width: 10px;
+            height: 10px;
+            background: #667eea;
+            border-radius: 50%;
+            position: absolute;
+            left: -6px;
+            top: 4px;
+        }
+
+        .experience-meta {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+        }
     </style>
 </head>
 <body>
-    <!-- Sidebar -->
     <div class="sidebar">
-        <div class="company-name" th:text="${employer.companyName}">Công ty</div>
-        <nav class="nav flex-column">
-            <a class="nav-link" href="/employer/dashboard">
-                <i class="bi bi-speedometer2"></i> Bảng điều khiển
-            </a>
-            <a class="nav-link" href="/employer/jobs">
-                <i class="bi bi-briefcase"></i> Tin tuyển dụng
-            </a>
-            <a class="nav-link active" href="/employer/applications">
-                <i class="bi bi-file-earmark-text"></i> Hồ sơ ứng viên
-            </a>
-            <a class="nav-link" href="/employer/profile">
-                <i class="bi bi-building"></i> Hồ sơ doanh nghiệp
-            </a>
-            <hr style="border-color: rgba(255,255,255,0.2);">
-            <a class="nav-link" href="/auth/logout">
-                <i class="bi bi-box-arrow-right"></i> Đăng xuất
-            </a>
-        </nav>
+        <div class="sidebar-header" th:text="${employer.companyName}">JobFind Employer</div>
+        <ul class="sidebar-menu">
+            <li><a href="/employer/dashboard"><i class="fa-solid fa-gauge-high"></i> Bảng điều khiển</a></li>
+            <li><a href="/employer/jobs"><i class="fa-solid fa-briefcase"></i> Tin tuyển dụng</a></li>
+            <li><a class="active" href="/employer/applications"><i class="fa-regular fa-address-card"></i> Hồ sơ ứng viên</a></li>
+            <li><a href="/employer/profile"><i class="fa-solid fa-building"></i> Hồ sơ doanh nghiệp</a></li>
+            <li><a href="/auth/logout"><i class="fa-solid fa-arrow-right-from-bracket"></i> Đăng xuất</a></li>
+            <li><a href="/"><i class="fa-solid fa-arrow-left"></i> Quay lại trang chính</a></li>
+        </ul>
     </div>
     
     <!-- Main Content -->
@@ -157,7 +192,7 @@
         </div>
         
         <a href="/employer/applications" class="btn btn-link text-decoration-none ps-0 mb-3">
-            <i class="bi bi-arrow-left"></i> Quay về danh sách
+            <i class="fa-solid fa-arrow-left"></i> Quay về danh sách
         </a>
         
         <!-- Flash Messages -->
@@ -205,6 +240,14 @@
                             Nội dung thư giới thiệu
                         </div>
                     </div>
+
+                    <div class="mb-3" th:if="${!#strings.isEmpty(applicationDetail.decisionNote)}">
+                        <h3 class="section-title">GHI CHÚ ĐÃ GỬI</h3>
+                        <div class="info-box"
+                             th:utext="${#strings.replace(applicationDetail.decisionNote, '\\n', '<br>')}">
+                            Ghi chú gửi ứng viên
+                        </div>
+                    </div>
                     
                     <div>
                         <h3 class="section-title">TÓM TẮT KINH NGHIỆM</h3>
@@ -219,12 +262,26 @@
                     </div>
                     
                     <!-- Experience Details -->
-                    <div th:if="${!#strings.isEmpty(applicationDetail.candidateExperience)}" class="mt-4">
+                    <div class="mt-4">
                         <h3 class="section-title">KINH NGHIỆM LÀM VIỆC</h3>
-                        <div class="info-box"
-                             th:utext="${#strings.replace(applicationDetail.candidateExperience, '\\n', '<br>')}">
-                            Kinh nghiệm làm việc
+                        <div th:if="${applicationDetail.experienceEntries != null && !#lists.isEmpty(applicationDetail.experienceEntries)}">
+                            <div class="experience-item" th:each="exp : ${applicationDetail.experienceEntries}">
+                                <div class="experience-meta">
+                                    <div>
+                                        <div class="fw-semibold" th:text="${exp.title}">Vị trí</div>
+                                        <div class="text-muted small" th:if="${exp.hasCompany()}" th:text="${exp.company}">Công ty</div>
+                                    </div>
+                                    <div class="text-muted small" th:if="${exp.rangeLabel}">
+                                        <i class="bi bi-calendar-event me-1"></i>
+                                        <span th:text="${exp.rangeLabel}">04/2022 - 07/2025</span>
+                                    </div>
+                                </div>
+                                <p class="mb-0 text-secondary" th:if="${exp.hasDescription()}" th:text="${exp.description}"></p>
+                            </div>
                         </div>
+                        <p class="text-muted" th:if="${applicationDetail.experienceEntries == null || #lists.isEmpty(applicationDetail.experienceEntries)}">
+                            Ứng viên chưa cập nhật kinh nghiệm làm việc.
+                        </p>
                     </div>
                 </div>
                 
@@ -275,7 +332,9 @@
                 <!-- Action Card -->
                 <div class="content-card">
                     <h3 class="section-title">HÀNH ĐỘNG</h3>
-                    <form th:action="@{/employer/applications/{id}/update-status(id=${application.id})}" method="post" class="d-grid gap-3">
+                    <form th:action="@{/employer/applications/{id}/update-status(id=${applicationDetail.applicationId})}" method="post" class="d-grid gap-3">
+                        <input type="hidden" name="_csrf" th:value="${_csrf.token}" />
+                        <input type="hidden" name="applicationId" th:value="${applicationDetail.applicationId}" />
                         <div>
                             <label for="status" class="form-label fw-semibold">Trạng thái tuyển dụng</label>
                             <select id="status" name="status" class="form-select" required>
@@ -292,7 +351,8 @@
                                       name="note" 
                                       class="form-control" 
                                       rows="4" 
-                                      placeholder="Chia sẻ lý do từ chối hoặc hướng dẫn bước tiếp theo..."></textarea>
+                                      placeholder="Chia sẻ lý do từ chối hoặc hướng dẫn bước tiếp theo..."
+                                      th:text="${applicationDetail.decisionNote}"></textarea>
                             <div class="form-text">Bắt buộc khi từ chối. Ứng viên sẽ nhìn thấy nội dung này.</div>
                         </div>
                         <button type="submit" class="btn btn-primary">

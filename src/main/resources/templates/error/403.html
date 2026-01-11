@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${pageTitle}">403 - Truy cập bị từ chối</title>
+    <link rel="stylesheet" th:href="@{/assets/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/assets/style.css}">
+    <style>
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f8f9ff 0%, #ecf4ff 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        .error-card {
+            max-width: 640px;
+            width: 100%;
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 25px 60px rgba(15, 23, 42, 0.08);
+            padding: 3rem;
+            text-align: center;
+        }
+        .error-code {
+            font-size: 5rem;
+            font-weight: 800;
+            color: #0d6efd;
+        }
+        .error-message {
+            font-size: 1.25rem;
+            margin-bottom: 1.5rem;
+            color: #334155;
+        }
+        .action-buttons a {
+            margin: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+<div class="error-card">
+    <div class="error-code">403</div>
+    <h1 class="fw-bold mb-3">Bạn không có quyền truy cập trang này</h1>
+    <p class="error-message">
+        Tài khoản <span th:text="${currentUser} ?: 'khách'">khách</span> không đủ quyền theo cấu hình phân quyền JobFind.
+        Nếu bạn nghĩ đây là nhầm lẫn, vui lòng thử đăng nhập bằng tài khoản khác hoặc liên hệ quản trị viên.
+    </p>
+    <div class="action-buttons">
+        <a class="btn btn-primary" th:href="@{/}">Về trang chủ</a>
+        <a class="btn btn-outline-primary" th:href="@{/auth/login}">Đăng nhập lại</a>
+    </div>
+</div>
+<script th:src="@{/assets/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

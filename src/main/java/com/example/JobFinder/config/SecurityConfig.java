@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -16,6 +17,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -55,7 +57,9 @@ public class SecurityConfig {
                     "/uploads/**",
                     "/webjars/**",
                     "/error",
-                    "/api/debug/**"
+                    "/api/debug/**",
+                    "/candidate/profile",
+                    "/candidate/profile/**"
                 ).permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/employer/**").hasRole("EMPLOYER")
@@ -83,6 +87,10 @@ public class SecurityConfig {
                 .key("jobfinder-remember-me-key")
                 .tokenValiditySeconds(7 * 24 * 60 * 60)
                 .userDetailsService(userDetailsService)
+            )
+            .exceptionHandling(exceptions -> exceptions
+                .authenticationEntryPoint((request, response, authException) -> response.sendRedirect("/auth/login"))
+                .accessDeniedHandler((request, response, accessDeniedException) -> response.sendRedirect("/403"))
             )
             .authenticationProvider(authenticationProvider())
             .csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**"));

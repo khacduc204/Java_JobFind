@@ -29,26 +29,30 @@ public interface ApplicationRepository extends JpaRepository<Application, Intege
     long countByStatus(@Param("status") String status);
     
     // Get all applications with filters for admin
-    @Query("SELECT a FROM Application a " +
-           "LEFT JOIN FETCH a.job j " +
-           "LEFT JOIN FETCH j.employer e " +
-           "LEFT JOIN FETCH a.candidate c " +
-           "LEFT JOIN FETCH c.user u " +
-           "WHERE (:keyword IS NULL OR :keyword = '' OR " +
-           "LOWER(u.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-           "LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-           "LOWER(j.title) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
-           "AND (:status IS NULL OR :status = '' OR a.status = :status) " +
-           "AND (:jobId IS NULL OR j.id = :jobId) " +
-           "AND (:employerId IS NULL OR e.id = :employerId) " +
-           "ORDER BY a.appliedAt DESC")
-    Page<Application> findAllWithFilters(
-        @Param("keyword") String keyword,
-        @Param("status") String status,
-        @Param("jobId") Integer jobId,
-        @Param("employerId") Integer employerId,
-        Pageable pageable
-    );
+       @Query("SELECT a FROM Application a " +
+                 "LEFT JOIN FETCH a.job j " +
+                 "LEFT JOIN FETCH j.employer e " +
+                 "LEFT JOIN FETCH a.candidate c " +
+                 "LEFT JOIN FETCH c.user u " +
+                 "WHERE (:keyword IS NULL OR :keyword = '' OR " +
+                 "LOWER(u.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+                 "LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+                 "LOWER(j.title) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+                 "AND (:status IS NULL OR :status = '' OR a.status = :status) " +
+                 "AND (:jobId IS NULL OR j.id = :jobId) " +
+                 "AND (:employerId IS NULL OR e.id = :employerId) " +
+                 "AND (:dateFrom IS NULL OR a.appliedAt >= :dateFrom) " +
+                 "AND (:dateTo IS NULL OR a.appliedAt <= :dateTo) " +
+                 "ORDER BY a.appliedAt DESC")
+       Page<Application> findAllWithFilters(
+              @Param("keyword") String keyword,
+              @Param("status") String status,
+              @Param("jobId") Integer jobId,
+              @Param("employerId") Integer employerId,
+              @Param("dateFrom") LocalDateTime dateFrom,
+              @Param("dateTo") LocalDateTime dateTo,
+              Pageable pageable
+       );
     
     // Count applications in last N days
     @Query("SELECT COUNT(a) FROM Application a WHERE a.appliedAt >= :since")
@@ -150,4 +154,12 @@ public interface ApplicationRepository extends JpaRepository<Application, Intege
            "LEFT JOIN FETCH c.user u " +
            "WHERE a.id = :id")
     Optional<Application> findByIdWithFullDetails(@Param("id") Integer id);
+    
+    // Count applications by status per month
+    @Query("SELECT YEAR(a.appliedAt) AS yr, MONTH(a.appliedAt) AS mon, a.status AS status, COUNT(a) AS total " +
+           "FROM Application a " +
+           "WHERE a.appliedAt IS NOT NULL AND a.appliedAt >= :start " +
+           "GROUP BY YEAR(a.appliedAt), MONTH(a.appliedAt), a.status " +
+           "ORDER BY yr, mon")
+    List<Object[]> countApplicationsByStatusPerMonth(@Param("start") LocalDateTime start);
 }

@@ -7,4 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface PermissionRepository extends JpaRepository<Permission, Integer> {
 
     Optional<Permission> findByNameIgnoreCase(String name);
+
+    boolean existsByNameIgnoreCase(String name);
 }

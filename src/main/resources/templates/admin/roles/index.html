@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin-layout}">
+<head>
+    <title>Quản lý vai trò &amp; quyền</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="pagetitle">
+        <h1>Quản lý vai trò &amp; phân quyền</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}">Trang chủ</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/admin/users}">Người dùng</a></li>
+                <li class="breadcrumb-item active">Vai trò &amp; quyền</li>
+            </ol>
+        </nav>
+    </div>
+
+    <section class="section">
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="card info-card shadow-sm h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Tổng số vai trò</h5>
+                        <div class="d-flex align-items-center">
+                            <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                <i class="bi bi-people"></i>
+                            </div>
+                            <div class="ps-3">
+                                <h6 th:text="${totalRoles}">0</h6>
+                                <span class="text-muted small">bao gồm hệ thống &amp; tùy chỉnh</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card info-card shadow-sm h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Tổng số quyền</h5>
+                        <div class="d-flex align-items-center">
+                            <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                <i class="bi bi-shield-lock"></i>
+                            </div>
+                            <div class="ps-3">
+                                <h6 th:text="${totalPermissions}">0</h6>
+                                <span class="text-muted small">module chức năng</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card info-card shadow-sm h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Tổng người dùng</h5>
+                        <div class="d-flex align-items-center">
+                            <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                <i class="bi bi-person-badge"></i>
+                            </div>
+                            <div class="ps-3">
+                                <h6 th:text="${totalUsers}">0</h6>
+                                <span class="text-muted small">liên kết với vai trò</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-2 mb-3">
+                    <div>
+                        <h5 class="card-title mb-0">Danh sách vai trò</h5>
+                        <small class="text-muted">Quản lý phân quyền cho các nhóm người dùng</small>
+                    </div>
+                    <a th:href="@{/admin/roles/manage}" class="btn btn-success">
+                        <i class="bi bi-plus-circle me-1"></i>Thêm vai trò
+                    </a>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Tên vai trò</th>
+                                <th>Mô tả</th>
+                                <th class="text-center">Người dùng</th>
+                                <th class="text-center">Số quyền</th>
+                                <th class="text-end">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:if="${#lists.isEmpty(roles)}">
+                                <td colspan="6" class="text-center text-muted py-4">Chưa có vai trò nào.</td>
+                            </tr>
+                            <tr th:each="summary : ${roles}" th:with="isSystemRole=${systemRoleIds.contains(summary.role().id)}">
+                                <td th:text="${'#' + summary.role().id}">#1</td>
+                                <td>
+                                    <div class="fw-semibold" th:text="${summary.role().name}">Admin</div>
+                                    <span class="badge bg-light text-dark border" th:if="${isSystemRole}">Hệ thống</span>
+                                </td>
+                                <td th:text="${summary.role().description} ?: '—'"></td>
+                                <td class="text-center">
+                                    <span class="fw-semibold" th:text="${summary.userCount()}">0</span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="fw-semibold" th:text="${summary.role().permissions.size()}">0</span>
+                                </td>
+                                <td class="text-end">
+                                    <div class="btn-group btn-group-sm">
+                                        <a th:href="@{/admin/roles/manage(id=${summary.role().id})}" class="btn btn-outline-primary">
+                                            <i class="bi bi-pencil"></i> Sửa
+                                        </a>
+                                                <form th:action="@{/admin/roles/delete/{id}(id=${summary.role().id})}"
+                                                    method="post"
+                                                    th:attr="data-confirm-message=|Xác nhận xoá vai trò ${summary.role().name}?|">
+                                            <button type="submit"
+                                                    class="btn btn-outline-danger"
+                                                    th:disabled="${isSystemRole or summary.userCount() > 0}">
+                                                <i class="bi bi-trash"></i> Xóa
+                                            </button>
+                                        </form>
+                                    </div>
+                                    <div class="text-muted small mt-1" th:if="${summary.userCount() > 0}">
+                                        Không thể xóa khi còn người dùng.
+                                    </div>
+                                    <div class="text-muted small mt-1" th:if="${isSystemRole}">
+                                        Vai trò hệ thống được bảo vệ.
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-2 mb-3">
+                    <div>
+                        <h5 class="card-title mb-0">Danh mục quyền hệ thống</h5>
+                        <small class="text-muted">Thêm quyền mới để gán cho các vai trò</small>
+                    </div>
+                    <form class="row g-2" th:action="@{/admin/roles/permissions}" method="post">
+                        <div class="col-md-4">
+                            <input type="text" name="name" class="form-control" placeholder="Tên quyền (vd: manage_roles)" required maxlength="50">
+                        </div>
+                        <div class="col">
+                            <input type="text" name="description" class="form-control" placeholder="Mô tả quyền" maxlength="120">
+                        </div>
+                        <div class="col-auto">
+                            <button type="submit" class="btn btn-outline-primary">
+                                <i class="bi bi-plus-circle me-1"></i>Thêm quyền
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div th:if="${allPermissions.isEmpty()}" class="alert alert-light border mb-0">
+                    Chưa có quyền nào. Hãy thêm quyền mới bằng biểu mẫu phía trên.
+                </div>
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3" th:if="${!allPermissions.isEmpty()}">
+                    <div class="col" th:each="permission : ${allPermissions}">
+                        <div class="border rounded-3 p-3 h-100">
+                            <div class="fw-semibold text-primary text-uppercase small mb-1" th:text="${permission.name}">manage_roles</div>
+                            <div class="text-muted small mb-0" th:text="${permission.description} ?: 'Chưa có mô tả'"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('form[data-confirm-message]').forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!confirm(form.dataset.confirmMessage)) {
+                        event.preventDefault();
+                    }
+                });
+            });
+        });
+    </script>
+</div>
+</body>
+</html>

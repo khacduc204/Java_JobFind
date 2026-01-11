@@ -1,6 +1,7 @@
 package com.example.JobFinder.controller;
 
 import com.example.JobFinder.dto.ApplicationDetailView;
+import com.example.JobFinder.dto.ExperienceEntry;
 import com.example.JobFinder.model.Application;
 import com.example.JobFinder.model.Employer;
 import com.example.JobFinder.model.Job;
@@ -10,7 +11,11 @@ import com.example.JobFinder.repository.CategoryRepository;
 import com.example.JobFinder.repository.EmployerRepository;
 import com.example.JobFinder.repository.JobRepository;
 import com.example.JobFinder.repository.UserRepository;
+import com.example.JobFinder.service.NotificationService;
+import com.example.JobFinder.service.EmailService;
+import com.example.JobFinder.util.ExperienceParser;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -37,6 +42,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -44,6 +50,7 @@ import java.util.stream.Collectors;
 @Controller
 @RequestMapping("/employer")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('EMPLOYER')")
 public class EmployerController {
     
     private final EmployerRepository employerRepository;
@@ -51,6 +58,8 @@ public class EmployerController {
     private final JobRepository jobRepository;
     private final ApplicationRepository applicationRepository;
     private final CategoryRepository categoryRepository;
+    private final NotificationService notificationService;
+    private final EmailService emailService;
 
     private static final String LOGO_UPLOAD_DIR = "uploads/logos/";
     private static final long MAX_LOGO_SIZE = 3 * 1024 * 1024; // 3MB
@@ -150,6 +159,7 @@ public class EmployerController {
     /**
      * Danh sách tin tuyển dụng
      */
+    @PreAuthorize("hasAuthority('manage_jobs')")
     @GetMapping("/jobs")
     public String listJobs(
             @RequestParam(required = false, defaultValue = "1") int page,
@@ -208,6 +218,7 @@ public class EmployerController {
     /**
      * Form tạo tin mới
      */
+    @PreAuthorize("hasAuthority('manage_jobs')")
     @GetMapping("/jobs/create")
     public String createJobForm(Authentication authentication, Model model) {
         Employer employer = getEmployerFromAuth(authentication);
@@ -230,6 +241,7 @@ public class EmployerController {
     /**
      * Form sửa tin
      */
+    @PreAuthorize("hasAuthority('manage_jobs')")
     @GetMapping("/jobs/edit/{id}")
     public String editJobForm(
             @PathVariable Integer id,
@@ -271,6 +283,7 @@ public class EmployerController {
     /**
      * Lưu tin mới
      */
+    @PreAuthorize("hasAuthority('manage_jobs')")
     @PostMapping("/jobs/create")
     public String createJob(
             @RequestParam String title,
@@ -330,6 +343,7 @@ public class EmployerController {
     /**
      * Cập nhật tin
      */
+    @PreAuthorize("hasAuthority('manage_jobs')")
     @PostMapping("/jobs/edit/{id}")
     public String updateJob(
             @PathVariable Integer id,
@@ -400,6 +414,7 @@ public class EmployerController {
     /**
      * Xóa tin
      */
+    @PreAuthorize("hasAuthority('manage_jobs')")
     @PostMapping("/jobs/delete/{id}")
     public String deleteJob(
             @PathVariable Integer id,
@@ -437,6 +452,7 @@ public class EmployerController {
     /**
      * Trang quản lý hồ sơ ứng viên
      */
+    @PreAuthorize("hasAuthority('view_applications')")
     @GetMapping("/applications")
     public String listApplications(
             @RequestParam(required = false) Integer jobId,
@@ -496,6 +512,7 @@ public class EmployerController {
     /**
      * Xem chi tiết hồ sơ ứng viên
      */
+    @PreAuthorize("hasAuthority('view_applications')")
     @GetMapping("/applications/{id}")
     public String viewApplication(
             @PathVariable Integer id,
@@ -545,13 +562,13 @@ public class EmployerController {
             return "redirect:/employer/applications";
         }
         
-        // Mark as viewed if status is 'applied'
         if ("applied".equals(application.getStatus())) {
             application.setStatus("viewed");
             applicationRepository.save(application);
             // Reload to ensure all lazy relationships are fetched
             applicationOpt = applicationRepository.findByIdWithFullDetails(id);
             application = applicationOpt.get();
+            notificationService.notifyApplicationViewed(application);
         }
         
         // Fetch employer with user to avoid LazyInitializationException
@@ -615,6 +632,7 @@ public class EmployerController {
         String candidateExperience = null;
         String candidateLocation = null;
         String candidateSkills = null;
+        List<ExperienceEntry> experienceEntries = List.of();
 
         if (application.getCandidate() != null) {
             candidateHeadline = application.getCandidate().getHeadline();
@@ -622,6 +640,7 @@ public class EmployerController {
             candidateExperience = application.getCandidate().getExperience();
             candidateLocation = application.getCandidate().getLocation();
             candidateSkills = application.getCandidate().getSkills();
+            experienceEntries = ExperienceParser.parse(candidateExperience);
 
             if (application.getCandidate().getUser() != null) {
                 if (application.getCandidate().getUser().getName() != null && !application.getCandidate().getUser().getName().isEmpty()) {
@@ -662,8 +681,10 @@ public class EmployerController {
             .candidateExperience(candidateExperience)
             .candidateLocation(candidateLocation)
             .candidateSkills(candidateSkills)
+            .experienceEntries(experienceEntries)
             .coverLetter(application.getCoverLetter())
             .resumeSnapshot(application.getResumeSnapshot())
+            .decisionNote(application.getDecisionNote())
             .jobTitle(jobTitle)
             .jobLocation(jobLocation)
             .jobEmploymentType(jobEmploymentType)
@@ -781,13 +802,21 @@ public class EmployerController {
     /**
      * Cập nhật trạng thái hồ sơ
      */
-    @PostMapping("/applications/{id}/update-status")
+    @PreAuthorize("hasAuthority('view_applications')")
+    @PostMapping({"/applications/{id}/update-status", "/applications/update-status"})
     public String updateApplicationStatus(
-            @PathVariable Integer id,
+            @PathVariable(name = "id", required = false) Integer pathId,
+            @RequestParam(name = "applicationId", required = false) Integer requestId,
             @RequestParam String status,
             @RequestParam(required = false) String note,
             Authentication authentication,
             RedirectAttributes redirectAttributes) {
+        Integer id = pathId != null ? pathId : requestId;
+        if (id == null) {
+            redirectAttributes.addFlashAttribute("flashType", "danger");
+            redirectAttributes.addFlashAttribute("flashMessage", "Thiếu mã hồ sơ, không thể cập nhật trạng thái");
+            return "redirect:/employer/applications";
+        }
         
         Employer employer = getEmployerFromAuth(authentication);
         
@@ -795,7 +824,7 @@ public class EmployerController {
             return "redirect:/auth/login";
         }
         
-        Optional<Application> applicationOpt = applicationRepository.findById(id);
+        Optional<Application> applicationOpt = applicationRepository.findByIdWithFullDetails(id);
         
         if (applicationOpt.isEmpty()) {
             redirectAttributes.addFlashAttribute("flashType", "danger");
@@ -819,12 +848,22 @@ public class EmployerController {
             return "redirect:/employer/applications/" + id;
         }
         
+        String normalizedNote = StringUtils.hasText(note) ? note.trim() : null;
+        String previousStatus = application.getStatus();
+        String previousNote = application.getDecisionNote();
+
         application.setStatus(status);
-        if (note != null && !note.trim().isEmpty()) {
-            application.setCoverLetter(note); // Using coverLetter field for decision note
-        }
+        application.setDecisionNote(normalizedNote);
         
         applicationRepository.save(application);
+
+        boolean statusChanged = !status.equalsIgnoreCase(previousStatus);
+        boolean noteChanged = !Objects.equals(normalizedNote, previousNote);
+
+        if (statusChanged || noteChanged) {
+            notificationService.notifyApplicationStatusChanged(application, normalizedNote);
+            emailService.sendStatusUpdateToCandidate(application, normalizedNote);
+        }
         
         redirectAttributes.addFlashAttribute("flashType", "success");
         redirectAttributes.addFlashAttribute("flashMessage", "Đã cập nhật trạng thái hồ sơ thành công");

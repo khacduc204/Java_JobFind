@@ -25,4 +25,14 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     List<User> findByRoleId(@Param("roleId") Integer roleId);
 
     boolean existsByEmailIgnoreCase(String email);
+
+    @Query("SELECT u.role.id AS roleId, COUNT(u.id) AS userCount FROM User u WHERE u.role.id IN :roleIds GROUP BY u.role.id")
+    List<RoleUserCount> countUsersByRoleIds(@Param("roleIds") List<Integer> roleIds);
+
+    interface RoleUserCount {
+
+        Integer getRoleId();
+
+        long getUserCount();
+    }
 }

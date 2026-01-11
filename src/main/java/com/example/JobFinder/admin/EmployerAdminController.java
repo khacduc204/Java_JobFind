@@ -7,6 +7,7 @@ import com.example.JobFinder.repository.EmployerRepository;
 import com.example.JobFinder.repository.RoleRepository;
 import com.example.JobFinder.repository.UserRepository;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -26,6 +27,7 @@ import java.util.UUID;
 
 @Controller
 @RequestMapping("/admin/employers")
+@PreAuthorize("hasAuthority('manage_users')")
 public class EmployerAdminController {
 
     private final EmployerRepository employerRepository;

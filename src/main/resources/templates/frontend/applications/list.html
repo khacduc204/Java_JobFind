@@ -1,281 +1,191 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${pageTitle}">Ứng tuyển của tôi - JobFind</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    <style>
-        .page-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 2rem 0;
-            margin-bottom: 2rem;
-        }
-        .stat-card {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            transition: transform 0.2s;
-        }
-        .stat-card:hover {
-            transform: translateY(-2px);
-        }
-        .stat-card .icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-        }
-        .application-card {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 1rem;
-            transition: transform 0.2s;
-        }
-        .application-card:hover {
-            transform: translateX(4px);
-        }
-        .status-badge {
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.875rem;
-            font-weight: 500;
-        }
-    </style>
-</head>
-<body class="bg-light">
-    <!-- Header -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
-        <div class="container">
-            <a class="navbar-brand" href="/" th:href="@{/}">
-                <strong style="color: #667eea;">JobFind</strong>
-            </a>
-            <div class="navbar-nav ms-auto">
-                <a class="nav-link" href="/jobs" th:href="@{/jobs}">Việc làm</a>
-                <a class="nav-link active" href="/applications" th:href="@{/applications}">Ứng tuyển của tôi</a>
-                <a class="nav-link" href="/dashboard" th:href="@{/dashboard}">Dashboard</a>
+<th:block th:replace="~{fragments/header :: head}" />
+<body class="applications-page">
+<th:block th:replace="~{fragments/header :: header}" />
+
+<main class="applications-main">
+    <section class="app-hero">
+        <div class="container hero-grid">
+            <div class="hero-copy">
+                <p class="eyebrow">
+                    <i class="fa-solid fa-bolt me-2"></i>
+                    Hành trình ứng tuyển của bạn
+                </p>
+                <h1>Theo dõi mọi cơ hội đã gửi đi</h1>
+                <p>Giữ nhịp với từng phản hồi từ nhà tuyển dụng, chủ động cập nhật CV và tiếp tục mở rộng hành trình sự nghiệp.</p>
+                <div class="hero-actions">
+                    <a th:href="@{/jobs}" class="btn-solid">
+                        <i class="fa-solid fa-magnifying-glass me-2"></i>Tìm thêm việc phù hợp
+                    </a>
+                    <a th:href="@{/candidate/edit-profile}" class="btn-ghost">
+                        <i class="fa-solid fa-pen-to-square me-2"></i>Cập nhật hồ sơ
+                    </a>
+                </div>
+            </div>
+            <div class="hero-panel">
+                <div class="panel-title">Ảnh chụp nhanh</div>
+                <div class="hero-metrics">
+                    <div class="metric-card">
+                        <span class="metric-label">Tổng đơn đã gửi</span>
+                        <strong th:text="${total != null ? total : 0}">0</strong>
+                        <small>bao gồm mọi vị trí đang theo dõi</small>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-label">Được shortlist</span>
+                        <strong th:text="${statusCounts['shortlisted'] ?: 0}">0</strong>
+                        <small>đơn đã qua vòng sàng lọc</small>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-label">Offer thành công</span>
+                        <strong th:text="${statusCounts['hired'] ?: 0}">0</strong>
+                        <small>cơ hội đã chốt nhận việc</small>
+                    </div>
+                </div>
             </div>
         </div>
-    </nav>
+    </section>
 
-    <!-- Page Header -->
-    <div class="page-header">
-        <div class="container">
-            <h1 class="mb-2">Ứng tuyển của tôi</h1>
-            <p class="mb-0 opacity-75">Theo dõi tất cả các đơn ứng tuyển và trạng thái của bạn</p>
-        </div>
-    </div>
-
-    <!-- Main Content -->
-    <div class="container mb-5">
-        <!-- Flash Messages -->
-        <div th:if="${flashMessage}" th:class="${'alert alert-' + flashType + ' alert-dismissible fade show'}" role="alert">
-            <i th:class="${flashType == 'success' ? 'bi bi-check-circle me-1' : 'bi bi-exclamation-triangle me-1'}"></i>
+    <section class="app-panel container">
+        <div th:if="${flashMessage}" th:class="${'alert alert-' + flashType + ' shadow-sm applications-alert'}" role="alert">
+            <i class="fa-solid" th:classappend="${flashType == 'success' ? ' fa-circle-check' : ' fa-triangle-exclamation'}"></i>
             <span th:text="${flashMessage}"></span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
 
-        <!-- Statistics -->
-        <div class="row g-3 mb-4">
-            <div class="col-md-3">
-                <div class="stat-card">
-                    <div class="d-flex align-items-center">
-                        <div class="icon me-3" style="background: #dbeafe; color: #1e40af;">
-                            <i class="bi bi-file-earmark-text"></i>
-                        </div>
-                        <div>
-                            <div class="h4 mb-0" th:text="${total}">0</div>
-                            <small class="text-muted">Tổng đơn</small>
-                        </div>
+        <div class="filters-card">
+            <form method="get" th:action="@{/applications}" class="search-form">
+                <div class="form-field">
+                    <label for="keyword">Từ khóa</label>
+                    <div class="input-icon">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="keyword" name="keyword" th:value="${filterKeyword}" placeholder="Tên công việc, công ty hoặc kỹ năng">
                     </div>
                 </div>
-            </div>
-            <div class="col-md-3">
-                <div class="stat-card">
-                    <div class="d-flex align-items-center">
-                        <div class="icon me-3" style="background: #fef3c7; color: #b45309;">
-                            <i class="bi bi-hourglass-split"></i>
-                        </div>
-                        <div>
-                            <div class="h4 mb-0" th:text="${statusCounts['applied'] + statusCounts['viewed']}">0</div>
-                            <small class="text-muted">Chờ xử lý</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="stat-card">
-                    <div class="d-flex align-items-center">
-                        <div class="icon me-3" style="background: #d1fae5; color: #065f46;">
-                            <i class="bi bi-star"></i>
-                        </div>
-                        <div>
-                            <div class="h4 mb-0" th:text="${statusCounts['shortlisted']}">0</div>
-                            <small class="text-muted">Shortlist</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="stat-card">
-                    <div class="d-flex align-items-center">
-                        <div class="icon me-3" style="background: #dcfce7; color: #166534;">
-                            <i class="bi bi-check-circle"></i>
-                        </div>
-                        <div>
-                            <div class="h4 mb-0" th:text="${statusCounts['hired']}">0</div>
-                            <small class="text-muted">Đã tuyển</small>
-                        </div>
-                    </div>
-                </div>
+                <input type="hidden" name="status" th:value="${filterStatus != null ? filterStatus : ''}">
+                <button type="submit" class="btn-solid">
+                    <i class="fa-solid fa-search me-2"></i>Lọc kết quả
+                </button>
+                <a th:if="${(filterStatus != null and filterStatus != '') or (filterKeyword != null and filterKeyword != '')}" th:href="@{/applications}" class="btn-link-reset">Xóa bộ lọc</a>
+            </form>
+
+            <div class="status-filter" th:if="${statusFilters != null}">
+                <a th:each="status : ${statusFilters}"
+                   th:href="@{/applications(status=${status.value}, keyword=${filterKeyword})}"
+                   th:class="${'filter-chip' + (filterStatus == status.value ? ' is-active' : '')}">
+                    <span class="chip-label" th:text="${status.label}">Tất cả</span>
+                    <span class="chip-count" th:text="${status.count}">0</span>
+                </a>
             </div>
         </div>
 
-        <div class="row">
-            <!-- Filter Sidebar -->
-            <div class="col-md-3">
-                <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-body">
-                        <h6 class="mb-3">Bộ lọc</h6>
-                        <form method="get" th:action="@{/applications}">
-                            <div class="mb-3">
-                                <label class="form-label small">Tìm kiếm</label>
-                                <input type="text" class="form-control form-control-sm" name="keyword" 
-                                       th:value="${filterKeyword}" placeholder="Tên công việc, công ty...">
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label small">Trạng thái</label>
-                                <select class="form-select form-select-sm" name="status">
-                                    <option value="">-- Tất cả --</option>
-                                    <option value="applied" th:selected="${filterStatus == 'applied'}">Đã ứng tuyển</option>
-                                    <option value="viewed" th:selected="${filterStatus == 'viewed'}">Đã xem</option>
-                                    <option value="shortlisted" th:selected="${filterStatus == 'shortlisted'}">Được shortlist</option>
-                                    <option value="rejected" th:selected="${filterStatus == 'rejected'}">Từ chối</option>
-                                    <option value="hired" th:selected="${filterStatus == 'hired'}">Đã tuyển dụng</option>
-                                </select>
-                            </div>
-                            <button type="submit" class="btn btn-primary btn-sm w-100">
-                                <i class="bi bi-funnel me-1"></i>Lọc
+        <div th:if="${#lists.isEmpty(applications)}" class="app-empty">
+            <div class="empty-icon">
+                <i class="fa-regular fa-inbox"></i>
+            </div>
+            <h3>Chưa có đơn ứng tuyển nào</h3>
+            <p>Tạo dấu ấn đầu tiên bằng việc ứng tuyển một vị trí phù hợp ngay hôm nay.</p>
+            <div class="empty-actions">
+                <a th:href="@{/jobs}" class="btn-solid">
+                    <i class="fa-solid fa-magnifying-glass me-2"></i>Khám phá việc làm mới
+                </a>
+                <a th:href="@{/candidate/profile}" class="btn-ghost">
+                    <i class="fa-solid fa-user me-2"></i>Hoàn thiện hồ sơ
+                </a>
+            </div>
+        </div>
+
+        <div th:unless="${#lists.isEmpty(applications)}" class="applications-wrapper">
+            <article th:each="app : ${applications}" class="application-card">
+                <div class="card-header">
+                    <div class="employer-mark"
+                         th:text="${app.employerName != null and !#strings.isEmpty(app.employerName) ? #strings.substring(app.employerName,0,1) : 'J'}">
+                        J
+                    </div>
+                    <div class="job-info">
+                        <a th:if="${app.jobId != null}" th:href="@{/jobs/{id}(id=${app.jobId})}" class="job-title" th:text="${app.jobTitle}">Vị trí đang tuyển</a>
+                        <span th:unless="${app.jobId != null}" class="job-title" th:text="${app.jobTitle}">Vị trí đang tuyển</span>
+                        <p class="company-line">
+                            <span th:text="${app.employerName != null && app.employerName != '' ? app.employerName : 'Nhà tuyển dụng ẩn'}">Công ty A</span>
+                            <span th:if="${app.jobLocation != null && app.jobLocation != ''}">
+                                <i class="fa-solid fa-circle fa-2xs mx-2"></i>
+                                <span th:text="${app.jobLocation}">Hà Nội</span>
+                            </span>
+                        </p>
+                        <div class="job-meta">
+                            <span>
+                                <i class="fa-regular fa-money-bill-1 me-2"></i>
+                                <span th:text="${app.jobSalary != null && app.jobSalary != '' ? app.jobSalary : 'Thỏa thuận'}">Thỏa thuận</span>
+                            </span>
+                            <span th:if="${app.coverLetter != null && app.coverLetter != ''}">
+                                <i class="fa-regular fa-message me-2"></i>
+                                <span th:text="${#strings.abbreviate(app.coverLetter, 80)}">Cover letter</span>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="status-stack">
+                        <span class="status-chip" th:classappend="${' status-' + app.status}" th:text="${app.statusLabel}">Đã ứng tuyển</span>
+                        <small class="status-time">
+                            <i class="fa-regular fa-clock me-1"></i>
+                            <span th:if="${app.appliedAt}" th:text="${#temporals.format(app.appliedAt, 'dd/MM/yyyy')}">01/01/2024</span>
+                            <span th:unless="${app.appliedAt}">Chưa xác định</span>
+                        </small>
+                    </div>
+                </div>
+                <div class="card-progress" th:with="stages=${statusStages}">
+                    <div class="progress-track">
+                        <div class="progress-step" th:each="stage, iter : ${stages}" th:classappend="${app.statusIndex >= iter.index ? ' is-active' : ''}">
+                            <span class="step-dot"></span>
+                            <span class="step-label" th:switch="${stage}">
+                                <span th:case="'applied'">Ứng tuyển</span>
+                                <span th:case="'viewed'">HR đã xem</span>
+                                <span th:case="'shortlisted'">Shortlist</span>
+                                <span th:case="'hired'">Offer</span>
+                                <span th:case="*" th:text="${stage}"></span>
+                            </span>
+                        </div>
+                    </div>
+                    <div th:if="${app.status == 'rejected'}" class="progress-note is-danger">
+                        <i class="fa-solid fa-circle-exclamation me-2"></i>Hồ sơ đã bị từ chối
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="footer-actions">
+                        <a th:href="@{/applications/{id}(id=${app.id})}" class="btn-ghost">
+                            <i class="fa-solid fa-eye me-2"></i>Xem chi tiết
+                        </a>
+                        <form th:if="${app.status != 'hired' && app.status != 'rejected'}"
+                              method="post"
+                              th:action="@{/applications/{id}/withdraw(id=${app.id})}"
+                              onsubmit="return confirm('Bạn có chắc muốn rút đơn?');">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                            <button type="submit" class="btn-solid btn-danger">
+                                <i class="fa-solid fa-xmark me-2"></i>Rút đơn
                             </button>
                         </form>
                     </div>
                 </div>
+            </article>
 
-                <div class="card border-0 shadow-sm">
-                    <div class="card-body">
-                        <h6 class="mb-2">Mẹo ứng tuyển</h6>
-                        <ul class="small mb-0">
-                            <li>Cập nhật CV và thông tin cá nhân trước khi ứng tuyển</li>
-                            <li>Viết thư ứng tuyển ngắn, nêu rõ điểm mạnh liên quan</li>
-                            <li>Theo dõi trạng thái để kịp thời phản hồi khi được mời phỏng vấn</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Applications List -->
-            <div class="col-md-9">
-                <div th:if="${#lists.isEmpty(applications)}" class="text-center py-5">
-                    <i class="bi bi-inbox" style="font-size: 4rem; color: #ccc;"></i>
-                    <p class="text-muted mt-3">Chưa có đơn ứng tuyển nào</p>
-                    <a href="/jobs" th:href="@{/jobs}" class="btn btn-primary">
-                        <i class="bi bi-search me-1"></i>Tìm việc làm ngay
-                    </a>
-                </div>
-
-                <div th:each="app : ${applications}" class="application-card">
-                    <div class="row align-items-center">
-                        <div class="col-md-7">
-                            <h5 class="mb-2">
-                                <a th:href="@{/jobs/{id}(id=${app.jobId})}" th:text="${app.jobTitle}" class="text-decoration-none">
-                                    Tuyển dụng Developer
-                                </a>
-                            </h5>
-                            <div class="text-muted small mb-2">
-                                <i class="bi bi-building me-1"></i>
-                                <span th:text="${app.employerName}">Công ty ABC</span>
-                                <span th:if="${app.jobLocation}" class="ms-3">
-                                    <i class="bi bi-geo-alt me-1"></i>
-                                    <span th:text="${app.jobLocation}">Hà Nội</span>
-                                </span>
-                            </div>
-                            <div th:if="${app.coverLetter}" class="text-muted small">
-                                <i class="bi bi-chat-left-text me-1"></i>
-                                Thư ứng tuyển: <span th:text="${#strings.abbreviate(app.coverLetter, 100)}">...</span>
-                            </div>
-                        </div>
-                        <div class="col-md-3 text-center">
-                            <span th:class="${'status-badge bg-' + 
-                                (app.status == 'applied' ? 'secondary' : 
-                                 app.status == 'viewed' ? 'info' : 
-                                 app.status == 'shortlisted' ? 'warning' : 
-                                 app.status == 'rejected' ? 'danger' : 
-                                 app.status == 'hired' ? 'success' : 'secondary')}"
-                                  th:text="${app.status == 'applied' ? 'Đã ứng tuyển' : 
-                                           app.status == 'viewed' ? 'Đã xem' : 
-                                           app.status == 'shortlisted' ? 'Được shortlist' : 
-                                           app.status == 'rejected' ? 'Từ chối' : 
-                                           app.status == 'hired' ? 'Đã tuyển dụng' : app.status}">
-                                Đã ứng tuyển
-                            </span>
-                            <div class="small text-muted mt-2">
-                                <i class="bi bi-clock me-1"></i>
-                                <span th:if="${app.appliedAt}" th:text="${#temporals.format(app.appliedAt, 'dd/MM/yyyy')}">01/01/2024</span>
-                            </div>
-                        </div>
-                        <div class="col-md-2 text-end">
-                            <a th:href="@{/applications/{id}(id=${app.id})}" class="btn btn-outline-primary btn-sm">
-                                <i class="bi bi-eye me-1"></i>Xem
-                            </a>
-                            <form th:if="${app.status != 'hired' && app.status != 'rejected'}" 
-                                  method="post" 
-                                  th:action="@{/applications/{id}/withdraw(id=${app.id})}"
-                                  class="d-inline"
-                                  onsubmit="return confirm('Bạn có chắc muốn rút đơn?');">
-                                <button type="submit" class="btn btn-outline-danger btn-sm mt-1">
-                                    <i class="bi bi-x-circle me-1"></i>Rút đơn
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Pagination -->
-                <nav th:if="${totalPages > 1}" class="mt-4">
-                    <ul class="pagination justify-content-center">
-                        <li class="page-item" th:classappend="${currentPage == 1 ? 'disabled' : ''}">
-                            <a class="page-link" 
-                               th:href="@{/applications(page=${currentPage - 1}, status=${filterStatus}, keyword=${filterKeyword})}">
-                                Trước
-                            </a>
-                        </li>
-                        <li th:each="i : ${#numbers.sequence(1, totalPages)}" 
-                            class="page-item" 
-                            th:classappend="${i == currentPage ? 'active' : ''}">
-                            <a class="page-link" 
-                               th:href="@{/applications(page=${i}, status=${filterStatus}, keyword=${filterKeyword})}" 
-                               th:text="${i}">1</a>
-                        </li>
-                        <li class="page-item" th:classappend="${currentPage == totalPages ? 'disabled' : ''}">
-                            <a class="page-link" 
-                               th:href="@{/applications(page=${currentPage + 1}, status=${filterStatus}, keyword=${filterKeyword})}">
-                                Sau
-                            </a>
-                        </li>
-                    </ul>
-                </nav>
-            </div>
+            <nav th:if="${totalPages > 1}" class="app-pagination">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" th:classappend="${currentPage == 1 ? 'disabled' : ''}">
+                        <a class="page-link" th:href="@{/applications(page=${currentPage - 1}, status=${filterStatus}, keyword=${filterKeyword})}">Trước</a>
+                    </li>
+                    <li th:each="i : ${#numbers.sequence(1, totalPages)}" class="page-item" th:classappend="${i == currentPage ? 'active' : ''}">
+                        <a class="page-link" th:href="@{/applications(page=${i}, status=${filterStatus}, keyword=${filterKeyword})}" th:text="${i}">1</a>
+                    </li>
+                    <li class="page-item" th:classappend="${currentPage == totalPages ? 'disabled' : ''}">
+                        <a class="page-link" th:href="@{/applications(page=${currentPage + 1}, status=${filterStatus}, keyword=${filterKeyword})}">Sau</a>
+                    </li>
+                </ul>
+            </nav>
         </div>
-    </div>
+    </section>
+</main>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<th:block th:replace="~{fragments/footer :: footer}" />
+<th:block th:replace="~{fragments/footer :: backToTop}" />
+<th:block th:replace="~{fragments/footer :: scripts}" />
 </body>
 </html>

@@ -50,9 +50,12 @@ public interface JobRepository extends JpaRepository<Job, Integer> {
            "ORDER BY j.createdAt DESC")
     List<Job> findFeaturedJobs(Pageable pageable);
     
-    // Get jobs by employer
-    @Query("SELECT j FROM Job j LEFT JOIN FETCH j.categories WHERE j.employer.id = :employerId ORDER BY j.createdAt DESC")
-    List<Job> findByEmployerId(@Param("employerId") Integer employerId);
+       // Get jobs by employer
+       @Query("SELECT j FROM Job j LEFT JOIN FETCH j.categories WHERE j.employer.id = :employerId ORDER BY j.createdAt DESC")
+       List<Job> findByEmployerId(@Param("employerId") Integer employerId);
+
+       @Query("SELECT j FROM Job j LEFT JOIN FETCH j.categories WHERE j.employer.id = :employerId AND j.status = 'published' ORDER BY COALESCE(j.updatedAt, j.createdAt) DESC")
+       List<Job> findPublishedByEmployerId(@Param("employerId") Integer employerId);
     
     // Get jobs by employer with pagination
     @Query("SELECT j FROM Job j LEFT JOIN FETCH j.categories WHERE j.employer.id = :employerId")
@@ -108,4 +111,22 @@ public interface JobRepository extends JpaRepository<Job, Integer> {
            "AND (j.deadline IS NULL OR j.deadline >= CURRENT_DATE) " +
            "ORDER BY (SELECT COUNT(jv) FROM JobView jv WHERE jv.job.id = j.id) DESC, j.createdAt DESC")
     List<Job> findTopJobsByViewCount(Pageable pageable);
+
+    @Query("SELECT YEAR(j.createdAt) AS yr, MONTH(j.createdAt) AS mon, COUNT(j) AS total " +
+           "FROM Job j " +
+           "WHERE j.createdAt IS NOT NULL AND j.createdAt >= :start " +
+           "GROUP BY YEAR(j.createdAt), MONTH(j.createdAt) " +
+           "ORDER BY yr, mon")
+    List<Object[]> countJobsGroupedByMonth(@Param("start") LocalDateTime start);
+
+    @Query("""
+            SELECT DISTINCT j.title
+            FROM Job j
+            WHERE j.status = 'published'
+              AND j.title IS NOT NULL
+              AND j.title <> ''
+              AND (j.deadline IS NULL OR j.deadline >= CURRENT_DATE)
+            ORDER BY j.createdAt DESC
+            """)
+    List<String> findRecentJobTitles(Pageable pageable);
 }

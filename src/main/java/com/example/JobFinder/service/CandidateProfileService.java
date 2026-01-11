@@ -16,7 +16,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -99,11 +104,28 @@ public class CandidateProfileService {
         if (experienceJson == null || experienceJson.trim().isEmpty()) {
             return Collections.emptyList();
         }
-        try {
-            return objectMapper.readValue(experienceJson, new TypeReference<List<Map<String, Object>>>() {});
-        } catch (Exception e) {
+
+        List<Map<String, Object>> parsed = tryParseExperienceArray(experienceJson.trim());
+        if (parsed.isEmpty()) {
             return Collections.emptyList();
         }
+
+        return normalizeExperienceList(parsed);
+    }
+
+    /**
+     * Convert stored experience JSON into textarea-friendly lines.
+     */
+    public String formatExperienceTextarea(String experienceJson) {
+        List<Map<String, Object>> experiences = parseExperience(experienceJson);
+        if (experiences.isEmpty()) {
+            return "";
+        }
+
+        return experiences.stream()
+            .map(this::buildExperienceLine)
+            .filter(line -> !line.isBlank())
+            .collect(Collectors.joining("\n"));
     }
 
     /**
@@ -171,6 +193,8 @@ public class CandidateProfileService {
         if (experience != null && !experience.trim().isEmpty()) {
             List<Map<String, String>> experienceList = parseExperienceInput(experience);
             candidate.setExperience(objectMapper.writeValueAsString(experienceList));
+        } else {
+            candidate.setExperience(null);
         }
 
         candidateRepository.save(candidate);
@@ -274,27 +298,227 @@ public class CandidateProfileService {
      */
     private List<Map<String, String>> parseExperienceInput(String experienceInput) {
         List<Map<String, String>> experienceList = new ArrayList<>();
-        String[] lines = experienceInput.split("\n");
+        if (experienceInput == null) {
+            return experienceList;
+        }
 
-        for (String line : lines) {
-            line = line.trim();
-            if (line.isEmpty()) continue;
+        String trimmedInput = experienceInput.trim();
+        if (trimmedInput.isEmpty()) {
+            return experienceList;
+        }
+
+        // Allow users to paste raw JSON
+        if (looksLikeJson(trimmedInput)) {
+            List<Map<String, Object>> parsed = tryParseExperienceArray(trimmedInput);
+            if (!parsed.isEmpty()) {
+                return parsed.stream()
+                    .map(this::mapToStringMap)
+                    .collect(Collectors.toList());
+            }
+        }
+
+        String[] lines = trimmedInput.split("\r?\n");
+        for (String rawLine : lines) {
+            String line = rawLine.trim();
+            if (line.isEmpty()) {
+                continue;
+            }
+
+            if (looksLikeJson(line)) {
+                List<Map<String, Object>> parsedLine = tryParseExperienceArray(line);
+                if (!parsedLine.isEmpty()) {
+                    parsedLine.stream()
+                        .map(this::mapToStringMap)
+                        .filter(entry -> !entry.values().stream().allMatch(String::isBlank))
+                        .forEach(experienceList::add);
+                    continue;
+                }
+            }
 
             String[] parts = line.split("\\|");
-            if (parts.length >= 1) {
-                Map<String, String> exp = new HashMap<>();
-                exp.put("title", parts.length > 0 ? parts[0].trim() : "");
-                exp.put("company", parts.length > 1 ? parts[1].trim() : "");
-                exp.put("start", parts.length > 2 ? parts[2].trim() : "");
-                exp.put("end", parts.length > 3 ? parts[3].trim() : "");
-                exp.put("description", parts.length > 4 ? parts[4].trim() : "");
-                
-                if (!exp.get("title").isEmpty()) {
-                    experienceList.add(exp);
-                }
+            Map<String, String> exp = new HashMap<>();
+            exp.put("title", parts.length > 0 ? parts[0].trim() : "");
+            exp.put("company", parts.length > 1 ? parts[1].trim() : "");
+            exp.put("start", parts.length > 2 ? parts[2].trim() : "");
+            exp.put("end", parts.length > 3 ? parts[3].trim() : "");
+            exp.put("description", parts.length > 4 ? parts[4].trim() : "");
+
+            boolean hasContent = exp.values().stream().anyMatch(value -> value != null && !value.isBlank());
+            if (hasContent) {
+                experienceList.add(exp);
             }
         }
 
         return experienceList;
+    }
+
+    private List<Map<String, Object>> tryParseExperienceArray(String json) {
+        if (json == null || json.isBlank()) {
+            return Collections.emptyList();
+        }
+
+        String candidateJson = json.trim();
+        try {
+            return objectMapper.readValue(candidateJson, new TypeReference<List<Map<String, Object>>>() {});
+        } catch (Exception primary) {
+            // Attempt to unescape nested JSON strings
+            String normalized = candidateJson;
+            if ((normalized.startsWith("\"") && normalized.endsWith("\"")) ||
+                (normalized.startsWith("'") && normalized.endsWith("'"))) {
+                normalized = normalized.substring(1, normalized.length() - 1);
+            }
+            normalized = normalized.replace("\\\"", "\"");
+            try {
+                return objectMapper.readValue(normalized, new TypeReference<List<Map<String, Object>>>() {});
+            } catch (Exception secondary) {
+                return Collections.emptyList();
+            }
+        }
+    }
+
+    private List<Map<String, Object>> normalizeExperienceList(List<Map<String, Object>> rawList) {
+        return rawList.stream()
+            .map(this::normalizeExperienceEntry)
+            .filter(entry -> entry.values().stream()
+                .anyMatch(value -> value instanceof String str ? !str.isBlank() : value != null))
+            .collect(Collectors.toList());
+    }
+
+    private Map<String, Object> normalizeExperienceEntry(Map<String, Object> entry) {
+        if (entry == null || entry.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        Map<String, Object> working = unwrapNestedExperience(entry);
+
+        String title = safeValue(working.get("title"));
+        String company = safeValue(working.get("company"));
+        String start = safeValue(working.get("start"));
+        String end = safeValue(working.get("end"));
+        String description = safeValue(working.get("description"));
+
+        Map<String, Object> normalized = new LinkedHashMap<>();
+        normalized.put("title", title);
+        normalized.put("company", company);
+        normalized.put("start", start);
+        normalized.put("end", end);
+        normalized.put("description", description);
+        normalized.put("startDisplay", formatExperienceDate(start));
+        normalized.put("endDisplay", end.isBlank() ? "Hiện tại" : formatExperienceDate(end));
+        normalized.put("isCurrent", end.isBlank());
+
+        return normalized;
+    }
+
+    private Map<String, Object> unwrapNestedExperience(Map<String, Object> entry) {
+        if (entry == null || entry.isEmpty()) {
+            return new LinkedHashMap<>();
+        }
+
+        Map<String, Object> working = new LinkedHashMap<>(entry);
+
+        if (working.size() == 1) {
+            Object firstValue = working.values().iterator().next();
+            if (firstValue instanceof String nested && looksLikeJson(nested)) {
+                List<Map<String, Object>> nestedList = tryParseExperienceArray(nested);
+                if (!nestedList.isEmpty()) {
+                    return new LinkedHashMap<>(nestedList.get(0));
+                }
+            }
+        }
+
+        Object titleValue = working.get("title");
+        if (titleValue instanceof String nestedTitle && looksLikeJson(nestedTitle)) {
+            List<Map<String, Object>> nestedList = tryParseExperienceArray(nestedTitle);
+            if (!nestedList.isEmpty()) {
+                return new LinkedHashMap<>(nestedList.get(0));
+            }
+        }
+
+        return working;
+    }
+
+    private Map<String, String> mapToStringMap(Map<String, Object> source) {
+        Map<String, String> target = new LinkedHashMap<>();
+        target.put("title", safeValue(source != null ? source.get("title") : null));
+        target.put("company", safeValue(source != null ? source.get("company") : null));
+        target.put("start", safeValue(source != null ? source.get("start") : null));
+        target.put("end", safeValue(source != null ? source.get("end") : null));
+        target.put("description", safeValue(source != null ? source.get("description") : null));
+        return target;
+    }
+
+    private String safeValue(Object value) {
+        return value == null ? "" : value.toString().trim();
+    }
+
+    private boolean looksLikeJson(String value) {
+        if (value == null) {
+            return false;
+        }
+        String trimmed = value.trim();
+        return !trimmed.isEmpty() && (trimmed.startsWith("{") || trimmed.startsWith("["));
+    }
+
+    private String formatExperienceDate(String value) {
+        if (value == null || value.isBlank()) {
+            return "";
+        }
+
+        String trimmed = value.trim();
+        DateTimeFormatter monthYearFormatter = DateTimeFormatter.ofPattern("MM/yyyy");
+
+        try {
+            LocalDate date = LocalDate.parse(trimmed);
+            return date.format(monthYearFormatter);
+        } catch (DateTimeParseException ignored) { }
+
+        try {
+            YearMonth ym = YearMonth.parse(trimmed);
+            return ym.format(monthYearFormatter);
+        } catch (DateTimeParseException ignored) { }
+
+        try {
+            LocalDate date = LocalDate.parse(trimmed, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+            return date.format(monthYearFormatter);
+        } catch (DateTimeParseException ignored) { }
+
+        try {
+            YearMonth ym = YearMonth.parse(trimmed, DateTimeFormatter.ofPattern("MM/yyyy"));
+            return ym.format(monthYearFormatter);
+        } catch (DateTimeParseException ignored) { }
+
+        return trimmed;
+    }
+
+    private String buildExperienceLine(Map<String, Object> experience) {
+        if (experience == null) {
+            return "";
+        }
+
+        List<String> segments = Arrays.asList(
+            safeValue(experience.get("title")),
+            safeValue(experience.get("company")),
+            safeValue(experience.get("start")),
+            safeValue(experience.get("end")),
+            safeValue(experience.get("description"))
+        );
+
+        int lastIndex = -1;
+        for (int i = segments.size() - 1; i >= 0; i--) {
+            if (!segments.get(i).isBlank()) {
+                lastIndex = i;
+                break;
+            }
+        }
+
+        if (lastIndex == -1) {
+            return "";
+        }
+
+        return segments.subList(0, lastIndex + 1)
+            .stream()
+            .map(segment -> segment == null ? "" : segment)
+            .collect(Collectors.joining(" | "));
     }
 }
