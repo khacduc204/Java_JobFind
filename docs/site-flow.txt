@@ -1,0 +1,67 @@
+JobFinder - Luồng xử lý chính (chi tiết)
+========================================
+
+1) Danh sách việc làm /jobs
+   - Request: GET /jobs (public)
+   - Controller: JobController.getJobs()
+   - Service: JobService đọc params (keyword, location, category, employmentType, sort, page, perPage)
+   - Repo: JobRepository truy vấn + phân trang, join categories, employer
+   - Mapping: jobToMap() -> render templates/frontend/jobs/index.html
+   - Nếu user login ROLE_CANDIDATE: tải saved_jobs để đánh dấu “đã lưu”
+
+2) Chi tiết việc làm /jobs/{id}
+   - Request: GET /jobs/{id} (public)
+   - Service: JobService.getJobDetail(jobId, incrementView=true) tăng view_count, cập nhật last_viewed_at
+   - Trả về job + categories + employer + view_count -> templates/frontend/jobs/detail.html
+   - Nếu login CANDIDATE: hiển thị trạng thái saved từ saved_jobs
+
+3) Việc làm hot /jobs/hot
+   - Request: GET /jobs/hot?range=7|30|90 (public)
+   - Service: JobService.getHotJobs(withinDays) sắp xếp view_count desc, last_viewed_at desc
+   - Render: templates/frontend/jobs/hot.html
+
+4) Lưu / bỏ lưu job (AJAX)
+   - Request: POST /jobs/save?jobId=... (ROLE_CANDIDATE)
+   - Service: JobService.toggleSaveJob(userId, jobId) thêm/xóa bản ghi saved_jobs
+   - Response: JSON trạng thái saved/unsaved để cập nhật UI
+
+5) Ứng tuyển (chưa hoàn thiện)
+   - Cần bổ sung Application entity, repository, service, controller, form upload CV
+
+6) Đăng ký / Đăng nhập
+   - Auth: UserService + CustomUserDetailsService load user từ bảng users + roles
+   - Security: cho phép public /jobs/**, /uploads/**; các route khác cần đăng nhập
+   - Mật khẩu: BCrypt trong users.password
+
+7) Hồ sơ ứng viên (Candidate)
+   - Entity Candidate (bảng candidates): headline, summary, location, skills, experience, profile_picture, cv_path, updated_at
+   - OneToOne với users qua user_id; controller/service cập nhật hồ sơ
+
+8) Quản trị viên (/admin/**)
+   - UserAdminController CRUD users -> templates/admin/users/
+   - Chỉ ROLE_ADMIN; avatar lưu static/uploads/avatars
+
+9) Nhà tuyển dụng (Employer)
+   - Bảng employers liên kết jobs qua employer_id
+   - Controllers/templates employer/** để quản lý job, xem ứng tuyển (mức hoàn thiện tùy code hiện tại)
+
+10) Dữ liệu và seed
+   - schema.sql + data.sql: tạo bảng + dữ liệu mẫu (roles, permissions, users, categories, jobs...)
+   - database_jobs_schema.sql: schema + seed cho module jobs
+   - Khi app start: spring.sql.init.mode=always chạy schema/data nếu kết nối DB thành công
+
+11) Static assets & uploads
+   - static/assets (Bootstrap, JS, CSS); static/uploads (avatars, cv, logos)
+   - Truy cập upload qua /uploads/**
+
+12) Security tổng quan
+   - Public: /, /home, /jobs/**, /uploads/**, /css/**, /js/**
+   - Admin: /admin/** -> ROLE_ADMIN
+   - Candidate: POST /jobs/save -> ROLE_CANDIDATE
+   - Form login đã config trong SecurityConfig
+
+13) Lỗi thường gặp
+   - Thiếu cột DB (vd cv_path) -> ALTER TABLE thêm cột
+   - Sai password MySQL -> chỉnh spring.datasource.* trong application.properties
+   - Chưa import schema -> lỗi 404/SQL “table missing”
+
