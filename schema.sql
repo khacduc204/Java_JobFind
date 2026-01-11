@@ -75,13 +75,18 @@ CREATE TABLE IF NOT EXISTS `jobs` (
   `employer_id` INT NOT NULL,
   `title` VARCHAR(255) NOT NULL,
   `description` TEXT NOT NULL,
+  `requirements` TEXT DEFAULT NULL,
   `location` VARCHAR(255) DEFAULT NULL,
   `salary` VARCHAR(100) DEFAULT NULL,
-  `employment_type` VARCHAR(50) DEFAULT NULL,
+  `employment_type` VARCHAR(50) DEFAULT 'Full-time',
   `banner_image` VARCHAR(255) DEFAULT NULL, -- ảnh minh họa job
   `status` ENUM('draft','published','closed') DEFAULT 'draft',
+  `quantity` INT DEFAULT NULL,
+  `deadline` DATE DEFAULT NULL,
+  `view_count` INT DEFAULT 0,
+  `last_viewed_at` TIMESTAMP NULL DEFAULT NULL,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` TIMESTAMP NULL DEFAULT NULL,
+  `updated_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (`employer_id`) REFERENCES `employers`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 

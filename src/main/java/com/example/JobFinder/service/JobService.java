@@ -1,10 +1,12 @@
 package com.example.JobFinder.service;
 
+import com.example.JobFinder.model.Candidate;
 import com.example.JobFinder.model.Job;
 import com.example.JobFinder.model.JobView;
 import com.example.JobFinder.model.SavedJob;
 import com.example.JobFinder.model.User;
 import com.example.JobFinder.repository.ApplicationRepository;
+import com.example.JobFinder.repository.CandidateRepository;
 import com.example.JobFinder.repository.JobRepository;
 import com.example.JobFinder.repository.JobViewRepository;
 import com.example.JobFinder.repository.SavedJobRepository;
@@ -30,6 +32,7 @@ public class JobService {
     private final JobViewRepository jobViewRepository;
     private final SavedJobRepository savedJobRepository;
     private final ApplicationRepository applicationRepository;
+    private final CandidateRepository candidateRepository;
     
     /**
      * Get paginated published jobs with filters
@@ -177,6 +180,67 @@ public class JobService {
         return jobs.stream()
                 .map(this::jobToMap)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Recommend jobs for a candidate using SQL scoring (skills + location)
+     */
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> getRecommendedJobsForCandidate(Integer candidateId, int limit) {
+        if (candidateId == null || limit <= 0) {
+            return Collections.emptyList();
+        }
+
+        Optional<Candidate> candidateOpt = candidateRepository.findById(candidateId);
+        if (candidateOpt.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        Pageable pageable = PageRequest.of(0, limit);
+        List<Object[]> rows = jobRepository.findRecommendedJobIds(candidateId, candidateOpt.get().getLocation(), pageable);
+
+        if (rows.isEmpty()) {
+            return getTopViewedJobs(limit);
+        }
+
+        List<Integer> jobIds = rows.stream()
+                .map(r -> ((Number) r[0]).intValue())
+                .toList();
+
+        Map<Integer, Double> scoreMap = new HashMap<>();
+        double maxScore = 0;
+        for (Object[] row : rows) {
+            int id = ((Number) row[0]).intValue();
+            double score = row[1] != null ? ((Number) row[1]).doubleValue() : 0.0;
+            scoreMap.put(id, score);
+            if (score > maxScore) {
+                maxScore = score;
+            }
+        }
+
+        List<Job> jobs = jobRepository.findByIdInWithDetails(jobIds);
+        Map<Integer, Job> jobMap = jobs.stream()
+                .collect(Collectors.toMap(Job::getId, j -> j));
+
+        List<Map<String, Object>> recommendations = new ArrayList<>();
+
+        for (Integer jobId : jobIds) {
+            Job job = jobMap.get(jobId);
+            if (job == null) {
+                continue;
+            }
+
+            Map<String, Object> jobData = jobToMap(job);
+            double rawScore = scoreMap.getOrDefault(jobId, 0.0);
+            int normalizedScore = maxScore > 0 ? (int) Math.round((rawScore / maxScore) * 100) : 50;
+            normalizedScore = Math.max(5, Math.min(100, normalizedScore));
+
+            jobData.put("matchScore", normalizedScore);
+            jobData.put("matchLabel", normalizedScore >= 80 ? "Rất phù hợp" : normalizedScore >= 60 ? "Khá phù hợp" : "Tham khảo");
+            recommendations.add(jobData);
+        }
+
+        return recommendations;
     }
     
     /**

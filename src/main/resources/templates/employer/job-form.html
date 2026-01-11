@@ -149,7 +149,8 @@
         
         <!-- Content Card -->
         <div class="content-card">
-            <form th:action="${isEdit ? '/employer/jobs/edit/' + job.id : '/employer/jobs/create'}" 
+            <form id="jobForm"
+                  th:action="${isEdit ? '/employer/jobs/edit/' + job.id : '/employer/jobs/create'}" 
                   method="post">
                 
                 <!-- Tiêu đề -->
@@ -167,20 +168,20 @@
                 <!-- Mô tả công việc -->
                 <div class="mb-3">
                     <label for="description" class="form-label required-field">Mô tả công việc</label>
-                    <textarea class="form-control" 
+                    <textarea class="form-control tinymce-editor" 
                               id="description" 
                               name="description" 
                               rows="6"
                               placeholder="Mô tả chi tiết về công việc..."
-                              required
                               th:text="${isEdit ? job.description : ''}"></textarea>
                     <small class="text-muted">Mô tả chi tiết về công việc, trách nhiệm, môi trường làm việc...</small>
+                    <div class="invalid-feedback" id="descriptionError" style="display: none;">Vui lòng nhập mô tả công việc.</div>
                 </div>
                 
                 <!-- Yêu cầu công việc -->
                 <div class="mb-3">
                     <label for="jobRequirements" class="form-label">Yêu cầu công việc</label>
-                    <textarea class="form-control" 
+                    <textarea class="form-control tinymce-editor" 
                               id="jobRequirements" 
                               name="jobRequirements" 
                               rows="6"
@@ -321,5 +322,48 @@
     
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- TinyMCE (Tiny Cloud) for rich text job content -->
+    <script src="https://cdn.tiny.cloud/1/d7chqy488l9bipext69mb6wn3a6znouyljw4wi660kj89lg8/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+    <script>
+        tinymce.init({
+            selector: 'textarea.tinymce-editor',
+            height: 420,
+            menubar: false,
+            branding: false,
+            plugins: 'lists link autolink autosave preview code',
+            toolbar: 'undo redo | bold italic underline | bullist numlist outdent indent | link | removeformat | code preview',
+            toolbar_mode: 'sliding',
+            autosave_interval: '30s',
+            default_link_target: '_blank',
+            link_assume_external_targets: 'https',
+            content_style: 'body { font-family: Segoe UI, sans-serif; font-size: 14px; }'
+        });
+
+        const form = document.getElementById('jobForm');
+        form.addEventListener('submit', function (event) {
+            // Đồng bộ nội dung TinyMCE về textarea trước khi submit
+            tinymce.triggerSave();
+
+            const descriptionEditor = tinymce.get('description');
+            const descriptionInput = document.getElementById('description');
+            const descriptionError = document.getElementById('descriptionError');
+            const descriptionText = descriptionEditor
+                ? descriptionEditor.getContent({ format: 'text' }).trim()
+                : (descriptionInput.value || '').trim();
+
+            if (!descriptionText) {
+                event.preventDefault();
+                descriptionInput.classList.add('is-invalid');
+                descriptionError.style.display = 'block';
+                if (descriptionEditor) {
+                    descriptionEditor.focus();
+                }
+            } else {
+                descriptionInput.classList.remove('is-invalid');
+                descriptionError.style.display = 'none';
+            }
+        });
+    </script>
 </body>
 </html>

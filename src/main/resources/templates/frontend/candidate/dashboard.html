@@ -12,7 +12,7 @@
         <div class="dashboard-welcome-banner mb-4">
             <div class="welcome-content">
                 <h2 class="welcome-title">
-                    Xin chào, <span th:text="${currentUser != null ? currentUser.name : 'Ứng viên'}">Ứng viên</span>! 👋
+                    Xin chào, <span th:text="${fullName != null ? fullName : (currentUser != null ? currentUser.name : 'Ứng viên')}">Ứng viên</span>! 👋
                 </h2>
                 <p class="mb-0 opacity-90">Chúc bạn có một ngày làm việc hiệu quả!</p>
             </div>
@@ -26,7 +26,7 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <p class="text-muted mb-1 small">Hồ sơ hoàn thành</p>
-                                <h3 class="mb-0 stat-value">85%</h3>
+                                <h3 class="mb-0 stat-value" th:text="${profileCompletion != null ? profileCompletion : 80} + '%'">85%</h3>
                             </div>
                             <div class="stat-icon" style="background: linear-gradient(135deg, rgba(0,177,79,0.1) 0%, rgba(0,177,79,0.2) 100%); color: #00b14f;">
                                 <i class="fa-solid fa-user-check"></i>
@@ -42,7 +42,7 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <p class="text-muted mb-1 small">Đơn ứng tuyển</p>
-                                <h3 class="mb-0 stat-value">0</h3>
+                                <h3 class="mb-0 stat-value" th:text="${applicationsCount != null ? applicationsCount : 0}">0</h3>
                             </div>
                             <div class="stat-icon" style="background: linear-gradient(135deg, rgba(13,110,253,0.1) 0%, rgba(13,110,253,0.2) 100%); color: #0d6efd;">
                                 <i class="fa-solid fa-file-circle-check"></i>
@@ -58,7 +58,7 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <p class="text-muted mb-1 small">Việc làm lưu</p>
-                                <h3 class="mb-0 stat-value">0</h3>
+                                <h3 class="mb-0 stat-value" th:text="${savedJobsCount != null ? savedJobsCount : 0}">0</h3>
                             </div>
                             <div class="stat-icon" style="background: linear-gradient(135deg, rgba(255,193,7,0.1) 0%, rgba(255,193,7,0.2) 100%); color: #ffc107;">
                                 <i class="fa-solid fa-bookmark"></i>
@@ -74,7 +74,7 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <p class="text-muted mb-1 small">Lượt xem CV</p>
-                                <h3 class="mb-0 stat-value">0</h3>
+                                <h3 class="mb-0 stat-value" th:text="${profileViews != null ? profileViews : 0}">0</h3>
                             </div>
                             <div class="stat-icon" style="background: linear-gradient(135deg, rgba(220,53,69,0.1) 0%, rgba(220,53,69,0.2) 100%); color: #dc3545;">
                                 <i class="fa-solid fa-eye"></i>
@@ -180,17 +180,44 @@
                             <i class="fa-solid fa-briefcase"></i>
                             Việc làm đề xuất
                         </h5>
-                        <a href="#" class="btn btn-sm btn-outline-success">Xem tất cả</a>
                     </div>
-                    <div class="empty-state">
+                    <div th:if="${#lists.isEmpty(recommendedJobs)}" class="empty-state">
                         <div class="empty-state-icon">
                             <i class="fa-solid fa-magnifying-glass"></i>
                         </div>
-                        <h6 class="empty-state-title">Chưa có việc làm phù hợp</h6>
-                        <p class="empty-state-description">Chúng tôi đang tìm kiếm việc làm phù hợp với bạn</p>
-                        <a href="#" class="btn btn-success">
+                        <h6 class="empty-state-title">Chưa có gợi ý phù hợp</h6>
+                        <p class="empty-state-description">Hãy cập nhật kỹ năng hoặc ứng tuyển một vài việc để hệ thống hiểu bạn hơn.</p>
+                        <a th:href="@{/jobs}" class="btn btn-success">
                             <i class="fa-solid fa-search me-2"></i>Tìm việc ngay
                         </a>
+                    </div>
+
+                    <div class="row g-3" th:if="${!#lists.isEmpty(recommendedJobs)}">
+                        <div class="col-md-6" th:each="job : ${recommendedJobs}">
+                            <article class="card border-0 shadow-sm h-100">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start gap-3">
+                                        <div>
+                                            <h6 class="mb-1" th:text="${job.title}">Tin tuyển dụng</h6>
+                                            <div class="text-muted small">
+                                                <span th:text="${job.companyName}">Nhà tuyển dụng</span>
+                                                <span class="mx-1">·</span>
+                                                <span th:text="${job.location}">Toàn quốc</span>
+                                            </div>
+                                            <div class="text-muted small mt-1" th:text="${job.salary}">Lương thỏa thuận</div>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="badge bg-success bg-opacity-10 text-success" th:text="'Điểm ' + ${job.matchScore != null ? job.matchScore : 0}">Điểm 90</span>
+                                            <div class="small fw-semibold mt-1" th:text="${job.matchLabel}">Rất phù hợp</div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3 d-flex flex-wrap gap-2">
+                                        <a class="btn btn-sm btn-outline-success" th:href="@{/jobs/{id}(id=${job.id})}">Xem chi tiết</a>
+                                        <a class="btn btn-sm btn-light" th:href="@{'/jobs?keyword=' + ${job.title}}">Tìm việc tương tự</a>
+                                    </div>
+                                </div>
+                            </article>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -211,10 +238,10 @@
                                 <i class="fa-solid fa-user-check me-2"></i>
                                 Thông tin cá nhân
                             </span>
-                            <span class="progress-percentage">100%</span>
+                            <span class="progress-percentage" th:text="${profileCompletion != null ? profileCompletion + '%' : '100%'}">100%</span>
                         </div>
                         <div class="progress-bar-custom">
-                            <div class="progress-bar-fill" style="width: 100%;"></div>
+                            <div class="progress-bar-fill" th:style="'width: ' + (${profileCompletion != null ? profileCompletion : 100}) + '%;'"></div>
                         </div>
                     </div>
                     
@@ -224,10 +251,10 @@
                                 <i class="fa-solid fa-file-pdf me-2"></i>
                                 CV & Thư giới thiệu
                             </span>
-                            <span class="progress-percentage">75%</span>
+                            <span class="progress-percentage" th:text="${candidate != null and candidate.cvPath != null ? '100%' : '50%'}">75%</span>
                         </div>
                         <div class="progress-bar-custom">
-                            <div class="progress-bar-fill" style="width: 75%;"></div>
+                            <div class="progress-bar-fill" th:style="'width: ' + (${candidate != null and candidate.cvPath != null ? 100 : 50}) + '%;'"></div>
                         </div>
                     </div>
                     
@@ -237,10 +264,10 @@
                                 <i class="fa-solid fa-graduation-cap me-2"></i>
                                 Học vấn & Kinh nghiệm
                             </span>
-                            <span class="progress-percentage">60%</span>
+                            <span class="progress-percentage" th:text="${candidate != null and candidate.experience != null ? '80%' : '40%'}">60%</span>
                         </div>
                         <div class="progress-bar-custom">
-                            <div class="progress-bar-fill" style="width: 60%;"></div>
+                            <div class="progress-bar-fill" th:style="'width: ' + (${candidate != null and candidate.experience != null ? 80 : 40}) + '%;'"></div>
                         </div>
                     </div>
                     
@@ -273,18 +300,12 @@
                         <a th:href="@{/jobs/saved}" class="list-group-item list-group-item-action">
                             <i class="fa-solid fa-bookmark me-2"></i>Việc đã lưu
                         </a>
-                        <a href="#" class="list-group-item list-group-item-action">
+                        <a th:href="@{/candidate/edit-profile}" class="list-group-item list-group-item-action">
                             <i class="fa-solid fa-gear me-2"></i>Cài đặt tài khoản
                         </a>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-                            Chào mừng bạn đến với JobFind! 
-                            Bạn đang đăng nhập với vai trò <strong>Ứng viên</strong>.
-                            Hãy hoàn thiện hồ sơ để nhận được nhiều cơ hội việc làm hơn!
-                        </p>
         </div>
     </div>
 

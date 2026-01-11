@@ -129,4 +129,32 @@ public interface JobRepository extends JpaRepository<Job, Integer> {
             ORDER BY j.createdAt DESC
             """)
     List<String> findRecentJobTitles(Pageable pageable);
+
+       // Recommendation fallback for MariaDB: prioritize location match, then recency
+       @Query(value = """
+                     SELECT j.id,
+                               CASE
+                                      WHEN :location IS NOT NULL AND j.location IS NOT NULL AND LOWER(j.location) LIKE CONCAT('%', LOWER(:location), '%') THEN 5
+                                      ELSE 0
+                               END AS match_score
+                     FROM jobs j
+                     WHERE j.status = 'published'
+                       AND (j.deadline IS NULL OR j.deadline >= CURRENT_DATE)
+                     ORDER BY match_score DESC, j.created_at DESC
+                     """,
+                     countQuery = """
+                            SELECT COUNT(*) FROM jobs j
+                            WHERE j.status = 'published'
+                              AND (j.deadline IS NULL OR j.deadline >= CURRENT_DATE)
+                     """,
+                     nativeQuery = true)
+       List<Object[]> findRecommendedJobIds(@Param("candidateId") Integer candidateId, @Param("location") String location, Pageable pageable);
+
+       // Fetch jobs with employer, user, categories by IDs
+       @Query("SELECT DISTINCT j FROM Job j " +
+                 "LEFT JOIN FETCH j.employer e " +
+                 "LEFT JOIN FETCH e.user " +
+                 "LEFT JOIN FETCH j.categories " +
+                 "WHERE j.id IN :ids")
+       List<Job> findByIdInWithDetails(@Param("ids") List<Integer> ids);
 }
