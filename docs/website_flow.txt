@@ -1,0 +1,76 @@
+Luồng xử lý chính của ứng dụng JobFinder (tóm tắt, tiếng Việt):
+
+1. Khởi động ứng dụng
+- JobFinderApplication (Spring Boot) khởi tạo context.
+- Bean cấu hình (DataSource, JPA, Security, Multipart, v.v.) được tạo.
+
+2. Nhận request từ client
+- Trình duyệt gửi HTTP request (GET/POST) tới server.
+- Các tài nguyên tĩnh (CSS/JS/images) được phục vụ trực tiếp từ /static (spring.resource.static-locations).
+
+3. DispatcherServlet và mapping
+- DispatcherServlet tiếp nhận request.
+- Dựa trên đường dẫn (Controller mappings) và Method, DispatcherServlet chuyển tiếp tới Controller tương ứng (ví dụ: HomeController, AdminController, UserAdminController).
+
+4. Security filter (Spring Security)
+- Trước khi vào Controller, filter chain của Spring Security xác thực và ủy quyền.
+- Các endpoint /admin/** chỉ cho phép ROLE_ADMIN; nếu chưa đăng nhập sẽ redirect đến trang login.
+
+5. Xử lý ở Controller
+- Controller nhận các tham số (path, query, form) qua @RequestParam, @PathVariable, @ModelAttribute.
+- Controller gọi Service để xử lý nghiệp vụ (business logic).
+- Controller chuẩn bị Model attributes để render view hoặc trả JSON (REST API).
+- Nếu cần redirect kèm flash message, Controller dùng RedirectAttributes.addFlashAttribute().
+
+6. Service layer
+- Service đảm nhiệm logic chính: validate data, xử lý upload, điều phối repository, gọi helper util (ví dụ: ImageService, PasswordEncoder).
+- Dùng @Transactional khi cần thao tác DB đảm bảo atomic.
+
+7. Repository / Persistence
+- Repository (Spring Data JPA) thực hiện CRUD với database (Entity -> table).
+- Các truy vấn tuỳ chỉnh có thể dùng @Query với JOIN FETCH để tránh lỗi lazy loading.
+
+8. Upload file (avatar, cv, logos)
+- Controller nhận MultipartFile từ form.
+- Service kiểm tra kiểu file, kích thước, đặt tên file (UUID + ext) và lưu vào thư mục static/uploads/...
+- Nếu update avatar: xóa file cũ (nếu có) sau khi lưu file mới.
+- Lưu đường dẫn tương đối vào DB (ví dụ: /uploads/avatars/{filename}).
+
+9. Template rendering
+- Sau khi Controller thêm dữ liệu vào Model, Thymeleaf (templates/*.html) render view thành HTML.
+- Fragment (header/footer) được include để tái sử dụng layout.
+
+10. Trả response cho client
+- HTML được trả về và trình duyệt hiển thị.
+- Với các thao tác POST thành công, thường redirect (PRG pattern) để tránh resubmit form.
+
+11. Flash messages và UI
+- Flash attributes hiển thị thông báo success/warning/error trên page tiếp theo.
+- UI sử dụng Bootstrap để hiển thị modal xác nhận, alert tự đóng, responsive.
+
+12. Các flow đặc thù
+- Đăng nhập / Đăng xuất: Spring Security xử lý auth, lưu user vào SecurityContext; CustomUserDetailsService cung cấp dữ liệu user.
+- Quản trị (Admin): Các controller trong /admin/* kiểm tra role và hiển thị dashboard, danh sách users, CRUD user.
+- Tìm việc (Home): HomeController hiển thị danh sách công việc, filter theo keyword/location, hiển thị stats và categories.
+- Ứng tuyển: Candidate gửi CV, file CV lưu vào uploads/cv, ứng dụng tạo record trong bảng applications.
+
+13. Lưu ý về môi trường
+- Development: file upload lưu trong src/main/resources/static/uploads/... tiện test.
+- Production: khuyến nghị chuyển sang external storage (S3) và lưu path trong DB.
+
+14. Logging và lỗi
+- Các lỗi backend được log (logger) và có handler chung (ControllerAdvice) để trả trang lỗi thân thiện.
+- Validation lỗi hiển thị trên form (BindingResult) hoặc trả status phù hợp cho API.
+
+15. Task định kỳ / Migrations
+- Các script SQL (schema.sql, data.sql, add_view_count.sql) dùng để khởi tạo DB hoặc migrate.
+- Nếu cần cron jobs (count views, send email), dùng scheduled tasks hoặc worker ngoài.
+
+16. Tóm tắt flow ví dụ: Thêm user (Admin)
+- Admin mở /admin/users/add (GET) -> Controller trả form.
+- Admin submit form (POST) với avatar -> Controller nhận dữ liệu + MultipartFile.
+- Controller gọi UserService.createUser(dto, file): validate, hash password (BCrypt), lưu file, lưu entity vào DB.
+- Service trả kết quả -> Controller redirect về /admin/users và thêm flash success.
+- Page danh sách hiển thị user mới.
+
+File này trình bày luồng xử lý chính và các lưu ý quan trọng để phát triển và bảo trì ứng dụng.
